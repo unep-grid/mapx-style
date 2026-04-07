@@ -2,27 +2,24 @@
 download_fonts.py — Download font TTF files from Google Fonts into data/fonts/files/.
 
 Reads data/fonts/sources.json to know which families/weights to fetch.
-For each family, downloads the Google Fonts zip and extracts the matching
-static TTF files (renamed to match the {stem}-{WeightName}.ttf convention
-used by data/fonts/combinations.json and build_glyphs.py).
+Uses the Google Fonts download/list JSON API (same endpoint used by gftools) to
+get per-file download URLs, then fetches only the static variants we need.
 
 Usage:
   uv run skills/download_fonts.py                    # download all families
   uv run skills/download_fonts.py --dir Noto_Sans    # one directory only
   uv run skills/download_fonts.py --dry-run          # list files without downloading
 
-Google Fonts zip URL:
-  https://fonts.google.com/download?family=<url-encoded-name>
-
-The zip contains static TTF files either at the root or under a static/ subfolder.
+Google Fonts manifest API:
+  https://fonts.google.com/download/list?family=<url-encoded-name>
+  Response prefix ")]}'\\n" must be stripped before JSON parse (XSSI protection).
+  Each fileRef has {filename, url}; static variants are under "static/" subdirectory.
 """
 
 import argparse
-import io
 import json
 import sys
 import urllib.parse
-import zipfile
 from pathlib import Path
 
 import requests
@@ -33,12 +30,12 @@ REPO_ROOT = Path(__file__).parent.parent
 SOURCES_FILE = REPO_ROOT / "data/fonts/sources.json"
 FONTS_DIR = REPO_ROOT / "data/fonts/files"
 
-GOOGLE_FONTS_DL = "https://fonts.google.com/download"
+MANIFEST_URL = "https://fonts.google.com/download/list?family={}"
 
 
-def _italic_suffix(weight: str) -> str:
+def _italic_suffix(weight_name: str) -> str:
     """Return the italic filename suffix for a given weight name."""
-    return "Italic" if weight == "Regular" else f"{weight}Italic"
+    return "Italic" if weight_name == "Regular" else f"{weight_name}Italic"
 
 
 def _expected_files(family: dict) -> list[str]:
@@ -50,22 +47,29 @@ def _expected_files(family: dict) -> list[str]:
     return sorted(files)
 
 
-def _zip_candidates(zf: zipfile.ZipFile, filename: str) -> str | None:
+def _fetch_url_map(google_family: str, console: Console) -> dict[str, str]:
     """
-    Find `filename` inside the zip, checking root and static/ subfolder.
-    Returns the zip entry name if found, else None.
+    Fetch the download/list manifest and return {basename: download_url}.
+    Basenames are stripped of any leading directory (e.g. "static/").
+    Returns empty dict on failure.
     """
-    # Exact match at root
-    if filename in zf.namelist():
-        return filename
-    # Any path ending with /filename (covers static/ and nested dirs)
-    for name in zf.namelist():
-        if name.endswith(f"/{filename}"):
-            return name
-    return None
+    url = MANIFEST_URL.format(urllib.parse.quote(google_family))
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+    except requests.RequestException as exc:
+        console.print(f"[red]manifest fetch failed:[/red] {exc}")
+        return {}
+    data = json.loads(resp.text[5:])  # strip ")]}'\n" XSSI prefix
+    return {
+        Path(item["filename"]).name: item["url"]
+        for item in data["manifest"]["fileRefs"]
+    }
 
 
-def download_family(family: dict, out_dir: Path, dry_run: bool, console: Console) -> tuple[int, int]:
+def download_family(
+    family: dict, out_dir: Path, dry_run: bool, console: Console
+) -> tuple[int, int]:
     """Download one font family. Returns (downloaded, missing) counts."""
     google_family = family["google_family"]
     expected = _expected_files(family)
@@ -76,29 +80,27 @@ def download_family(family: dict, out_dir: Path, dry_run: bool, console: Console
             console.print(f"  [dim]would save:[/dim] {out_dir.relative_to(REPO_ROOT)}/{f}")
         return len(expected), 0
 
-    url = f"{GOOGLE_FONTS_DL}?family={urllib.parse.quote(google_family)}"
-    console.print(f"  Fetching [cyan]{google_family}[/cyan] …", end=" ")
-
-    try:
-        resp = requests.get(url, timeout=60, headers={"User-Agent": "Mozilla/5.0"})
-        resp.raise_for_status()
-    except requests.RequestException as exc:
-        console.print(f"[red]FAILED[/red] ({exc})")
+    console.print(f"  Fetching manifest for [cyan]{google_family}[/cyan] …", end=" ")
+    url_map = _fetch_url_map(google_family, console)
+    if not url_map:
         return 0, len(expected)
+    console.print(f"[green]{len(url_map)} files in manifest[/green]")
 
-    console.print(f"[green]{len(resp.content) // 1024} KB[/green]")
-
-    zf = zipfile.ZipFile(io.BytesIO(resp.content))
     downloaded, missing = 0, 0
-
     for filename in expected:
-        entry = _zip_candidates(zf, filename)
-        if entry is None:
-            console.print(f"    [yellow]missing in zip:[/yellow] {filename}")
+        src_url = url_map.get(filename)
+        if src_url is None:
+            console.print(f"    [yellow]not in manifest:[/yellow] {filename}")
             missing += 1
             continue
-        dest = out_dir / filename
-        dest.write_bytes(zf.read(entry))
+        try:
+            font_resp = requests.get(src_url, timeout=60)
+            font_resp.raise_for_status()
+        except requests.RequestException as exc:
+            console.print(f"    [red]download failed:[/red] {filename} ({exc})")
+            missing += 1
+            continue
+        (out_dir / filename).write_bytes(font_resp.content)
         downloaded += 1
 
     return downloaded, missing
@@ -139,19 +141,18 @@ def main() -> None:
             total_dl += dl
             total_missing += missing
 
-    # Summary table
     table = Table(show_header=False, box=None, padding=(0, 2))
     table.add_row("Files downloaded:", f"[green]{total_dl}[/green]")
     if total_missing:
-        table.add_row("Files missing in zips:", f"[yellow]{total_missing}[/yellow]")
+        table.add_row("Files missing:", f"[yellow]{total_missing}[/yellow]")
 
     console.print()
     console.print(table)
 
     if total_missing:
         console.print(
-            "[yellow]Some files were not found in the Google Fonts zips. "
-            "Check that the stem/weight names in sources.json match the zip contents.[/yellow]"
+            "[yellow]Some files were not found in the Google Fonts manifest. "
+            "Check that the stem/weight names in sources.json match the manifest.[/yellow]"
         )
         sys.exit(1)
 

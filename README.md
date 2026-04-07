@@ -16,6 +16,9 @@ Style assets for [MapX](https://mapx.org) — sprites, glyphs, fonts, MapLibre b
 | `public/fonts/` | Font metadata and lists (glyph PBFs on S3) |
 | `public/style/` | MapLibre base style JSON + debug style (all S3 PMTiles + Matterhorn contours) |
 | `data/catalog.json` | Catalog of all S3 assets |
+| `data/fonts/sources.json` | Font download manifest (families, weights, stems) |
+| `data/fonts/combinations.json` | Maps MapLibre font names → TTF stems for glyph build |
+| `data/fonts/files/` | TTF sources — gitignored, fetch with `uv run skills/download_fonts.py` |
 | `data/un_countries/` | UN border metadata (data restricted — see `data/un_countries/README.md`) |
 | `skills/s3/` | Upload, catalog, ACL, range test, progress monitoring |
 | `skills/build_*.py` | Build sprites, glyphs, borders, bathymetry, basemap |
@@ -33,6 +36,7 @@ npm run dev        # http://localhost:5173
 
 # Python (skills)
 uv sync
+uv run skills/download_fonts.py         # fetch TTF sources (gitignored, required for glyph build)
 uv run skills/s3/catalog.py list        # what's on S3
 uv run skills/s3/upload.py --help
 ```

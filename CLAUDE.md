@@ -22,8 +22,9 @@ For the full developer guide (HCP setup, data sources, CI/CD) see [DEVELOPERS.md
 | `public/style/` | MapLibre base style JSON + all-PMTiles debug style — GitHub Pages CDN |
 | `public/fonts/fonts.json` | Font family catalog — GitHub Pages CDN |
 | `data/catalog.json` | Single catalog for all assets (S3 uploads + style provenance) |
+| `data/fonts/sources.json` | Font download manifest — which families/weights to fetch from Google Fonts |
 | `data/fonts/combinations.json` | Font combinations — maps MapLibre font names → TTF stems; used by `build_glyphs.py` |
-| `data/fonts/files/` | Font TTF sources (~16 MB, committed) |
+| `data/fonts/files/` | Font TTF sources — **gitignored**, populate with `uv run skills/download_fonts.py` |
 | `data/un_countries/` | UN border GeoJSONs (restricted — not committed, see §Guardrails) |
 | `skills/s3/` | S3 upload, catalog, ACL, range test, progress monitoring |
 | `skills/patterns/` | Pattern SVG generator (index.cjs + config.json) |
