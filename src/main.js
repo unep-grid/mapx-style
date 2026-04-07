@@ -3,6 +3,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import mlcontour from "maplibre-contour";
 import { MapxStyle } from "@unepgrid-mapx/theme-core";
 import { MapCompare } from "./mapcompare.js";
+import { buildSpriteDemo, flyToPatterns, flyToIcons } from "./sprite_demo.js";
 
 const env = import.meta.env.DEV ? "dev" : "prod";
 const mxStyle = new MapxStyle({ env, maplibregl, mlcontour });
@@ -120,13 +121,20 @@ document.getElementById("toggle-terrain-3d").addEventListener("change", (e) => {
   e.target.checked ? mxStyle.enableTerrain() : mxStyle.disableTerrain();
 });
 
-  mapProd.on("load", () => {
+mapProd.on("load", () => {
   mxStyle.setTheme("color_light");
+
+  buildSpriteDemo(mapProd, mxStyle);
 });
 
+document
+  .getElementById("fly-to-patterns")
+  .addEventListener("click", () => flyToPatterns(mapProd));
+document
+  .getElementById("fly-to-icons")
+  .addEventListener("click", () => flyToIcons(mapProd));
 
 // ── debug data (prod map only) ─────────────────────────────────────────
-
 
 mapProd.on("mousemove", (e) => {
   const features = mapProd.queryRenderedFeatures(e.point);

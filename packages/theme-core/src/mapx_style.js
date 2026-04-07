@@ -84,6 +84,10 @@ export class MapxStyle {
     this._terrainEnabled = false;
     this._terrainCfg = MapxStyle.TERRAIN_CFG;
     this._onPitchEnd = this._handlePitchEnd.bind(this);
+    this._onMapError = (e) => {
+      if (String(e?.error?.message ?? "").includes("mapterhorn.com")) return;
+      console.error(e.error ?? e);
+    };
     this._hillshadeEnabled = true;
     this._contoursEnabled = true;
     this._maskEnabled = true; // on by default
@@ -164,6 +168,7 @@ export class MapxStyle {
   attachMap(map) {
     this._map = map;
     map.on("pitchend", this._onPitchEnd);
+    map.on("error", this._onMapError);
     const apply = () => {
       this._applyLayers(map, this._theme);
       if (this._maskEnabled) this._loadAndApplyMask(map);
@@ -174,7 +179,10 @@ export class MapxStyle {
 
   /** Unlink the attached map. */
   detachMap() {
-    if (this._map) this._map.off("pitchend", this._onPitchEnd);
+    if (this._map) {
+      this._map.off("pitchend", this._onPitchEnd);
+      this._map.off("error", this._onMapError);
+    }
     this._map = null;
   }
 

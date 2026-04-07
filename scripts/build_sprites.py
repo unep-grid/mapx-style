@@ -69,9 +69,9 @@ ASSETS = REPO_ROOT / "packages/theme-core/assets/sprites"
 
 SVG_DIRS_SDF = [
     ASSETS / "maki",
-    ASSETS / "geology",
 ]
 SVG_DIRS_PATTERNS = [
+    ASSETS / "geology",
     ASSETS / "patterns",
 ]
 OUTPUT_DIR = ASSETS / "generated"
@@ -100,7 +100,7 @@ def _icon_meta(name: str) -> tuple[str, str]:
     if name.startswith("maki-"):
         return "maki", "default"
     if name.startswith("geol_"):
-        return "geology", "default"
+        return "geology", "patterns"
     if name.startswith("t_"):
         return "pattern", "patterns"
     return "other", "default"

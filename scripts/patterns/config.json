@@ -5,7 +5,7 @@
     "w": "#FFF",
     "o": "#ff8c00"
   },
-  "baseSize": 32,
+  "baseSize": 16,
   "linesAngles": [0, 1, 2, 3, 4, 5, 6, 7],
   "linesStrokeWidth": [0.2, 0.5, 1, 2, 3],
   "linesSize": {
