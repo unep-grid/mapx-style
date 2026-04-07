@@ -1,0 +1,4 @@
+[workspace]
+resolver = "2"
+# No local workspace members — external tools (spreet, build_pbf_glyphs)
+# are installed via `make install-rust-tools`, not declared here.

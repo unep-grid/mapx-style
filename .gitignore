@@ -1,0 +1,48 @@
+# Build output
+dist/
+
+# JS deps
+node_modules/
+
+# agents
+.claude
+
+# Python env
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Credentials
+.env
+
+# Large geo files (use skills/s3/ to upload these)
+*.gpkg
+*.geojson
+*.tif
+*.tiff
+*.geotiff
+*.mbtiles
+*.pmtiles
+
+# Rust build output
+target/
+
+# Font TTF sources (download with: uv run skills/download_fonts.py)
+data/fonts/files/
+
+# Generated PBF glyphs (built from TTFs, uploaded to S3 — not committed)
+*.pbf
+
+# Editor swap / backup files
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

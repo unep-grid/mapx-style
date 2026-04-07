@@ -1,0 +1,14 @@
+{
+  "name": "@unepgrid-mapx/theme-core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MapX + Protomaps basemap theme engine: built-in themes and resolvers for MapLibre layer updates and CSS variables",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": ["src"],
+  "dependencies": {
+    "chroma-js": "^3.0.0",
+    "pmtiles": "^4.0.0"
+  }
+}

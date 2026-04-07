@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MapX Style Demo</title>
+    <style>
+      :root {
+        --mx_ui_background:          #1a1a2e;
+        --mx_ui_background_contrast: #111;
+        --mx_ui_text:                #ddd;
+        --mx_ui_border:              #2a2a3e;
+        --mx_ui_input_accent:        #4a90d9;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { display: flex; height: 100vh; font-family: system-ui, sans-serif; }
+
+      #sidebar {
+        width: 220px;
+        min-width: 220px;
+        background: var(--mx_ui_background);
+        color: var(--mx_ui_text);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        overflow-y: auto;
+        z-index: 10;
+      }
+      #sidebar h1 { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; }
+
+      .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #666; margin-top: 4px; }
+
+      .layer-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; user-select: none; }
+      .layer-toggle input { cursor: pointer; accent-color: var(--mx_ui_input_accent); }
+
+      #theme-picker,
+      #language-picker {
+        background:    var(--mx_ui_background_contrast);
+        color:         var(--mx_ui_text);
+        border:        1px solid var(--mx_ui_border);
+        border-radius: 4px;
+        padding:       4px 6px;
+        font-size:     12px;
+        cursor:        pointer;
+        width:         100%;
+      }
+
+      .map-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 7px;
+        border-radius: 3px;
+      }
+      .map-label-prod  { background: #1a3a5c; color: #7ec8ff; border-left: 3px solid #4a90d9; }
+      .map-label-debug { background: #1a2e1a; color: #7fff7f; border-left: 3px solid #44cc44; }
+
+      #status { margin-top: auto; font-size: 11px; color: #555; padding-top: 12px; border-top: 1px solid var(--mx_ui_border); }
+
+      /* ── Compare layout ─────────────────────────────────────── */
+      /* Grid stacks both panes into the same cell — no height-inheritance quirks */
+      #compare-wrap { flex: 1; display: grid; position: relative; overflow: hidden; min-width: 0; }
+
+      .map-pane { grid-area: 1 / 1; width: 100%; height: 100%; }
+      /* #map-prod sits on top, clipped to the left of the divider */
+      #map-prod  { z-index: 2; }
+      /* #map-debug sits behind, always full-size */
+      #map-debug { z-index: 1; }
+
+      /* Divider — grid-area puts it in the same cell, position:absolute pins it */
+      #compare-divider {
+        grid-area: 1 / 1;
+        position: absolute;
+        top: 0; bottom: 0;
+        width: 3px;
+        background: rgba(255,255,255,0.9);
+        box-shadow: 0 0 6px rgba(0,0,0,0.6);
+        cursor: col-resize;
+        z-index: 10;
+        transform: translateX(-50%);
+      }
+      #compare-handle {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 34px; height: 34px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 8px rgba(0,0,0,0.5);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 15px; color: #333;
+        pointer-events: none;
+        user-select: none;
+      }
+      /* Floating side labels on the map */
+      .map-side-label {
+        grid-area: 1 / 1;
+        position: absolute;
+        top: 10px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 3px;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+      }
+      #label-prod  { left: 10px;  background: #1a3a5c; color: #7ec8ff; }
+      #label-debug { right: 10px; background: #1a2e1a; color: #7fff7f; }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar">
+      <h1>MapX Style</h1>
+      <div class="section-title">Basemap</div>
+      <label class="layer-toggle">
+        <input type="checkbox" data-group="protomaps_basemap" checked />
+        Protomaps basemap
+      </label>
+
+      <div class="section-title">Overlays</div>
+      <label class="layer-toggle">
+        <input type="checkbox" data-group="mapx_borders" checked />
+        UN Borders
+      </label>
+      <label class="layer-toggle">
+        <input type="checkbox" id="toggle-place-mask" checked />
+        Place name mask
+      </label>
+
+      <div class="section-title">Terrain</div>
+      <label class="layer-toggle">
+        <input type="checkbox" id="toggle-hillshade" checked />
+        Hillshade
+      </label>
+      <label class="layer-toggle">
+        <input type="checkbox" id="toggle-contours" checked />
+        Contour lines
+      </label>
+      <label class="layer-toggle">
+        <input type="checkbox" id="toggle-terrain-3d" />
+        3D terrain
+      </label>
+
+      <div class="section-title">Theme</div>
+      <select id="theme-picker"></select>
+
+      <div class="section-title">Language</div>
+      <select id="language-picker">
+        <option value="en" selected>English</option>
+        <option value="fr">Français</option>
+        <option value="ar">العربية</option>
+        <option value="zh">中文</option>
+        <option value="es">Español</option>
+        <option value="ru">Русский</option>
+        <option value="bn">বাংলা</option>
+        <option value="de">Deutsch</option>
+      </select>
+
+    </div>
+
+    <div id="compare-wrap">
+      <div id="map-debug" class="map-pane"></div>
+      <div id="map-prod"  class="map-pane"></div>
+      <div id="compare-divider"><div id="compare-handle">⟺</div></div>
+      <div id="label-prod"  class="map-side-label">Production</div>
+      <div id="label-debug" class="map-side-label">Debug</div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

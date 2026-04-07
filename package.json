@@ -1,0 +1,28 @@
+{
+  "name": "mapx-style",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:patterns": "node skills/patterns/index.cjs",
+    "validate": "gl-style-validate public/style/style.json"
+  },
+  "dependencies": {
+    "@maplibre/maplibre-gl-compare": "^0.5.0",
+    "@unepgrid-mapx/theme-core": "*",
+    "maplibre-contour": "^0.1.0",
+    "maplibre-gl": "^5.0.0",
+    "pmtiles": "^4.0.0"
+  },
+  "devDependencies": {
+    "@maplibre/maplibre-gl-style-spec": "^24.7.0",
+    "d3": "^5.0.0",
+    "jsdom": "^16.7.0",
+    "textures": "^1.2.0",
+    "vite": "^5.0.0"
+  }
+}

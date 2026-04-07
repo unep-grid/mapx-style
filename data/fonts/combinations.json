@@ -1,0 +1,112 @@
+{
+  "comment": "Maps MapLibre text-font names → TTF file stems (first entry = highest priority for glyph overlap). Used by build_glyphs.py --combinations flag. Each key must exactly match what the style uses as text-font value.",
+
+  "Noto Sans Regular": [
+    "NotoSans-Regular",
+    "NotoSansArmenian-Regular",
+    "NotoSansSC-Regular",
+    "NotoSansArabic-Regular",
+    "NotoSansBengali-Regular"
+  ],
+  "Noto Sans Medium": [
+    "NotoSans-Medium",
+    "NotoSansArmenian-Medium",
+    "NotoSansSC-Medium",
+    "NotoSansArabic-Medium",
+    "NotoSansBengali-Medium"
+  ],
+  "Noto Sans Bold": [
+    "NotoSans-Bold",
+    "NotoSansArmenian-Bold",
+    "NotoSansSC-Bold",
+    "NotoSansArabic-Bold",
+    "NotoSansBengali-Bold"
+  ],
+  "Noto Sans Light": [
+    "NotoSans-Light",
+    "NotoSansArmenian-Light",
+    "NotoSansSC-Light",
+    "NotoSansArabic-Light",
+    "NotoSansBengali-Light"
+  ],
+  "Noto Sans SemiBold": [
+    "NotoSans-SemiBold",
+    "NotoSansArmenian-SemiBold",
+    "NotoSansSC-SemiBold",
+    "NotoSansArabic-SemiBold",
+    "NotoSansBengali-SemiBold"
+  ],
+  "Noto Sans ExtraBold": [
+    "NotoSans-ExtraBold",
+    "NotoSansArmenian-ExtraBold",
+    "NotoSansSC-ExtraBold",
+    "NotoSansArabic-ExtraBold",
+    "NotoSansBengali-ExtraBold"
+  ],
+  "Noto Sans ExtraLight": [
+    "NotoSans-ExtraLight",
+    "NotoSansArmenian-ExtraLight",
+    "NotoSansSC-ExtraLight",
+    "NotoSansArabic-ExtraLight",
+    "NotoSansBengali-ExtraLight"
+  ],
+  "Noto Sans Black": [
+    "NotoSans-Black",
+    "NotoSansArmenian-Black",
+    "NotoSansSC-Black",
+    "NotoSansArabic-Black",
+    "NotoSansBengali-Black"
+  ],
+  "Noto Sans Thin": [
+    "NotoSans-Thin",
+    "NotoSansArmenian-Thin",
+    "NotoSansSC-Thin",
+    "NotoSansArabic-Thin",
+    "NotoSansBengali-Thin"
+  ],
+
+  "Noto Sans Italic": ["NotoSans-Italic"],
+  "Noto Sans Medium Italic": ["NotoSans-MediumItalic"],
+  "Noto Sans Bold Italic": ["NotoSans-BoldItalic"],
+  "Noto Sans Light Italic": ["NotoSans-LightItalic"],
+  "Noto Sans SemiBold Italic": ["NotoSans-SemiBoldItalic"],
+  "Noto Sans ExtraBold Italic": ["NotoSans-ExtraBoldItalic"],
+  "Noto Sans ExtraLight Italic": ["NotoSans-ExtraLightItalic"],
+  "Noto Sans Black Italic": ["NotoSans-BlackItalic"],
+  "Noto Sans Thin Italic": ["NotoSans-ThinItalic"],
+
+  "Noto Sans Mono Regular": ["NotoSansMono-Regular"],
+  "Noto Sans Mono Bold": ["NotoSansMono-Bold"],
+  "Noto Sans Mono Thin": ["NotoSansMono-Thin"],
+
+  "Libre Baskerville Regular": ["LibreBaskerville-Regular"],
+  "Libre Baskerville Bold": ["LibreBaskerville-Bold"],
+  "Libre Baskerville Italic": ["LibreBaskerville-Italic"],
+
+  "Roboto Regular": ["Roboto-Regular"],
+  "Roboto Medium": ["Roboto-Medium"],
+  "Roboto Bold": ["Roboto-Bold"],
+  "Roboto Light": ["Roboto-Light"],
+  "Roboto Thin": ["Roboto-Thin"],
+  "Roboto Black": ["Roboto-Black"],
+  "Roboto Italic": ["Roboto-Italic"],
+  "Roboto Medium Italic": ["Roboto-MediumItalic"],
+  "Roboto Bold Italic": ["Roboto-BoldItalic"],
+  "Roboto Light Italic": ["Roboto-LightItalic"],
+  "Roboto Thin Italic": ["Roboto-ThinItalic"],
+  "Roboto Black Italic": ["Roboto-BlackItalic"],
+
+  "Titillium Web Regular": ["TitilliumWeb-Regular"],
+  "Titillium Web Bold": ["TitilliumWeb-Bold"],
+  "Titillium Web Black": ["TitilliumWeb-Black"],
+  "Titillium Web SemiBold": ["TitilliumWeb-SemiBold"],
+  "Titillium Web Light": ["TitilliumWeb-Light"],
+  "Titillium Web ExtraLight": ["TitilliumWeb-ExtraLight"],
+  "Titillium Web Italic": ["TitilliumWeb-Italic"],
+  "Titillium Web Bold Italic": ["TitilliumWeb-BoldItalic"],
+  "Titillium Web SemiBold Italic": ["TitilliumWeb-SemiBoldItalic"],
+  "Titillium Web Light Italic": ["TitilliumWeb-LightItalic"],
+  "Titillium Web ExtraLight Italic": ["TitilliumWeb-ExtraLightItalic"],
+
+  "Varela Round Regular": ["VarelaRound-Regular"]
+}
