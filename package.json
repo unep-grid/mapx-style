@@ -8,8 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "build:patterns": "node skills/patterns/index.cjs",
-    "validate": "gl-style-validate public/style/style.json"
+    "build:patterns": "node scripts/patterns/index.cjs",
+    "validate": "gl-style-validate packages/theme-core/src/style/style.json"
   },
   "dependencies": {
     "@maplibre/maplibre-gl-compare": "^0.5.0",

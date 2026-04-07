@@ -42,7 +42,7 @@
         "road-label"
       ],
       "license": "ODbL (OpenStreetMap contributors)",
-      "notes": "Dev: reference dev_url directly in the style (no upload needed). Prod: stream-upload from source_url to S3 without local storage using: uv run skills/s3/stream_upload.py <source_url> <s3_key> --type pmtiles --public. File is ~6-10 GB — do NOT download locally. Update source_url date for newer builds."
+      "notes": "Dev: reference dev_url directly in the style (no upload needed). Prod: stream-upload from source_url to S3 without local storage using: uv run scripts/s3/stream_upload.py <source_url> <s3_key> --type pmtiles --public. File is ~6-10 GB — do NOT download locally. Update source_url date for newer builds."
     },
     {
       "id": "un_countries_polygons",
@@ -126,7 +126,7 @@
         "country_un_1_label_1"
       ],
       "license": "UN Geospatial — restricted redistribution",
-      "notes": "Generated from data/un_countries/ GeoJSONs via tippecanoe. Upload: uv run skills/s3/upload.py borders.pmtiles maps/borders.pmtiles --type pmtiles --public"
+      "notes": "Generated from data/un_countries/ GeoJSONs via tippecanoe. Upload: uv run scripts/s3/upload.py borders.pmtiles maps/borders.pmtiles --type pmtiles --public"
     },
     {
       "id": "mapx_hillshade",
@@ -152,7 +152,7 @@
       "id_source": "mapx_satellite",
       "id_layers": [],
       "license": "TBD",
-      "notes": "Placeholder. Upload via: uv run skills/s3/upload.py satellite.tif cog/satellite.tif --type cog --public"
+      "notes": "Placeholder. Upload via: uv run scripts/s3/upload.py satellite.tif cog/satellite.tif --type cog --public"
     },
     {
       "id": "mapx_borders__v0_21d0ec",
@@ -207,7 +207,7 @@
         "bathymetry"
       ],
       "license": "GEBCO (open data)",
-      "notes": "Build: uv run skills/build_bathymetry.py. Source: VersaTiles, zoom 0-10, 681 MB."
+      "notes": "Build: uv run scripts/build_bathymetry.py. Source: VersaTiles, zoom 0-10, 681 MB."
     },
     {
       "id": "bathymetry__v0_4a8cbd",

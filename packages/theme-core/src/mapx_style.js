@@ -1,6 +1,7 @@
 import { Protocol } from "pmtiles";
-import styleJson from "../../../public/style/style.json";
-import styleDebugJson from "../../../public/style/style_debug.json";
+import styleJson from "./style/style.json";
+import styleDebugJson from "./style/style_debug.json";
+import { version as STYLE_VERSION } from "../../../style_version.json";
 import { build_style } from "./build_style.js";
 import { themes } from "./themes/index.js";
 import { layer_resolver } from "./layer_resolver.js";
@@ -21,7 +22,7 @@ const CSS_EL_ID = "mapx-theme-css";
  * injection. Call destroy() to tear down.
  *
  * @example
- * const mxStyle = new MapxStyle({ env: "dev", maplibregl, mlcontour });
+ * const mxStyle = new MapxStyle({ maplibregl, mlcontour });
  * const map = new maplibregl.Map({
  *   style: mxStyle.getStyle(),
  *   transformRequest: mxStyle.transformRequest,
@@ -70,9 +71,13 @@ export class MapxStyle {
     "country_un_0_label_0",
   ];
 
-  constructor({ env = "prod", maplibregl, mlcontour } = {}) {
-    this._env = env;
-    this._sprite = `${S3_BASE}/style/${env}/assets/sprites/sprite`;
+  constructor({ maplibregl, mlcontour } = {}) {
+    this._glyphs = `${S3_BASE}/style/v${STYLE_VERSION}/glyphs/{fontstack}/{range}.pbf`;
+    this._sprite = [
+      { id: "default",  url: `${S3_BASE}/style/v${STYLE_VERSION}/sprites/sprite` },
+      { id: "patterns", url: `${S3_BASE}/style/v${STYLE_VERSION}/sprites/sprite_patterns` },
+    ];
+    this._spriteIndex = null;
     this._theme = null;
     this._map = null;
     this._language = "en";
@@ -360,6 +365,42 @@ export class MapxStyle {
     return theme ? css_resolver(theme.colors) : "";
   }
 
+  // ── Sprite / icon accessors ──────────────────────────────────────────────────
+
+  /**
+   * Returns the sprite-index.json from S3 (fetched once, cached on the instance).
+   * The index contains all icon and pattern entries with their sprite sheet
+   * coordinates and group metadata.
+   * @returns {Promise<object>}
+   */
+  async getSpriteIndex() {
+    if (!this._spriteIndex) {
+      const url = `${S3_BASE}/style/v${STYLE_VERSION}/sprites/sprite-index.json`;
+      this._spriteIndex = await fetch(url).then((r) => r.json());
+    }
+    return this._spriteIndex;
+  }
+
+  /**
+   * Returns all icon entries from the sprite index.
+   * Each entry: { id, group, sprite, x, y, w, h, sdf }
+   * @returns {Promise<Array>}
+   */
+  async getIcons() {
+    const index = await this.getSpriteIndex();
+    return index.icons;
+  }
+
+  /**
+   * Returns a single icon entry by id, or undefined if not found.
+   * @param {string} id
+   * @returns {Promise<object|undefined>}
+   */
+  async getIcon(id) {
+    const icons = await this.getIcons();
+    return icons.find((icon) => icon.id === id);
+  }
+
   // ── Style building ───────────────────────────────────────────────────────────
 
   /**
@@ -368,6 +409,7 @@ export class MapxStyle {
    */
   getStyle() {
     const style = structuredClone(styleJson);
+    style.glyphs = this._glyphs;
     style.sprite = this._sprite;
     if (this._demSource) build_style(style, this._demSource);
     return style;
@@ -379,6 +421,7 @@ export class MapxStyle {
    */
   getStyleDebug() {
     const style = structuredClone(styleDebugJson);
+    style.glyphs = this._glyphs;
     style.sprite = this._sprite;
     if (this._demSource) build_style(style, this._demSource);
     return style;
