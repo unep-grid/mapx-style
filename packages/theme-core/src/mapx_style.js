@@ -6,12 +6,12 @@ import { themes } from "./themes/index.js";
 import { layer_resolver } from "./layer_resolver.js";
 import { css_resolver } from "./css_resolver.js";
 
-const S3_BASE     = "https://mapx.unepgrid.s3.unige.ch/mapx";
+const S3_BASE = "https://mapx.unepgrid.s3.unige.ch/mapx";
 const HCP_S3_HOST = "s3.unige.ch";
-const HCP_S3_URL  = "https://mapx.unepgrid.s3.unige.ch/";
-const DEM_URL     = "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp";
-const MASK_URL    = `${S3_BASE}/masks/un_2020_countries_mask__v0.geojson`;
-const CSS_EL_ID   = "mapx-theme-css";
+const HCP_S3_URL = "https://mapx.unepgrid.s3.unige.ch/";
+const DEM_URL = "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp";
+const MASK_URL = `${S3_BASE}/masks/un_2020_countries_mask__v0.geojson`;
+const CSS_EL_ID = "mapx-theme-css";
 
 /**
  * MapxStyle — single entry point for the MapX style system.
@@ -37,13 +37,13 @@ const CSS_EL_ID   = "mapx-theme-css";
  * @param {object} [opt.mlcontour]  - maplibre-contour module (DemSource).
  */
 export class MapxStyle {
-  static _registered    = false;
+  static _registered = false;
   static _rtlRegistered = false;
-  static TERRAIN_CFG    = { source: "terrain", exaggeration: 1 };
-  static TERRAIN_PITCH  = 30;  // degrees applied when enableTerrain() tilts the map
-  static TERRAIN_THRESH = 5;   // pitch threshold above which manual tilt enables terrain
+  static TERRAIN_CFG = { source: "terrain", exaggeration: 1 };
+  static TERRAIN_PITCH = 30; // degrees applied when enableTerrain() tilts the map
+  static TERRAIN_THRESH = 5; // pitch threshold above which manual tilt enables terrain
   static HILLSHADE_LAYER = "hillshade";
-  static CONTOUR_LAYERS  = ["contour-lines", "contour-labels"];
+  static CONTOUR_LAYERS = ["contour-lines", "contour-labels"];
   static MASK_URL = MASK_URL;
   static PLACES_MASK_LAYERS = [
     "places_locality_capital",
@@ -71,19 +71,19 @@ export class MapxStyle {
   ];
 
   constructor({ env = "prod", maplibregl, mlcontour } = {}) {
-    this._env            = env;
-    this._sprite         = `${S3_BASE}/style/${env}/assets/sprites/sprite`;
-    this._theme          = null;
-    this._map            = null;
-    this._language          = "en";
-    this._terrainEnabled   = false;
-    this._terrainCfg       = MapxStyle.TERRAIN_CFG;
-    this._onPitchEnd       = this._handlePitchEnd.bind(this);
+    this._env = env;
+    this._sprite = `${S3_BASE}/style/${env}/assets/sprites/sprite`;
+    this._theme = null;
+    this._map = null;
+    this._language = "en";
+    this._terrainEnabled = false;
+    this._terrainCfg = MapxStyle.TERRAIN_CFG;
+    this._onPitchEnd = this._handlePitchEnd.bind(this);
     this._hillshadeEnabled = true;
-    this._contoursEnabled  = true;
-    this._maskEnabled         = true;   // on by default
-    this._maskUrl             = MASK_URL;
-    this._maskGeojson         = null;   // loaded lazily on first use
+    this._contoursEnabled = true;
+    this._maskEnabled = true; // on by default
+    this._maskUrl = MASK_URL;
+    this._maskGeojson = null; // loaded lazily on first use
     this._maskOriginalFilters = {};
 
     // ── RTL text plugin — once per page (Arabic, Hebrew, etc.)
@@ -105,21 +105,30 @@ export class MapxStyle {
       this._originalFetch = originalFetch;
       window.fetch = (input, init = {}) => {
         const url =
-          typeof input === "string" ? input :
-          input instanceof Request  ? input.url : "";
+          typeof input === "string"
+            ? input
+            : input instanceof Request
+              ? input.url
+              : "";
         if (url.includes(HCP_S3_HOST)) {
           const existing =
             init.headers instanceof Headers
               ? Object.fromEntries(init.headers.entries())
-              : (init.headers || {});
-          init = { ...init, headers: { ...existing, Authorization: "AWS all_users:" } };
+              : init.headers || {};
+          init = {
+            ...init,
+            headers: { ...existing, Authorization: "AWS all_users:" },
+          };
         }
         return originalFetch(input, init);
       };
 
       // ── PMTiles protocol
       const pmtilesProtocol = new Protocol();
-      maplibregl.addProtocol("pmtiles", pmtilesProtocol.tile.bind(pmtilesProtocol));
+      maplibregl.addProtocol(
+        "pmtiles",
+        pmtilesProtocol.tile.bind(pmtilesProtocol),
+      );
       this._maplibregl = maplibregl;
     }
 
@@ -127,10 +136,10 @@ export class MapxStyle {
     // Tiles are cached and shared between hillshade and contour sources.
     if (mlcontour && maplibregl) {
       this._demSource = new mlcontour.DemSource({
-        url:      DEM_URL,
+        url: DEM_URL,
         encoding: "terrarium",
-        maxzoom:  14,
-        worker:   true,
+        maxzoom: 14,
+        worker: true,
         cacheSize: 100,
       });
       this._demSource.setupMaplibre(maplibregl);
@@ -200,13 +209,29 @@ export class MapxStyle {
 
   // ── Hillshade / Contours ─────────────────────────────────────────────────────
 
-  enableHillshade()  { this._hillshadeEnabled = true;  this._setLayersVisibility(MapxStyle.HILLSHADE_LAYER, "visible"); }
-  disableHillshade() { this._hillshadeEnabled = false; this._setLayersVisibility(MapxStyle.HILLSHADE_LAYER, "none"); }
-  toggleHillshade()  { this._hillshadeEnabled ? this.disableHillshade() : this.enableHillshade(); }
+  enableHillshade() {
+    this._hillshadeEnabled = true;
+    this._setLayersVisibility(MapxStyle.HILLSHADE_LAYER, "visible");
+  }
+  disableHillshade() {
+    this._hillshadeEnabled = false;
+    this._setLayersVisibility(MapxStyle.HILLSHADE_LAYER, "none");
+  }
+  toggleHillshade() {
+    this._hillshadeEnabled ? this.disableHillshade() : this.enableHillshade();
+  }
 
-  enableContours()   { this._contoursEnabled = true;  this._setLayersVisibility(MapxStyle.CONTOUR_LAYERS, "visible"); }
-  disableContours()  { this._contoursEnabled = false; this._setLayersVisibility(MapxStyle.CONTOUR_LAYERS, "none"); }
-  toggleContours()   { this._contoursEnabled ? this.disableContours() : this.enableContours(); }
+  enableContours() {
+    this._contoursEnabled = true;
+    this._setLayersVisibility(MapxStyle.CONTOUR_LAYERS, "visible");
+  }
+  disableContours() {
+    this._contoursEnabled = false;
+    this._setLayersVisibility(MapxStyle.CONTOUR_LAYERS, "none");
+  }
+  toggleContours() {
+    this._contoursEnabled ? this.disableContours() : this.enableContours();
+  }
 
   // ── Places mask (within expression) ─────────────────────────────────────────
 
@@ -226,8 +251,7 @@ export class MapxStyle {
    */
   disableMask() {
     this._maskEnabled = false;
-    if (this._map && this._map.isStyleLoaded())
-      this._removeMask(this._map);
+    if (this._map && this._map.isStyleLoaded()) this._removeMask(this._map);
   }
 
   /** Toggle mask on/off. */
@@ -250,10 +274,14 @@ export class MapxStyle {
   // ── Theme management ─────────────────────────────────────────────────────────
 
   /** Returns all available themes. */
-  getThemes() { return themes; }
+  getThemes() {
+    return themes;
+  }
 
   /** Returns the currently active theme, or null. */
-  getTheme() { return this._theme; }
+  getTheme() {
+    return this._theme;
+  }
 
   /**
    * Apply a theme by id string or theme object.
@@ -278,7 +306,9 @@ export class MapxStyle {
   // ── Language ─────────────────────────────────────────────────────────────────
 
   /** Returns the current language code (ISO 639-1, e.g. "en", "fr", "ar"). */
-  getLanguage() { return this._language; }
+  getLanguage() {
+    return this._language;
+  }
 
   /**
    * Set the map label language.
@@ -292,12 +322,25 @@ export class MapxStyle {
     this._language = lang;
     if (!this._map) return;
     const apply = () => {
-      const expr = lang === "en"
-        ? ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]]
-        : ["coalesce",
+      let expr;
+      switch (lang) {
+        case "en":
+          expr = ["coalesce",
+            ["get", "name:en"], ["get", "name_en"],
+            ["get", "name"]];
+          break;
+        case "zh":
+          expr = ["coalesce",
+            ["get", "name:zh"], ["get", "name:zh-Hans"], ["get", "name_zh"],
+            ["get", "name:en"], ["get", "name_en"],
+            ["get", "name"]];
+          break;
+        default:
+          expr = ["coalesce",
             ["get", `name:${lang}`], ["get", `name_${lang}`],
             ["get", "name:en"],      ["get", "name_en"],
             ["get", "name"]];
+      }
       for (const id of MapxStyle.LABEL_LAYERS) {
         if (this._map.getLayer(id))
           this._map.setLayoutProperty(id, "text-field", expr);
@@ -308,10 +351,14 @@ export class MapxStyle {
   }
 
   /** Returns raw layer update array for the given (or current) theme. */
-  getLayers(theme = this._theme) { return theme ? layer_resolver(theme.colors) : []; }
+  getLayers(theme = this._theme) {
+    return theme ? layer_resolver(theme.colors) : [];
+  }
 
   /** Returns CSS custom property string for the given (or current) theme. */
-  getCss(theme = this._theme) { return theme ? css_resolver(theme.colors) : ""; }
+  getCss(theme = this._theme) {
+    return theme ? css_resolver(theme.colors) : "";
+  }
 
   // ── Style building ───────────────────────────────────────────────────────────
 
@@ -370,7 +417,9 @@ export class MapxStyle {
         this._maskOriginalFilters[id] = map.getFilter(id);
       const base = this._maskOriginalFilters[id];
       const conditions =
-        Array.isArray(base) && base[0] === "all" ? base.slice(1) : [base].filter(Boolean);
+        Array.isArray(base) && base[0] === "all"
+          ? base.slice(1)
+          : [base].filter(Boolean);
       map.setFilter(id, ["all", ...conditions, ["!", ["within", geojson]]]);
     }
   }
