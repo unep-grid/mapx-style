@@ -15,9 +15,9 @@
 
 const STEP = 0.5;
 const CELL = 0.4;
-const PATTERN_ORIGIN = [-10, -3]; // [lon, lat] bottom-left
+const PATTERN_ORIGIN = [6.1571, 46.1925]; // [lon, lat] bottom-left
 const PATTERN_COLS = 13;
-const ICON_ORIGIN = [1, -5];
+const ICON_ORIGIN = [13.5, 46.1925];
 const ICON_COLS = 20;
 
 export const PATTERNS_BOUNDS = [
