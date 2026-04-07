@@ -1,3 +1,6 @@
 [submodule "legacy/mapx"]
 	path = legacy/mapx
 	url = git@github.com:unep-grid/mapx.git
+[submodule "legacy"]
+	path = legacy
+	url = git@github.com:unep-grid/mapx.git
