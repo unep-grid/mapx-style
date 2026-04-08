@@ -58,20 +58,7 @@
       .map-label-prod  { background: #1a3a5c; color: #7ec8ff; border-left: 3px solid #4a90d9; }
       .map-label-debug { background: #1a2e1a; color: #7fff7f; border-left: 3px solid #44cc44; }
 
-      .demo-btn {
-        background: var(--mx_ui_background_contrast);
-        color: var(--mx_ui_text);
-        border: 1px solid var(--mx_ui_border);
-        border-radius: 4px;
-        padding: 5px 8px;
-        font-size: 12px;
-        cursor: pointer;
-        width: 100%;
-        text-align: left;
-      }
-      .demo-btn:hover { border-color: var(--mx_ui_input_accent); color: #fff; }
-
-      #status { margin-top: auto; font-size: 11px; color: #555; padding-top: 12px; border-top: 1px solid var(--mx_ui_border); }
+#status { margin-top: auto; font-size: 11px; color: #555; padding-top: 12px; border-top: 1px solid var(--mx_ui_border); }
 
       /* ── Compare layout ─────────────────────────────────────── */
       /* Grid stacks both panes into the same cell — no height-inheritance quirks */
@@ -163,9 +150,15 @@
       <div class="section-title">Theme</div>
       <select id="theme-picker"></select>
 
-      <div class="section-title">Sprite test</div>
-      <button class="demo-btn" id="fly-to-patterns">Patterns grid</button>
-      <button class="demo-btn" id="fly-to-icons">Icons grid</button>
+      <div class="section-title">Sprite / Pattern</div>
+      <label class="layer-toggle">
+        <input type="checkbox" id="toggle-demo-patterns" />
+        Patterns
+      </label>
+      <label class="layer-toggle">
+        <input type="checkbox" id="toggle-demo-icons" />
+        Icons
+      </label>
 
       <div class="section-title">Language</div>
       <select id="language-picker">

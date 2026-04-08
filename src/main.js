@@ -3,7 +3,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import mlcontour from "maplibre-contour";
 import { MapxStyle } from "@unepgrid-mapx/theme-core";
 import { MapCompare } from "./mapcompare.js";
-import { buildSpriteDemo, flyToPatterns, flyToIcons } from "./sprite_demo.js";
+import { buildSpriteDemo, showPatterns, hidePatterns, showIcons, hideIcons } from "./sprite_demo.js";
 
 const env = import.meta.env.DEV ? "dev" : "prod";
 const mxStyle = new MapxStyle({ env, maplibregl, mlcontour });
@@ -58,6 +58,9 @@ const mapDebug = new maplibregl.Map({
 
 // Only attach prod — debug is intentionally unthemed (x-ray mode)
 mxStyle.attachMap(mapProd);
+
+// Expose prod map for Playwright tests
+window.__mapProd = mapProd;
 
 mapProd.on("moveend", () => saveViewport(mapProd));
 
@@ -127,12 +130,12 @@ mapProd.on("load", () => {
   buildSpriteDemo(mapProd, mxStyle);
 });
 
-document
-  .getElementById("fly-to-patterns")
-  .addEventListener("click", () => flyToPatterns(mapProd));
-document
-  .getElementById("fly-to-icons")
-  .addEventListener("click", () => flyToIcons(mapProd));
+document.getElementById("toggle-demo-patterns").addEventListener("change", (e) => {
+  e.target.checked ? showPatterns(mapProd) : hidePatterns(mapProd);
+});
+document.getElementById("toggle-demo-icons").addEventListener("change", (e) => {
+  e.target.checked ? showIcons(mapProd) : hideIcons(mapProd);
+});
 
 // ── debug data (prod map only) ─────────────────────────────────────────
 

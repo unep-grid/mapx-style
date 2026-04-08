@@ -2,44 +2,51 @@
  * sprite_demo.js — Visual sprite/pattern test grid for the MapX Style demo app.
  *
  * Adds two GeoJSON layers to the prod map (prod only — debug has no sprite):
- *   • demo-patterns  fill layer, west of 0°: one polygon per pattern icon
- *   • demo-icons     symbol layer, east of 0°: one point per maki/geology icon
+ *   • demo-patterns  fill layer: one polygon per pattern/geology icon
+ *   • demo-icons     symbol layer: one point per maki icon
  *
- * Both grids are centred near [0°, 0°] (Gulf of Guinea — open ocean, no clutter).
- * The data is generated from the live sprite-index.json via mxStyle.getIcons().
+ * Layers are hidden by default; use showPatterns/showIcons to reveal and fly to them.
+ * Grids are placed over the Geneva/Alps area for meaningful visual regression
+ * (roads, hillshade, labels, mountains in the background).
  *
  * Layout (0.4° cells, 0.5° step):
- *   Patterns  lon -10 → -3.5   lat -3 → +3.5   13 cols × N rows
- *   Icons     lon  +1 → +11    lat -5 → +5      20 cols × N rows
+ *   Patterns  origin [6.16, 46.19]   13 cols × N rows
+ *   Icons     origin [13.5, 46.19]   20 cols × N rows
  */
 
-const STEP = 0.5;
-const CELL = 0.4;
-const PATTERN_ORIGIN = [6.1571, 46.1925]; // [lon, lat] bottom-left
+export const STEP = 0.5;
+export const CELL = 0.4;
+
+const PATTERN_ORIGIN = [6.1571, 46.1925];
 const PATTERN_COLS = 13;
 const ICON_ORIGIN = [13.5, 46.1925];
 const ICON_COLS = 20;
 
 export const PATTERNS_BOUNDS = [
   [PATTERN_ORIGIN[0] - 0.5, PATTERN_ORIGIN[1] - 0.5],
-  [PATTERN_ORIGIN[0] + PATTERN_COLS * STEP + 0.5, 5],
+  [PATTERN_ORIGIN[0] + PATTERN_COLS * STEP + 0.5, PATTERN_ORIGIN[1] + 7],
 ];
 export const ICONS_BOUNDS = [
   [ICON_ORIGIN[0] - 0.5, ICON_ORIGIN[1] - 0.5],
-  [ICON_ORIGIN[0] + ICON_COLS * STEP + 0.5, 6],
+  [ICON_ORIGIN[0] + ICON_COLS * STEP + 0.5, ICON_ORIGIN[1] + 7],
 ];
 
-function _makePolygon(lon, lat) {
+const PATTERN_LAYER_IDS = ["demo-patterns-fill", "demo-patterns-outline"];
+const ICON_LAYER_IDS = ["demo-icons-symbol"];
+
+/** Returns a closed GeoJSON ring for a cell at (lon, lat). */
+export function makePolygon(lon, lat) {
   return [
-    [lon, lat],
+    [lon,        lat],
     [lon + CELL, lat],
     [lon + CELL, lat + CELL],
-    [lon, lat + CELL],
-    [lon, lat],
+    [lon,        lat + CELL],
+    [lon,        lat],
   ];
 }
 
-function _grid(icons, [lon0, lat0], cols) {
+/** Returns a GeoJSON FeatureCollection grid from an icon list. */
+export function makeGrid(icons, [lon0, lat0], cols) {
   return {
     type: "FeatureCollection",
     features: icons.map((icon, i) => {
@@ -54,7 +61,7 @@ function _grid(icons, [lon0, lat0], cols) {
           coordinates:
             icon.geometry === "Point"
               ? [lon + CELL / 2, lat + CELL / 2]
-              : [_makePolygon(lon, lat)],
+              : [makePolygon(lon, lat)],
         },
         properties: { id: icon.id, group: icon.group },
       };
@@ -64,8 +71,7 @@ function _grid(icons, [lon0, lat0], cols) {
 
 /**
  * Build and add the sprite demo sources/layers to `map`.
- * Fetches the sprite index via `mxStyle.getIcons()`.
- * Safe to call before or after map load.
+ * Layers are added hidden — call showPatterns/showIcons to reveal them.
  *
  * @param {maplibregl.Map} map
  * @param {MapxStyle} mxStyle
@@ -81,46 +87,56 @@ export async function buildSpriteDemo(map, mxStyle) {
     .filter((ic) => ic.group === "maki")
     .map((ic) => ({ ...ic, geometry: "Point" }));
 
-  const patternGeoJSON = _grid(patterns, PATTERN_ORIGIN, PATTERN_COLS);
-  const iconGeoJSON = _grid(symbols, ICON_ORIGIN, ICON_COLS);
+  map.addSource("demo-patterns", { type: "geojson", data: makeGrid(patterns, PATTERN_ORIGIN, PATTERN_COLS) });
+  map.addSource("demo-icons",    { type: "geojson", data: makeGrid(symbols,  ICON_ORIGIN,    ICON_COLS)    });
 
-  const add = () => {
-    map.addSource("demo-patterns", { type: "geojson", data: patternGeoJSON });
-    map.addSource("demo-icons", { type: "geojson", data: iconGeoJSON });
-
-    map.addLayer({
-      id: "demo-patterns-fill",
-      type: "fill",
-      source: "demo-patterns",
-      paint: { "fill-pattern": ["concat", "patterns:", ["get", "id"]] },
-    });
-    map.addLayer({
-      id: "demo-patterns-outline",
-      type: "line",
-      source: "demo-patterns",
-      paint: { "line-color": "#333", "line-width": 0.5, "line-opacity": 0.4 },
-    });
-    map.addLayer({
-      id: "demo-icons-symbol",
-      type: "symbol",
-      source: "demo-icons",
-      layout: {
-        "icon-image": ["get", "id"],
-        "icon-size": 1,
-        "icon-allow-overlap": true,
-      },
-    });
-  };
-
-  add();
+  map.addLayer({
+    id: "demo-patterns-fill",
+    type: "fill",
+    source: "demo-patterns",
+    layout: { visibility: "none" },
+    paint: { "fill-pattern": ["concat", "patterns:", ["get", "id"]] },
+  });
+  map.addLayer({
+    id: "demo-patterns-outline",
+    type: "line",
+    source: "demo-patterns",
+    layout: { visibility: "none" },
+    paint: { "line-color": "#333", "line-width": 0.5, "line-opacity": 0.4 },
+  });
+  map.addLayer({
+    id: "demo-icons-symbol",
+    type: "symbol",
+    source: "demo-icons",
+    layout: {
+      visibility: "none",
+      "icon-image": ["get", "id"],
+      "icon-size": 1,
+      "icon-allow-overlap": true,
+    },
+  });
 }
 
-export function flyToPatterns(map) {
-  // maxZoom: 6 keeps ≈1–2 tile repetitions per cell (fill-pattern tiles at
-  // fixed screen-pixel size; polygons grow with zoom so ratio varies by zoom).
+export function showPatterns(map) {
+  for (const id of PATTERN_LAYER_IDS)
+    map.setLayoutProperty(id, "visibility", "visible");
+  // maxZoom: 6 keeps ≈1–2 tile repetitions per cell (fill-pattern pixel size
+  // is screen-stable; polygons grow with zoom so tile/cell ratio varies).
   map.fitBounds(PATTERNS_BOUNDS, { padding: 40, duration: 800, maxZoom: 6 });
 }
 
-export function flyToIcons(map) {
-  map.fitBounds(ICONS_BOUNDS, { padding: 40, duration: 800 });
+export function hidePatterns(map) {
+  for (const id of PATTERN_LAYER_IDS)
+    map.setLayoutProperty(id, "visibility", "none");
+}
+
+export function showIcons(map) {
+  for (const id of ICON_LAYER_IDS)
+    map.setLayoutProperty(id, "visibility", "visible");
+  map.fitBounds(ICONS_BOUNDS, { padding: 40, duration: 800, maxZoom: 6 });
+}
+
+export function hideIcons(map) {
+  for (const id of ICON_LAYER_IDS)
+    map.setLayoutProperty(id, "visibility", "none");
 }

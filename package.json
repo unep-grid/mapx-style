@@ -12,7 +12,9 @@
     "validate": "gl-style-validate packages/theme-core/src/style/style.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@maplibre/maplibre-gl-compare": "^0.5.0",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@maplibre/maplibre-gl-style-spec": "^24.7.0",
+    "@playwright/test": "^1",
     "@vitest/coverage-v8": "^3",
     "d3": "^5.0.0",
     "jsdom": "^16.7.0",
