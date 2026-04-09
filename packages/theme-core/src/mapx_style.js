@@ -6,6 +6,7 @@ import { build_style } from "./build_style.js";
 import { themes } from "./themes/index.js";
 import { layer_resolver } from "./layer_resolver.js";
 import { css_resolver } from "./css_resolver.js";
+import { MapScaler } from "./map_scaler.js";
 
 const S3_BASE = "https://mapx.unepgrid.s3.unige.ch/mapx";
 const HCP_S3_HOST = "s3.unige.ch";
@@ -167,6 +168,7 @@ export class MapxStyle {
   /** Link a map instance. Applies the current theme immediately if one is set. */
   attachMap(map) {
     this._map = map;
+    this._scaler = new MapScaler(map);
     map.on("pitchend", this._onPitchEnd);
     map.on("error", this._onMapError);
     const apply = () => {
@@ -182,6 +184,10 @@ export class MapxStyle {
     if (this._map) {
       this._map.off("pitchend", this._onPitchEnd);
       this._map.off("error", this._onMapError);
+    }
+    if (this._scaler) {
+      this._scaler.destroy();
+      this._scaler = null;
     }
     this._map = null;
   }
@@ -361,6 +367,27 @@ export class MapxStyle {
     };
     if (this._map.isStyleLoaded()) apply();
     else this._map.once("style.load", apply);
+  }
+
+  // ── Map scaling ──────────────────────────────────────────────────────────────
+
+  /**
+   * Scale text-size and/or icon-size on all basemap layers.
+   * @param {number} [value=1] - Scale factor (1 = original size).
+   * @param {string[]} [types=["text","icon"]] - Which sizes to scale.
+   */
+  scale(value = 1, types = ["text", "icon"]) {
+    this._scaler?.update(value, types);
+  }
+
+  /** Scale text-size only on basemap layers. */
+  scaleText(value = 1) {
+    this._scaler?.update(value, ["text"]);
+  }
+
+  /** Scale icon-size only on basemap layers. */
+  scaleIcon(value = 1) {
+    this._scaler?.update(value, ["icon"]);
   }
 
   /** Returns raw layer update array for the given (or current) theme. */
