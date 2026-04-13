@@ -26,10 +26,26 @@
       "maxzoom": 14,
       "attribution": "Terrain tiles © <a href='https://mapterhorn.com/attribution'>Mapterhorn</a>"
     },
+    "terrain_hillshade": {
+      "type": "raster-dem",
+      "encoding": "terrarium",
+      "tiles": ["__terrain_tiles_placeholder__"],
+      "tileSize": 512,
+      "maxzoom": 14
+    },
     "contours": {
       "type": "vector",
       "tiles": ["__contours_tiles_placeholder__"],
       "maxzoom": 15
+    },
+    "satellite": {
+      "type": "raster",
+      "tiles": [
+        "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg"
+      ],
+      "tileSize": 256,
+      "maxzoom": 14,
+      "attribution": "Sentinel-2 cloudless - <a href='https://s2maps.eu'>s2maps.eu</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2024)"
     }
   },
   "layers": [
@@ -141,7 +157,7 @@
     {
       "id": "hillshade",
       "type": "hillshade",
-      "source": "terrain",
+      "source": "terrain_hillshade",
       "layout": { "visibility": "visible" },
       "paint": {
         "hillshade-shadow-color": "rgba(40,30,10,0.55)",
@@ -1131,7 +1147,12 @@
       "minzoom": 13,
       "filter": ["all", ["has", "name"], ["!=", ["get", "kind"], "path"]],
       "layout": {
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Medium"],
         "text-size": ["interpolate", ["linear"], ["zoom"], 13, 10, 18, 12],
         "symbol-placement": "line",
@@ -1168,7 +1189,12 @@
         ["in", ["get", "kind"], ["literal", ["bay", "ocean", "sea", "water"]]]
       ],
       "layout": {
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Libre Baskerville Italic"],
         "text-size": ["interpolate", ["linear"], ["zoom"], 7, 12, 11, 18],
         "text-max-angle": 30,
@@ -1205,7 +1231,12 @@
         ]
       ],
       "layout": {
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Libre Baskerville Italic"],
         "text-size": ["interpolate", ["linear"], ["zoom"], 7, 12, 10, 18],
         "text-line-height": 1.3,
@@ -1248,7 +1279,12 @@
         ["in", ["get", "kind"], ["literal", ["canal", "river", "stream"]]]
       ],
       "layout": {
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Libre Baskerville Regular"],
         "text-size": ["interpolate", ["linear"], ["zoom"], 13, 6, 18, 12],
         "text-max-angle": 30,
@@ -1270,6 +1306,13 @@
         "text-halo-width": 1.2,
         "text-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.5, 18, 1]
       }
+    },
+    {
+      "id": "satellite",
+      "type": "raster",
+      "source": "satellite",
+      "layout": { "visibility": "none" },
+      "paint": { "raster-opacity": 1 }
     },
     {
       "id": "mxlayers",
@@ -1339,7 +1382,12 @@
           12,
           0.2
         ],
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Regular"],
         "text-size": [
           "interpolate",
@@ -1388,7 +1436,12 @@
           16,
           0.6
         ],
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Regular"],
         "text-size": [
           "interpolate",
@@ -1437,7 +1490,12 @@
           18,
           0.2
         ],
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Regular"],
         "text-size": [
           "interpolate",
@@ -1472,7 +1530,12 @@
       "layout": {
         "text-size": ["interpolate", ["linear"], ["zoom"], 4, 6, 22, 24],
         "text-allow-overlap": false,
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Italic"],
         "text-letter-spacing": 0.2,
         "text-padding": 10,
@@ -1507,7 +1570,12 @@
         "symbol-sort-key": ["-", 100, ["get", "group_size"]],
         "text-size": ["interpolate", ["linear"], ["zoom"], 4, 6, 22, 24],
         "text-allow-overlap": false,
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Regular"],
         "text-letter-spacing": 0.2,
         "text-padding": 10,
@@ -1542,7 +1610,12 @@
         "symbol-sort-key": ["-", 100, ["get", "group_size"]],
         "text-size": ["interpolate", ["linear"], ["zoom"], 4, 8, 22, 32],
         "text-allow-overlap": false,
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Italic"],
         "text-letter-spacing": 0.2,
         "text-padding": 10,
@@ -1577,7 +1650,12 @@
         "symbol-sort-key": ["-", 100, ["get", "group_size"]],
         "text-size": ["interpolate", ["linear"], ["zoom"], 4, 9, 22, 36],
         "text-allow-overlap": false,
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Regular"],
         "text-letter-spacing": 0.2,
         "text-padding": 10,
@@ -1612,7 +1690,12 @@
         "symbol-sort-key": ["-", 100, ["get", "group_size"]],
         "text-size": ["interpolate", ["linear"], ["zoom"], 4, 9, 22, 36],
         "text-allow-overlap": false,
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Regular"],
         "text-letter-spacing": 0.2,
         "text-padding": 10,
@@ -1649,7 +1732,12 @@
         "text-size": ["interpolate", ["linear"], ["zoom"], 4, 9, 22, 36],
         "text-transform": "uppercase",
         "text-allow-overlap": false,
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Italic"],
         "text-letter-spacing": 0.2,
         "text-padding": 10,
@@ -1685,7 +1773,12 @@
         "text-size": ["interpolate", ["linear"], ["zoom"], 4, 10, 22, 40],
         "text-transform": "uppercase",
         "text-allow-overlap": false,
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Regular"],
         "text-letter-spacing": 0.2,
         "text-padding": 10,
@@ -1721,7 +1814,12 @@
         "text-size": ["interpolate", ["linear"], ["zoom"], 4, 11, 22, 44],
         "text-transform": "uppercase",
         "text-allow-overlap": false,
-        "text-field": ["coalesce", ["get", "name:en"], ["get", "name_en"], ["get", "name"]],
+        "text-field": [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"]
+        ],
         "text-font": ["Noto Sans Medium Italic"],
         "text-letter-spacing": 0.2,
         "text-padding": 10,

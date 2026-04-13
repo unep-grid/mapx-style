@@ -12,6 +12,7 @@
  */
 export function build_style(style, demSource) {
   style.sources.terrain.tiles = [demSource.sharedDemProtocolUrl];
+  style.sources.terrain_hillshade.tiles = [demSource.sharedDemProtocolUrl];
 
   style.sources.contours.tiles = [
     demSource.contourProtocolUrl({

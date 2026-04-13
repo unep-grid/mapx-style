@@ -29,6 +29,13 @@
       "type": "vector",
       "tiles": ["__contours_tiles_placeholder__"],
       "maxzoom": 15
+    },
+    "satellite": {
+      "type": "raster",
+      "tiles": ["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg"],
+      "tileSize": 256,
+      "maxzoom": 14,
+      "attribution": "Sentinel-2 cloudless - <a href='https://s2maps.eu'>s2maps.eu</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2024)"
     }
   },
   "layers": [
@@ -349,6 +356,13 @@
         "text-halo-width": 1.5,
         "text-opacity": 1
       }
+    },
+    {
+      "id": "satellite",
+      "type": "raster",
+      "source": "satellite",
+      "layout": { "visibility": "none" },
+      "paint": { "raster-opacity": 1 }
     }
   ]
 }

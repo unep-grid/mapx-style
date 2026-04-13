@@ -132,4 +132,91 @@ describe("MapxStyle sprite index (mocked fetch)", () => {
   it("getIcon returns undefined for unknown id", async () => {
     expect(await mx.getIcon("does-not-exist")).toBeUndefined();
   });
+
+  describe("getIconDimensions", () => {
+    it("returns {w, h} for a known icon", async () => {
+      expect(await mx.getIconDimensions("maki-airport-11")).toEqual({ w: 11, h: 11 });
+    });
+    it("returns {w, h} for a known pattern", async () => {
+      expect(await mx.getIconDimensions("t_b_lines_01")).toEqual({ w: 32, h: 32 });
+    });
+    it("returns null for an unknown id", async () => {
+      expect(await mx.getIconDimensions("does-not-exist")).toBeNull();
+    });
+    it("fetches sprite-index only once across multiple calls", async () => {
+      await mx.getIconDimensions("maki-airport-11");
+      await mx.getIconDimensions("t_b_lines_01");
+      expect(globalThis.fetch).toHaveBeenCalledOnce();
+    });
+  });
+});
+
+describe("MapxStyle resolveSpriteName (mock map)", () => {
+  // Images: "maki-airport-11" is in the default sprite (bare name),
+  //         "t_b_lines_01" is in the patterns sprite (prefixed name).
+  const hasImage = (id) =>
+    id === "maki-airport-11" || id === "patterns:t_b_lines_01";
+
+  let mx;
+  beforeEach(() => {
+    mx = new MapxStyle();
+    mx._map = { hasImage: vi.fn(hasImage) };
+  });
+
+  it("returns bare id when image is in the default sprite", () => {
+    expect(mx.resolveSpriteName("maki-airport-11")).toBe("maki-airport-11");
+  });
+  it("returns prefixed id when image is only in the patterns sprite", () => {
+    expect(mx.resolveSpriteName("t_b_lines_01")).toBe("patterns:t_b_lines_01");
+  });
+  it("falls back to bare id when image is not found in any sprite", () => {
+    expect(mx.resolveSpriteName("does-not-exist")).toBe("does-not-exist");
+  });
+  it("returns the id unchanged when no map is attached", () => {
+    mx._map = null;
+    expect(mx.resolveSpriteName("maki-airport-11")).toBe("maki-airport-11");
+  });
+  it("returns the id unchanged for empty id", () => {
+    expect(mx.resolveSpriteName("")).toBe("");
+  });
+});
+
+describe("MapxStyle getImageDataUrl (mock map, null-guard paths)", () => {
+  // Canvas rendering requires a DOM environment (jsdom/happy-dom).
+  // These tests cover the early-return paths only.
+  let mx;
+  beforeEach(() => {
+    mx = new MapxStyle();
+  });
+
+  it("returns null when no map is attached", () => {
+    expect(mx.getImageDataUrl("maki-airport-11")).toBeNull();
+  });
+  it("returns null for an empty id", () => {
+    mx._map = { getImage: vi.fn(() => null) };
+    expect(mx.getImageDataUrl("")).toBeNull();
+  });
+  it("returns null when image is not found in either sprite", () => {
+    mx._map = { getImage: vi.fn(() => null) };
+    expect(mx.getImageDataUrl("does-not-exist")).toBeNull();
+  });
+  it("tries patterns: prefix when bare id is not found", () => {
+    const fakeImg = { data: { width: 32, height: 32, data: new Uint8Array(32 * 32 * 4) }, sdf: false };
+    mx._map = {
+      getImage: vi.fn((id) => (id === "patterns:t_b_lines_01" ? fakeImg : null)),
+    };
+    // getImageDataUrl calls document.createElement — skip rendering assertion in Node,
+    // just confirm it does NOT return null (image was found via prefix fallback).
+    // This would throw in Node without DOM; guard with try/catch.
+    let result;
+    try {
+      result = mx.getImageDataUrl("t_b_lines_01");
+    } catch {
+      // Canvas not available in Node — image was found, rendering attempted.
+      result = "canvas-attempted";
+    }
+    expect(result).not.toBeNull();
+    expect(mx._map.getImage).toHaveBeenCalledWith("t_b_lines_01");
+    expect(mx._map.getImage).toHaveBeenCalledWith("patterns:t_b_lines_01");
+  });
 });

@@ -46,6 +46,7 @@ export class MapxStyle {
   static TERRAIN_THRESH = 5; // pitch threshold above which manual tilt enables terrain
   static HILLSHADE_LAYER = "hillshade";
   static CONTOUR_LAYERS = ["contour-lines", "contour-labels"];
+  static SATELLITE_LAYER = "satellite";
   static MASK_URL = MASK_URL;
   static PLACES_MASK_LAYERS = [
     "places_locality_capital",
@@ -91,6 +92,7 @@ export class MapxStyle {
     };
     this._hillshadeEnabled = true;
     this._contoursEnabled = true;
+    this._satelliteEnabled = false;
     this._maskEnabled = true; // on by default
     this._maskUrl = MASK_URL;
     this._maskGeojson = null; // loaded lazily on first use
@@ -250,6 +252,30 @@ export class MapxStyle {
   }
   toggleContours() {
     this._contoursEnabled ? this.disableContours() : this.enableContours();
+  }
+
+  // ── Satellite imagery ────────────────────────────────────────────────────────
+
+  /**
+   * Enable satellite imagery layer (EOX Sentinel-2 cloudless).
+   * Disables hillshade while active — it makes no visual sense over satellite.
+   */
+  enableSatellite() {
+    this._satelliteEnabled = true;
+    this._setLayersVisibility(MapxStyle.SATELLITE_LAYER, "visible");
+    this.disableHillshade();
+  }
+
+  /** Disable satellite imagery and restore hillshade. */
+  disableSatellite() {
+    this._satelliteEnabled = false;
+    this._setLayersVisibility(MapxStyle.SATELLITE_LAYER, "none");
+    this.enableHillshade();
+  }
+
+  /** Toggle satellite imagery on/off. */
+  toggleSatellite() {
+    this._satelliteEnabled ? this.disableSatellite() : this.enableSatellite();
   }
 
   // ── Places mask (within expression) ─────────────────────────────────────────
@@ -434,6 +460,79 @@ export class MapxStyle {
   async getIcon(id) {
     const icons = await this.getIcons();
     return icons.find((icon) => icon.id === id);
+  }
+
+  /**
+   * Returns icon pixel dimensions from the sprite-index.
+   * Fetches and caches the index on first call; subsequent calls use the cache.
+   * @param {string} id - bare sprite image id
+   * @returns {Promise<{ w: number, h: number } | null>}
+   */
+  async getIconDimensions(id) {
+    const icon = await this.getIcon(id);
+    return icon ? { w: icon.w, h: icon.h } : null;
+  }
+
+  /**
+   * Resolves a bare sprite id to the fully-qualified name MapLibre expects in
+   * style expressions ("fill-pattern", "icon-image", etc.).
+   *
+   * In MapLibre GL JS, images from non-default sprites are namespaced:
+   * "patterns:t_b_lines_23". View data stores bare ids, so this step is needed
+   * before building layer specs.
+   *
+   * @param {string} id - bare sprite image id (e.g. "t_b_lines_23")
+   * @returns {string} resolved id (prefixed if needed, bare id as fallback)
+   */
+  resolveSpriteName(id) {
+    if (!this._map || !id) return id;
+    if (this._map.hasImage(id)) return id;
+    const prefixed = `patterns:${id}`;
+    if (this._map.hasImage(prefixed)) return prefixed;
+    return id;
+  }
+
+  /**
+   * Renders a sprite image to a PNG data URL for use in legend thumbnails etc.
+   * Uses the public map.getImage() API — no access to internal imageManager.
+   *
+   * For SDF icons: pass rgba to recolor visible pixels (same as MapLibre's
+   * runtime icon-color, but applied to a canvas for CSS background-image use).
+   * For raster patterns: pass rgba=null to return the raw image.
+   *
+   * @param {string} id - bare sprite image id
+   * @param {[number, number, number, number] | null} rgba - RGBA 0-255, or null
+   * @returns {string | null} PNG data URL, or null if image not found
+   */
+  getImageDataUrl(id, rgba = null) {
+    if (!this._map || !id) return null;
+    const img =
+      this._map.getImage(id) ?? this._map.getImage(`patterns:${id}`);
+    if (!img) return null;
+    const { width, height } = img.data;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    // img.data.data is Uint8Array; ImageData requires Uint8ClampedArray
+    const imData = new ImageData(
+      new Uint8ClampedArray(img.data.data),
+      width,
+      height,
+    );
+    if (rgba && img.sdf) {
+      const [r, g, b, a] = rgba;
+      for (let i = 0; i < imData.data.length; i += 4) {
+        if (imData.data[i + 3] > 0) {
+          imData.data[i] = r;
+          imData.data[i + 1] = g;
+          imData.data[i + 2] = b;
+          imData.data[i + 3] = a;
+        }
+      }
+    }
+    ctx.putImageData(imData, 0, 0);
+    return canvas.toDataURL("image/png");
   }
 
   // ── Style building ───────────────────────────────────────────────────────────
