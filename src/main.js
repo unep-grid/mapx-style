@@ -1,7 +1,7 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import mlcontour from "maplibre-contour";
-import { MapxStyle } from "@unepgrid-mapx/mapx-style";
+import { MapxStyle } from "@unep-grid/mapx-style";
 import { MapCompare } from "./mapcompare.js";
 import { buildSpriteDemo, showPatterns, hidePatterns, showIcons, hideIcons } from "./sprite_demo.js";
 
