@@ -1,12 +1,23 @@
 {
-  "name": "@unepgrid-mapx/theme-core",
+  "name": "@unepgrid-mapx/mapx-style",
   "version": "0.1.0",
   "type": "module",
-  "description": "MapX + Protomaps basemap theme engine: built-in themes and resolvers for MapLibre layer updates and CSS variables",
+  "description": "MapX style engine: HCP S3 auth, PMTiles protocol, DEM/terrain, themes, and MapLibre layer resolvers",
   "exports": {
-    ".": "./src/index.js"
+    ".": {
+      "import": "./src/index.js",
+      "default": "./dist/mapx-style.umd.js"
+    }
   },
-  "files": ["src"],
+  "main": "./dist/mapx-style.umd.js",
+  "module": "./src/index.js",
+  "files": ["src", "dist"],
+  "scripts": {
+    "build:lib": "vite build --config vite.config.lib.js"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "dependencies": {
     "chroma-js": "^3.0.0",
     "pmtiles": "^4.0.0"
