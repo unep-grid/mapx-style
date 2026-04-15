@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2](https://github.com/unep-grid/mapx-style/compare/v0.2.1...v0.2.2) (2026-04-15)
+
+### Bug Fixes
+
+* relase it config + add bumper ([187633a](https://github.com/unep-grid/mapx-style/commit/187633a551eec63e4d00d217eb65c2f9a7fbfdbc))
+
 ## [0.2.1](https://github.com/unep-grid/mapx-style/compare/v0.2.0...v0.2.1) (2026-04-15)
 
 ### Bug Fixes
