@@ -23,13 +23,12 @@ const CSS_EL_ID = "mapx-theme-css";
  * injection. Call destroy() to tear down.
  *
  * @example
- * const mxStyle = new MapxStyle({ maplibregl, mlcontour });
+ * const mxStyle = new MapxStyle({ maplibregl, mlcontour, theme: "classic_light" });
  * const map = new maplibregl.Map({
  *   style: mxStyle.getStyle(),
  *   transformRequest: mxStyle.transformRequest,
  * });
  * mxStyle.attachMap(map);
- * mxStyle.setTheme("classic_light");
  * // on teardown:
  * mxStyle.destroy();
  *
@@ -37,6 +36,7 @@ const CSS_EL_ID = "mapx-theme-css";
  * @param {"prod"|"staging"|"dev"} [opt.env="prod"] - S3 env for sprite URL.
  * @param {object} [opt.maplibregl] - maplibre-gl module (protocol + DEM setup).
  * @param {object} [opt.mlcontour]  - maplibre-contour module (DemSource).
+ * @param {string|object} [opt.theme] - Theme id or full theme object.
  */
 export class MapxStyle {
   static _registered = false;
@@ -73,7 +73,7 @@ export class MapxStyle {
     "country_un_0_label_0",
   ];
 
-  constructor({ maplibregl, mlcontour } = {}) {
+  constructor({ maplibregl, mlcontour, theme } = {}) {
     this._glyphs = `${S3_BASE}/style/v${STYLE_VERSION}/glyphs/{fontstack}/{range}.pbf`;
     this._sprite = [
       { id: "default",  url: `${S3_BASE}/style/v${STYLE_VERSION}/sprites/sprite` },
@@ -163,6 +163,10 @@ export class MapxStyle {
         return { url, headers: { Authorization: "AWS all_users:" } };
       }
     };
+
+    if (theme) {
+      this.setTheme(theme);
+    }
   }
 
   // ── Map lifecycle ────────────────────────────────────────────────────────────
@@ -631,6 +635,7 @@ export class MapxStyle {
   }
 
   _applyLayers(map, theme) {
+    if (!theme?.colors) return;
     for (const { id: ids, paint, layout } of layer_resolver(theme.colors)) {
       for (const id of ids) {
         if (!map.getLayer(id)) continue;

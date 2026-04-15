@@ -22,6 +22,14 @@ describe("MapxStyle (no map)", () => {
     it("returns null before setTheme", () => {
       expect(mx.getTheme()).toBeNull();
     });
+    it("accepts a theme id in the constructor", () => {
+      const themed = new MapxStyle({ theme: "classic_light" });
+      expect(themed.getTheme()?.id).toBe("classic_light");
+    });
+    it("accepts a full theme object in the constructor", () => {
+      const themed = new MapxStyle({ theme: themes[0] });
+      expect(themed.getTheme()).toBe(themes[0]);
+    });
   });
 
   describe("getStyle", () => {
@@ -218,5 +226,24 @@ describe("MapxStyle getImageDataUrl (mock map, null-guard paths)", () => {
     expect(result).not.toBeNull();
     expect(mx._map.getImage).toHaveBeenCalledWith("t_b_lines_01");
     expect(mx._map.getImage).toHaveBeenCalledWith("patterns:t_b_lines_01");
+  });
+});
+
+describe("MapxStyle attachMap without theme", () => {
+  it("does not throw when no theme was set", () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+
+    const map = {
+      on: vi.fn(),
+      off: vi.fn(),
+      once: vi.fn(),
+      isStyleLoaded: vi.fn(() => true),
+      getLayer: vi.fn(() => null),
+      setLayoutProperty: vi.fn(),
+      setPaintProperty: vi.fn(),
+    };
+
+    expect(() => mx.attachMap(map)).not.toThrow();
   });
 });
