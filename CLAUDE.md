@@ -49,10 +49,10 @@ This repo has three version numbers that are **independent** of each other. Neve
 ### Releasing the npm package
 
 ```bash
-npm run release   # gh auth token is resolved automatically
+npm run release
 ```
 
-`release-it` will: bump `packages/theme-core/package.json`, generate CHANGELOG, build `dist/`, commit, tag `v{N}`, push, create a GitHub release. The `publish.yml` workflow then fires on the tag and publishes to GitHub Packages.
+`release-it` will: bump `packages/theme-core/package.json`, generate CHANGELOG, build `dist/`, commit, tag `v{N}`, push. The `publish.yml` CI workflow then fires on the tag and handles publishing to GitHub Packages + creating the GitHub release (using its own `GITHUB_TOKEN` — no local token needed).
 
 ### Releasing a new S3 style version
 

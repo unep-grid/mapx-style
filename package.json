@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "build:patterns": "node scripts/patterns/index.cjs",
     "validate": "gl-style-validate packages/theme-core/src/style/style.json",
-    "release": "GITHUB_TOKEN=$(gh auth token) release-it",
+    "release": "release-it",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
