@@ -13,7 +13,6 @@
       "package.json",
       "package-lock.json",
       "packages/theme-core/package.json",
-      "packages/theme-core/dist",
       "CHANGELOG.md"
     ]
   },
@@ -23,16 +22,15 @@
   "npm": {
     "publish": false
   },
-  "hooks": {
-    "after:version:bump": [
-      "node scripts/release_sync_version.cjs",
-      "npm run build:lib -w packages/theme-core"
-    ]
-  },
   "plugins": {
     "@release-it/conventional-changelog": {
       "preset": "conventionalcommits",
       "infile": "CHANGELOG.md"
+    },
+    "@release-it/bumper": {
+      "out": [
+        "packages/theme-core/package.json"
+      ]
     }
   }
 }
