@@ -27,7 +27,7 @@ jobs:
             packages/theme-core/dist/mapx-style.esm.js
           do
             if ! git cat-file -e "HEAD:${f}" 2>/dev/null; then
-              echo "::error file=${f}::Missing from git at this tag. Run 'npm run build:lib -w packages/theme-core' and commit packages/theme-core/dist/ before tagging a release."
+              echo "::error file=${f}::Missing from git at this tag. Run 'npm run release' (uses release-it) — it builds and commits dist automatically before tagging."
               exit 1
             fi
           done

@@ -36,6 +36,38 @@ For the full developer guide (HCP setup, data sources, CI/CD) see [DEVELOPERS.md
 
 ---
 
+## Versioning — three independent axes
+
+This repo has three version numbers that are **independent** of each other. Never conflate them.
+
+| File | Kind | Current | When to bump |
+|---|---|---|---|
+| `style_version.json` | S3 path integer | `1` | Only when the S3 asset layout breaks — bumping creates a new `style/v{N}/` prefix and requires re-running all three build scripts. **Not semver.** |
+| `packages/theme-core/package.json` | npm semver (`@unep-grid/mapx-style`) | `0.2.0` | Normal semver on every library release; managed via `npm run release`. |
+| `package.json` (root) | private workspace / demo app | `0.1.0` | Never published — version is meaningless, don't bump it. |
+
+### Releasing the npm package
+
+```bash
+# Requires GITHUB_TOKEN with repo scope (or: export GITHUB_TOKEN=$(gh auth token))
+npm run release
+```
+
+`release-it` will: bump `packages/theme-core/package.json`, generate CHANGELOG, build `dist/`, commit, tag `v{N}`, push, create a GitHub release. The `publish.yml` workflow then fires on the tag and publishes to GitHub Packages.
+
+### Releasing a new S3 style version
+
+```bash
+# 1. Edit style_version.json: { "version": 2 }
+uv run scripts/build_glyphs.py
+uv run scripts/build_sprites.py
+uv run scripts/build_style.py
+```
+
+This is separate from the npm release — do it only when the on-S3 asset layout changes.
+
+---
+
 ## S3 — path conventions
 
 Style version is defined in [`style_version.json`](style_version.json) at repo root.
@@ -102,14 +134,6 @@ uv run scripts/build_basemap.py      # stream Protomaps basemap (~134 GB) → S3
 
 Style build scripts (`build_sprites`, `build_glyphs`, `build_style`) read the version from
 `style_version.json` automatically. Pass `--version N` to override, `--no-upload` to skip S3.
-
-**Version bump workflow** — to release a new style version:
-```bash
-# 1. Edit style_version.json: { "version": 2 }
-uv run scripts/build_glyphs.py
-uv run scripts/build_sprites.py
-uv run scripts/build_style.py
-```
 
 ### Large remote uploads (resumable)
 
