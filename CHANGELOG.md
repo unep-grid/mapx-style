@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0](https://github.com/unep-grid/mapx-style/compare/v0.2.2...v0.3.0) (2026-04-15)
+
+### Features
+
+* accept direct theme value ([4d78934](https://github.com/unep-grid/mapx-style/commit/4d78934c8190d670d2e978a71b3533a85a3e5f36))
+
 ## [0.2.2](https://github.com/unep-grid/mapx-style/compare/v0.2.1...v0.2.2) (2026-04-15)
 
 ### Bug Fixes
