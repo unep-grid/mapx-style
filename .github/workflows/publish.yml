@@ -19,6 +19,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify jsDelivr bundles are committed
+        run: |
+          set -euo pipefail
+          for f in \
+            packages/theme-core/dist/mapx-style.umd.js \
+            packages/theme-core/dist/mapx-style.esm.js
+          do
+            if ! git cat-file -e "HEAD:${f}" 2>/dev/null; then
+              echo "::error file=${f}::Missing from git at this tag. Run 'npm run build:lib -w packages/theme-core' and commit packages/theme-core/dist/ before tagging a release."
+              exit 1
+            fi
+          done
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
