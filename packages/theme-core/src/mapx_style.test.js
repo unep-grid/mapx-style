@@ -106,6 +106,70 @@ describe("MapxStyle (no map)", () => {
     it("defaults to 'en'", () => {
       expect(mx.getLanguage()).toBe("en");
     });
+    it("stores language before a map is attached", () => {
+      mx.setLanguage("fr");
+      expect(mx.getLanguage()).toBe("fr");
+    });
+  });
+});
+
+describe("MapxStyle language application", () => {
+  it("applies stored language when a map is attached", () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    const map = {
+      isStyleLoaded: vi.fn(() => true),
+      on: vi.fn(),
+      once: vi.fn(),
+      getLayer: vi.fn((id) => id === "road-label"),
+      setLayoutProperty: vi.fn(),
+    };
+
+    mx.setLanguage("fr");
+    mx.attachMap(map);
+
+    expect(map.setLayoutProperty).toHaveBeenCalledWith(
+      "road-label",
+      "text-field",
+      [
+        "coalesce",
+        ["get", "name:fr"],
+        ["get", "name_fr"],
+        ["get", "name:en"],
+        ["get", "name_en"],
+        ["get", "name"],
+      ],
+    );
+  });
+
+  it("applies language immediately when a map is already attached", () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    const map = {
+      isStyleLoaded: vi.fn(() => true),
+      on: vi.fn(),
+      once: vi.fn(),
+      getLayer: vi.fn((id) => id === "road-label"),
+      setLayoutProperty: vi.fn(),
+    };
+
+    mx.attachMap(map);
+    map.setLayoutProperty.mockClear();
+
+    mx.setLanguage("ar");
+
+    expect(map.setLayoutProperty).toHaveBeenCalledWith(
+      "road-label",
+      "text-field",
+      [
+        "coalesce",
+        ["get", "name:ar"],
+        ["get", "name_ar"],
+        ["get", "name:en"],
+        ["get", "name_en"],
+        ["get", "name"],
+      ],
+    );
   });
 });
 

@@ -82,13 +82,13 @@ export class MapxStyle {
     "country_un_0_label_0",
   ];
 
-  constructor({ maplibregl, mlcontour, theme } = {}) {
+  constructor({ maplibregl, mlcontour, theme, language } = {}) {
     this._glyphs = resolveGlyphsUrl();
     this._sprite = resolveSpriteUrls();
     this._spriteIndex = null;
     this._theme = null;
     this._map = null;
-    this._language = "en";
+    this._language = language || "en";
     this._terrainEnabled = false;
     this._terrainCfg = MapxStyle.TERRAIN_CFG;
     this._onPitchEnd = this._handlePitchEnd.bind(this);
@@ -185,10 +185,16 @@ export class MapxStyle {
     map.on("error", this._onMapError);
     const apply = () => {
       this._applyLayers(map, this._theme);
-      if (this._maskEnabled) this._loadAndApplyMask(map);
+      this._applyLanguage(map);
+      if (this._maskEnabled) {
+        this._loadAndApplyMask(map);
+      }
     };
-    if (map.isStyleLoaded()) apply();
-    else map.once("load", apply);
+    if (map.isStyleLoaded()) {
+      apply();
+    } else {
+      map.once("load", apply);
+    }
   }
 
   /** Unlink the attached map. */
@@ -297,8 +303,9 @@ export class MapxStyle {
    */
   async enableMask() {
     this._maskEnabled = true;
-    if (this._map && this._map.isStyleLoaded())
+    if (this._map && this._map.isStyleLoaded()) {
       await this._loadAndApplyMask(this._map);
+    }
   }
 
   /**
@@ -306,7 +313,9 @@ export class MapxStyle {
    */
   disableMask() {
     this._maskEnabled = false;
-    if (this._map && this._map.isStyleLoaded()) this._removeMask(this._map);
+    if (this._map && this._map.isStyleLoaded()) {
+      this._removeMask(this._map);
+    }
   }
 
   /** Toggle mask on/off. */
@@ -322,8 +331,9 @@ export class MapxStyle {
   setMaskUrl(url) {
     this._maskUrl = url;
     this._maskGeojson = null;
-    if (this._maskEnabled && this._map && this._map.isStyleLoaded())
+    if (this._maskEnabled && this._map && this._map.isStyleLoaded()) {
       this._loadAndApplyMask(this._map);
+    }
   }
 
   // ── Theme management ─────────────────────────────────────────────────────────
@@ -355,8 +365,11 @@ export class MapxStyle {
     this._theme = theme;
     if (this._map) {
       const apply = () => this._applyLayers(this._map, theme);
-      if (this._map.isStyleLoaded()) apply();
-      else this._map.once("style.load", apply);
+      if (this._map.isStyleLoaded()) {
+        apply();
+      } else {
+        this._map.once("style.load", apply);
+      }
     }
     this._applyCSS(theme);
     return true;
@@ -369,6 +382,50 @@ export class MapxStyle {
     return this._language;
   }
 
+  _getLanguageExpression(lang = this._language) {
+    switch (lang) {
+      case "en":
+        return [
+          "coalesce",
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"],
+        ];
+      case "zh":
+        return [
+          "coalesce",
+          ["get", "name:zh"],
+          ["get", "name:zh-Hans"],
+          ["get", "name_zh"],
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"],
+        ];
+      default:
+        return [
+          "coalesce",
+          ["get", `name:${lang}`],
+          ["get", `name_${lang}`],
+          ["get", "name:en"],
+          ["get", "name_en"],
+          ["get", "name"],
+        ];
+    }
+  }
+
+  _applyLanguage(map = this._map) {
+    if (!map) {
+      return;
+    }
+
+    const expr = this._getLanguageExpression();
+    for (const id of MapxStyle.LABEL_LAYERS) {
+      if (map.getLayer(id)) {
+        map.setLayoutProperty(id, "text-field", expr);
+      }
+    }
+  }
+
   /**
    * Set the map label language.
    * Updates text-field on all LABEL_LAYERS to prefer the requested language,
@@ -379,34 +436,7 @@ export class MapxStyle {
    */
   setLanguage(lang) {
     this._language = lang;
-    if (!this._map) return;
-    const apply = () => {
-      let expr;
-      switch (lang) {
-        case "en":
-          expr = ["coalesce",
-            ["get", "name:en"], ["get", "name_en"],
-            ["get", "name"]];
-          break;
-        case "zh":
-          expr = ["coalesce",
-            ["get", "name:zh"], ["get", "name:zh-Hans"], ["get", "name_zh"],
-            ["get", "name:en"], ["get", "name_en"],
-            ["get", "name"]];
-          break;
-        default:
-          expr = ["coalesce",
-            ["get", `name:${lang}`], ["get", `name_${lang}`],
-            ["get", "name:en"],      ["get", "name_en"],
-            ["get", "name"]];
-      }
-      for (const id of MapxStyle.LABEL_LAYERS) {
-        if (this._map.getLayer(id))
-          this._map.setLayoutProperty(id, "text-field", expr);
-      }
-    };
-    if (this._map.isStyleLoaded()) apply();
-    else this._map.once("style.load", apply);
+    this._applyLanguage();
   }
 
   // ── Map scaling ──────────────────────────────────────────────────────────────
@@ -520,8 +550,7 @@ export class MapxStyle {
    */
   getImageDataUrl(id, rgba = null) {
     if (!this._map || !id) return null;
-    const img =
-      this._map.getImage(id) ?? this._map.getImage(`patterns:${id}`);
+    const img = this._map.getImage(id) ?? this._map.getImage(`patterns:${id}`);
     if (!img) return null;
     const { width, height } = img.data;
     const canvas = document.createElement("canvas");
