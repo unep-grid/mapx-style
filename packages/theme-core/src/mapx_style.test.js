@@ -13,8 +13,13 @@ describe("MapxStyle (no map)", () => {
     it("returns all 8 themes", () => {
       expect(mx.getThemes()).toHaveLength(8);
     });
-    it("themes match imported themes", () => {
-      expect(mx.getThemes()).toBe(themes);
+    it("returns cloned themes rather than canonical references", () => {
+      const listedThemes = mx.getThemes();
+      expect(listedThemes).not.toBe(themes);
+      expect(listedThemes.map((theme) => theme.id)).toEqual(
+        themes.map((theme) => theme.id),
+      );
+      expect(listedThemes[0]).not.toBe(themes[0]);
     });
   });
 
@@ -28,7 +33,16 @@ describe("MapxStyle (no map)", () => {
     });
     it("accepts a full theme object in the constructor", () => {
       const themed = new MapxStyle({ theme: themes[0] });
-      expect(themed.getTheme()).toBe(themes[0]);
+      expect(themed.getTheme()).toEqual(themes[0]);
+      expect(themed.getTheme()).not.toBe(themes[0]);
+    });
+    it("returns a clone of the active theme", () => {
+      const themed = new MapxStyle({ theme: themes[0] });
+      const activeTheme = themed.getTheme();
+      activeTheme.colors.mx_ui_text.color = "#000";
+      expect(themed.getTheme().colors.mx_ui_text.color).toBe(
+        themes[0].colors.mx_ui_text.color,
+      );
     });
   });
 

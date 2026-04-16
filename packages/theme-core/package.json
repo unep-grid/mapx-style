@@ -12,6 +12,7 @@
   "main": "./dist/mapx-style.umd.js",
   "module": "./src/index.js",
   "files": [
+    "data/fonts",
     "src",
     "dist"
   ],

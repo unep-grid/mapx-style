@@ -1,12 +1,21 @@
 import { Protocol } from "pmtiles";
 import styleJson from "./style/style.json";
 import styleDebugJson from "./style/style_debug.json";
-import { version as STYLE_VERSION } from "../../../style_version.json";
 import { build_style } from "./build_style.js";
-import { themes } from "./themes/index.js";
 import { layer_resolver } from "./layer_resolver.js";
 import { css_resolver } from "./css_resolver.js";
 import { MapScaler } from "./map_scaler.js";
+import {
+  cloneTheme,
+  listBuiltInThemes,
+  normalizeTheme,
+  validateThemeColors,
+} from "./theme_registry.js";
+import {
+  resolveGlyphsUrl,
+  resolveSpriteIndexUrl,
+  resolveSpriteUrls,
+} from "./theme_assets.js";
 
 const S3_BASE = "https://mapx.unepgrid.s3.unige.ch/mapx";
 const HCP_S3_HOST = "s3.unige.ch";
@@ -74,11 +83,8 @@ export class MapxStyle {
   ];
 
   constructor({ maplibregl, mlcontour, theme } = {}) {
-    this._glyphs = `${S3_BASE}/style/v${STYLE_VERSION}/glyphs/{fontstack}/{range}.pbf`;
-    this._sprite = [
-      { id: "default",  url: `${S3_BASE}/style/v${STYLE_VERSION}/sprites/sprite` },
-      { id: "patterns", url: `${S3_BASE}/style/v${STYLE_VERSION}/sprites/sprite_patterns` },
-    ];
+    this._glyphs = resolveGlyphsUrl();
+    this._sprite = resolveSpriteUrls();
     this._spriteIndex = null;
     this._theme = null;
     this._map = null;
@@ -324,12 +330,12 @@ export class MapxStyle {
 
   /** Returns all available themes. */
   getThemes() {
-    return themes;
+    return listBuiltInThemes();
   }
 
   /** Returns the currently active theme, or null. */
   getTheme() {
-    return this._theme;
+    return this._theme ? cloneTheme(this._theme) : null;
   }
 
   /**
@@ -338,11 +344,14 @@ export class MapxStyle {
    * custom properties into the document.
    */
   setTheme(idOrTheme) {
-    const theme =
-      typeof idOrTheme === "string"
-        ? themes.find((t) => t.id === idOrTheme)
-        : idOrTheme;
-    if (!theme) return;
+    const theme = normalizeTheme(idOrTheme);
+
+    if (!theme) return false;
+    if (!validateThemeColors(theme)) {
+      console.warn("MapxStyle.setTheme received invalid theme colors");
+      return false;
+    }
+
     this._theme = theme;
     if (this._map) {
       const apply = () => this._applyLayers(this._map, theme);
@@ -350,6 +359,7 @@ export class MapxStyle {
       else this._map.once("style.load", apply);
     }
     this._applyCSS(theme);
+    return true;
   }
 
   // ── Language ─────────────────────────────────────────────────────────────────
@@ -440,7 +450,7 @@ export class MapxStyle {
    */
   async getSpriteIndex() {
     if (!this._spriteIndex) {
-      const url = `${S3_BASE}/style/v${STYLE_VERSION}/sprites/sprite-index.json`;
+      const url = resolveSpriteIndexUrl();
       this._spriteIndex = await fetch(url).then((r) => r.json());
     }
     return this._spriteIndex;

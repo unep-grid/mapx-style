@@ -36,7 +36,11 @@ npm run dev        # http://localhost:5173
 
 # Python (skills)
 uv sync
-uv run scripts/download_fonts.py         # fetch TTF sources (gitignored, required for glyph build)
+npm run download:fonts                   # fetch TTF sources (gitignored)
+npm run build:fonts                      # verify bundled webfont sources
+npm run build:glyphs -- --no-upload      # validate/list glyph outputs
+npm run build:sprites -- --no-upload     # validate/list sprite outputs
+npm run build:style -- --no-upload       # validate/list style uploads
 uv run scripts/s3/catalog.py list        # what's on S3
 uv run scripts/s3/upload.py --help
 ```
