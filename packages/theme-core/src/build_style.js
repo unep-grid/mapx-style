@@ -11,27 +11,30 @@
  * @returns {object} The same style object with terrain + contours sources resolved.
  */
 export function build_style(style, demSource) {
-  style.sources.terrain.tiles = [demSource.sharedDemProtocolUrl];
-  style.sources.terrain_hillshade.tiles = [demSource.sharedDemProtocolUrl];
+  if (style.sources.terrain)
+    style.sources.terrain.tiles = [demSource.sharedDemProtocolUrl];
+  if (style.sources.terrain_hillshade)
+    style.sources.terrain_hillshade.tiles = [demSource.sharedDemProtocolUrl];
 
-  style.sources.contours.tiles = [
-    demSource.contourProtocolUrl({
-      multiplier: 1,
-      thresholds: {
-        9:  [500, 2000],
-        10: [200, 1000],
-        11: [100,  500],
-        12: [ 50,  200],
-        13: [ 20,  100],
-        14: [ 10,   50],
-      },
-      contourLayer: "contours",
-      elevationKey: "ele",
-      levelKey:     "level",
-      extent: 4096,
-      buffer: 1,
-    }),
-  ];
+  if (style.sources.contours)
+    style.sources.contours.tiles = [
+      demSource.contourProtocolUrl({
+        multiplier: 1,
+        thresholds: {
+          9:  [500, 2000],
+          10: [200, 1000],
+          11: [100,  500],
+          12: [ 50,  200],
+          13: [ 20,  100],
+          14: [ 10,   50],
+        },
+        contourLayer: "contours",
+        elevationKey: "ele",
+        levelKey:     "level",
+        extent: 4096,
+        buffer: 1,
+      }),
+    ];
 
   return style;
 }

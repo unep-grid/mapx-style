@@ -19,15 +19,13 @@
  * @param {object} opt
  * @param {HTMLElement} opt.wrap    - Container element for both maps.
  * @param {HTMLElement} opt.divider - Draggable divider element.
- * @param {HTMLElement} [opt.labelB] - Optional label to reposition with the divider.
  */
 export class MapCompare {
-  constructor(mapA, mapB, { wrap, divider, labelB } = {}) {
+  constructor(mapA, mapB, { wrap, divider } = {}) {
     this._mapA    = mapA;
     this._mapB    = mapB;
     this._wrap    = wrap;
     this._divider = divider;
-    this._labelB  = labelB ?? null;
     this._dragging = false;
     this._syncing  = false;
 
@@ -75,10 +73,6 @@ export class MapCompare {
     const clamped = Math.max(0, Math.min(w, x));
     this._mapA.getContainer().style.clipPath = `inset(0 ${w - clamped}px 0 0)`;
     this._divider.style.left = `${clamped}px`;
-    if (this._labelB) {
-      this._labelB.style.right = `${w - clamped + 10}px`;
-      this._labelB.style.left  = "auto";
-    }
   }
 
   _makeSyncHandler(source, target) {

@@ -71,7 +71,6 @@ mapProd.addControl(new maplibregl.ScaleControl(), "bottom-left");
 new MapCompare(mapProd, mapDebug, {
   wrap: document.getElementById("compare-wrap"),
   divider: document.getElementById("compare-divider"),
-  labelB: document.getElementById("label-debug"),
 });
 
 // ── Theme picker ──────────────────────────────────────────────────────────────
@@ -139,7 +138,7 @@ document.getElementById("toggle-demo-icons").addEventListener("change", (e) => {
 
 // ── debug data (prod map only) ─────────────────────────────────────────
 
-mapProd.on("mousemove", (e) => {
+mapDebug.on("mousemove", (e) => {
   const features = mapProd.queryRenderedFeatures(e.point);
 
   if (features.length > 0) {
