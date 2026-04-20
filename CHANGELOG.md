@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/unep-grid/mapx-style/compare/v0.3.0...v0.4.0) (2026-04-20)
+
+### Features
+
+* fonts + test ([07aabaa](https://github.com/unep-grid/mapx-style/commit/07aabaa01be58a19c0bf701f51821eaf46b1b46e))
+
+### Bug Fixes
+
+* broken demo style + handle hit box ([42fc71c](https://github.com/unep-grid/mapx-style/commit/42fc71cd7eec6f7dbd702d36d010c11975d52fc1))
+* language loading ([7f3e877](https://github.com/unep-grid/mapx-style/commit/7f3e877d9a121c60e5e7f6fa012d795de736f45f))
+* remove dem tiles error handling, delegate to main error handler ([d09fb79](https://github.com/unep-grid/mapx-style/commit/d09fb79f6fe5d14d049fb512418586905a9eabcc))
+
 ## [0.3.0](https://github.com/unep-grid/mapx-style/compare/v0.2.2...v0.3.0) (2026-04-15)
 
 ### Features
