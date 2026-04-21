@@ -28,7 +28,7 @@ __pycache__/
 # Rust build output
 target/
 
-# Font TTF sources (download with: uv run skills/download_fonts.py)
+# Font TTF sources (download with: uv run scripts/download_fonts.py)
 data/fonts/files/
 
 # Generated PBF glyphs (built from TTFs, uploaded to S3 — not committed)
