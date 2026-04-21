@@ -24,10 +24,10 @@ describe("theme_fonts", () => {
     expect(fonts).toContain("Varela Round Regular");
   });
 
-  it("builds font-face CSS with package-owned asset URLs", () => {
+  it("builds font-face CSS with fontsource WOFF2 asset URLs", () => {
     const css = getFontFaceCss("Roboto");
     expect(css).toContain('font-family: "Roboto"');
-    expect(css).toContain("Roboto-Regular.ttf");
-    expect(css).toContain('format("truetype")');
+    expect(css).toContain("roboto-latin-400-normal.woff2");
+    expect(css).toContain('format("woff2")');
   });
 });

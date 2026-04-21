@@ -31,6 +31,16 @@
     "pmtiles": "^4.0.0"
   },
   "devDependencies": {
+    "@fontsource/libre-baskerville": "^5.2.10",
+    "@fontsource/noto-sans": "^5.2.10",
+    "@fontsource/noto-sans-arabic": "^5.2.10",
+    "@fontsource/noto-sans-armenian": "^5.2.8",
+    "@fontsource/noto-sans-bengali": "^5.2.11",
+    "@fontsource/noto-sans-mono": "^5.2.10",
+    "@fontsource/noto-sans-sc": "^5.2.9",
+    "@fontsource/roboto": "^5.2.10",
+    "@fontsource/titillium-web": "^5.2.8",
+    "@fontsource/varela-round": "^5.2.8",
     "@maplibre/maplibre-gl-style-spec": "^24.7.0",
     "@playwright/test": "^1",
     "@release-it/bumper": "^7.0.5",

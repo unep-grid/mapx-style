@@ -103,6 +103,7 @@ Run from the repo root with `uv run`:
 |---|---|
 | `npm run build:patterns` | Generate pattern SVGs → `public/sprites/patterns/` |
 | `uv run scripts/build_sprites.py` | SVGs → sprite sheets → upload to S3 |
+| `npm run download:fonts` | Fetch TTF sources from Google Fonts → `data/fonts/files/` (gitignored, only needed for glyph build) |
 | `uv run scripts/build_glyphs.py` | TTFs → PBF glyphs → upload to S3 |
 | `uv run scripts/build_borders.py` | UN GeoJSONs → PMTiles → upload to S3 |
 | `uv run scripts/build_basemap.py [--date YYYYMMDD] [--version N]` | Stream Protomaps basemap (~134 GB) → S3, resumable |
@@ -175,7 +176,22 @@ CORS headers are missing from the namespace config.
 | Maki icons | [mapbox/maki](https://github.com/mapbox/maki) | Apache 2.0 — committed to `public/sprites/maki/` |
 | Geology icons | MapX custom | Committed to `public/sprites/geology/` |
 | Fill patterns | MapX custom | Committed to `public/sprites/patterns/` |
-| Fonts | Google Fonts + custom | Metadata in `public/fonts/`; PBF glyphs on S3 |
+| UI web fonts (WOFF2) | `@fontsource/*` npm packages | `devDependencies` in root — installed by `npm install`, bundled by Vite into `dist/` |
+| MapLibre glyph fonts (PBF) | Google Fonts TTFs → `build_glyphs.py` | TTF sources fetched by `download_fonts.py` (gitignored); PBF output on S3 |
+
+#### Font architecture
+
+Two separate font pipelines serve different purposes:
+
+| Pipeline | Format | Source | Loaded by |
+|---|---|---|---|
+| UI web fonts | WOFF2 | `@fontsource/*` npm packages | `theme_fonts.js` — injected lazily when a theme is applied |
+| MapLibre glyphs | PBF (range files) | Google Fonts TTF → `build_glyphs.py` → S3 | MapLibre `transformRequest` (S3 auth header injected automatically) |
+
+`@font-face` CSS cannot inject custom HTTP headers, so UI fonts cannot be served from HCP S3.
+Using fontsource npm packages keeps them self-hosted in the Vite build — no external CDN dependency at runtime.
+
+External consumers of `@unep-grid/mapx-style` should install the peer dependencies listed in `packages/theme-core/package.json`.
 
 ### Restricted — not distributed
 

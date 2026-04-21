@@ -1,13 +1,13 @@
-import libreBaskervilleRegularUrl from "../../../data/fonts/files/Libre_Baskerville/LibreBaskerville-Regular.ttf";
-import notoSansRegularUrl from "../../../data/fonts/files/Noto_Sans/NotoSans-Regular.ttf";
-import notoSansArabicRegularUrl from "../../../data/fonts/files/Noto_Sans/NotoSansArabic-Regular.ttf";
-import notoSansArmenianRegularUrl from "../../../data/fonts/files/Noto_Sans/NotoSansArmenian-Regular.ttf";
-import notoSansBengaliRegularUrl from "../../../data/fonts/files/Noto_Sans/NotoSansBengali-Regular.ttf";
-import notoSansMonoRegularUrl from "../../../data/fonts/files/Noto_Sans/NotoSansMono-Regular.ttf";
-import notoSansSCRegularUrl from "../../../data/fonts/files/Noto_Sans/NotoSansSC-Regular.ttf";
-import robotoRegularUrl from "../../../data/fonts/files/Roboto/Roboto-Regular.ttf";
-import titilliumWebRegularUrl from "../../../data/fonts/files/Titillium_Web/TitilliumWeb-Regular.ttf";
-import varelaRoundRegularUrl from "../../../data/fonts/files/Varela_Round/VarelaRound-Regular.ttf";
+import libreBaskervilleRegularUrl from "@fontsource/libre-baskerville/files/libre-baskerville-latin-400-normal.woff2";
+import notoSansRegularUrl from "@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff2";
+import notoSansArabicRegularUrl from "@fontsource/noto-sans-arabic/files/noto-sans-arabic-arabic-400-normal.woff2";
+import notoSansArmenianRegularUrl from "@fontsource/noto-sans-armenian/files/noto-sans-armenian-armenian-400-normal.woff2";
+import notoSansBengaliRegularUrl from "@fontsource/noto-sans-bengali/files/noto-sans-bengali-bengali-400-normal.woff2";
+import notoSansMonoRegularUrl from "@fontsource/noto-sans-mono/files/noto-sans-mono-latin-400-normal.woff2";
+import notoSansSCRegularUrl from "@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff2";
+import robotoRegularUrl from "@fontsource/roboto/files/roboto-latin-400-normal.woff2";
+import titilliumWebRegularUrl from "@fontsource/titillium-web/files/titillium-web-latin-400-normal.woff2";
+import varelaRoundRegularUrl from "@fontsource/varela-round/files/varela-round-latin-400-normal.woff2";
 import combinations from "../../../data/fonts/combinations.json";
 
 const UI_FONT_FAMILIES = Object.freeze([
@@ -94,7 +94,7 @@ export function getFontFaceCss(fontName) {
   font-style: ${style};
   font-weight: ${weight};
   font-display: swap;
-  src: url("${url}") format("truetype");
+  src: url("${url}") format("woff2");
 }`,
     )
     .join("\n");
