@@ -115,7 +115,7 @@ def upload_file(
     if make_public:
         set_public_acl(s3_key)
 
-    endpoint = os.environ.get("UNIGE_S3_ENDPOINT", "").rstrip("/")
+    endpoint = os.environ.get("S3_ENDPOINT", "").rstrip("/")
     public_url = f"{endpoint}/{bucket}/{s3_key}" if make_public else ""
 
     entry = {

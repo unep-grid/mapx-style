@@ -6,28 +6,31 @@ import {
   resolveSpriteUrls,
 } from "./theme_assets.js";
 
+const TEST_BASE = "https://example.s3.example.com/mapx";
+const TEST_OPT = { baseUrl: TEST_BASE };
+
 describe("theme_assets", () => {
   it("builds the shared style asset base URL", () => {
-    expect(getStyleAssetBaseUrl()).toBe(
-      "https://mapx.unepgrid.s3.unige.ch/mapx/style/v1",
+    expect(getStyleAssetBaseUrl(TEST_OPT)).toBe(
+      `${TEST_BASE}/style/v1`,
     );
   });
 
   it("resolves glyph and sprite URLs from the same base", () => {
-    expect(resolveGlyphsUrl()).toBe(
-      "https://mapx.unepgrid.s3.unige.ch/mapx/style/v1/glyphs/{fontstack}/{range}.pbf",
+    expect(resolveGlyphsUrl(TEST_OPT)).toBe(
+      `${TEST_BASE}/style/v1/glyphs/{fontstack}/{range}.pbf`,
     );
-    expect(resolveSpriteIndexUrl()).toBe(
-      "https://mapx.unepgrid.s3.unige.ch/mapx/style/v1/sprites/sprite-index.json",
+    expect(resolveSpriteIndexUrl(TEST_OPT)).toBe(
+      `${TEST_BASE}/style/v1/sprites/sprite-index.json`,
     );
-    expect(resolveSpriteUrls()).toEqual([
+    expect(resolveSpriteUrls(TEST_OPT)).toEqual([
       {
         id: "default",
-        url: "https://mapx.unepgrid.s3.unige.ch/mapx/style/v1/sprites/sprite",
+        url: `${TEST_BASE}/style/v1/sprites/sprite`,
       },
       {
         id: "patterns",
-        url: "https://mapx.unepgrid.s3.unige.ch/mapx/style/v1/sprites/sprite_patterns",
+        url: `${TEST_BASE}/style/v1/sprites/sprite_patterns`,
       },
     ]);
   });

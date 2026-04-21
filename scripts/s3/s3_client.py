@@ -33,15 +33,15 @@ def _encode_credentials(username: str, password: str) -> tuple[str, str]:
 
 def make_client():
     """
-    Build a boto3 S3 client configured for the UNIGE HCP endpoint.
+    Build a boto3 S3 client configured for the HCP endpoint.
 
     Returns:
         (boto3.client, bucket_name)
     """
-    endpoint = os.environ["UNIGE_S3_ENDPOINT"].rstrip("/")
-    username  = os.environ["UNIGE_S3_USER"]
-    password  = os.environ["UNIGE_S3_KEY"]
-    bucket    = os.environ.get("UNIGE_S3_BUCKET", "mapx")
+    endpoint = os.environ["S3_ENDPOINT"].rstrip("/")
+    username  = os.environ["S3_USER"]
+    password  = os.environ["S3_KEY"]
+    bucket    = os.environ.get("S3_BUCKET", "mapx")
 
     access_key, secret_key = _encode_credentials(username, password)
 

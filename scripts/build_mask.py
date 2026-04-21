@@ -20,7 +20,7 @@ S3 output:
   masks/un_2020_countries_mask__v{N}.geojson
 
 Usage in MapxStyle (theme-core):
-  mxStyle.enablePlacesMask("https://mapx.unepgrid.s3.unige.ch/mapx/masks/un_2020_countries_mask__v0.geojson")
+  mxStyle.enablePlacesMask("<public_url from build output>")
   mxStyle.disablePlacesMask()
 """
 
@@ -93,8 +93,8 @@ def main() -> None:
     )
 
     import os
-    endpoint = os.environ.get("UNIGE_S3_ENDPOINT", "").rstrip("/")
-    bucket = os.environ.get("UNIGE_S3_BUCKET", "mapx")
+    endpoint = os.environ.get("S3_ENDPOINT", "").rstrip("/")
+    bucket = os.environ.get("S3_BUCKET", "mapx")
     public_url = f"{endpoint}/{bucket}/{s3_key}"
     console.print(f"\n[bold]Public URL:[/bold] [cyan]{public_url}[/cyan]")
     console.print(

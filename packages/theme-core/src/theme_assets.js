@@ -1,9 +1,8 @@
 import { version as STYLE_VERSION } from "../../../style_version.json";
-
-const S3_BASE = "https://mapx.unepgrid.s3.unige.ch/mapx";
+import { S3_BASE as DEFAULT_S3_BASE } from "./config.js";
 
 export function getStyleAssetBaseUrl({
-  baseUrl = S3_BASE,
+  baseUrl = DEFAULT_S3_BASE,
   version = STYLE_VERSION,
 } = {}) {
   return `${baseUrl}/style/v${version}`;

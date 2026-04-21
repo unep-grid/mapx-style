@@ -12,7 +12,10 @@ S3 output:
 """
 
 import argparse
+import json
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
@@ -56,11 +59,25 @@ def main() -> None:
         console.print("[yellow]Skipping upload (--no-upload).[/yellow]")
         return
 
+    s3_base = os.environ.get("S3_PUBLIC_BASE_URL", "").rstrip("/")
+    if not s3_base:
+        console.print("[red]S3_PUBLIC_BASE_URL is not set in .env[/red]")
+        sys.exit(1)
+
     s3, bucket = make_client()
     for filename, content_type in STYLE_FILES:
         local = STYLE_DIR / filename
         s3_key = f"style/v{version}/{filename}"
-        s3.upload_file(str(local), bucket, s3_key, ExtraArgs={"ContentType": content_type})
+        rendered = json.loads(local.read_text().replace("__S3_BASE__", s3_base))
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as tmp:
+            json.dump(rendered, tmp)
+            tmp_path = tmp.name
+        try:
+            s3.upload_file(tmp_path, bucket, s3_key, ExtraArgs={"ContentType": content_type})
+        finally:
+            Path(tmp_path).unlink(missing_ok=True)
         set_public_acl(s3_key)
         console.print(f"[green]Uploaded:[/green] {s3_key}")
 

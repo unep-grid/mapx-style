@@ -290,7 +290,7 @@ def stream_upload(
 ) -> dict:
     """Stream <url> to <s3_key> on HCP S3. Returns the catalog entry dict."""
     s3, bucket = make_client()
-    endpoint = os.environ.get("UNIGE_S3_ENDPOINT", "").rstrip("/")
+    endpoint = os.environ.get("S3_ENDPOINT", "").rstrip("/")
 
     ext = Path(s3_key).suffix.lower()
     content_type, default_type = _EXT_MAP.get(ext, ("application/octet-stream", "other"))

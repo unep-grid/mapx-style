@@ -57,6 +57,7 @@ sprite-index.json — combined catalog for icon picker:
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -92,7 +93,9 @@ _SPRITE_FILES = [
 
 sys.path.insert(0, str(REPO_ROOT / "scripts/s3"))
 
-S3_BASE = "https://mapx.unepgrid.s3.unige.ch/mapx"
+from dotenv import load_dotenv
+load_dotenv(REPO_ROOT / ".env")
+S3_BASE = os.environ.get("S3_PUBLIC_BASE_URL", "").rstrip("/")
 
 
 def _icon_meta(name: str) -> tuple[str, str]:

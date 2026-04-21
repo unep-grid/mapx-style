@@ -1,4 +1,4 @@
-# S3 Quick Reference — HCP (UNIGE)
+# S3 Quick Reference — HCP
 
 Full documentation: **[DEVELOPERS.md](../../DEVELOPERS.md)** · AI guide: **[CLAUDE.md](../../CLAUDE.md)**
 
@@ -7,29 +7,29 @@ Full documentation: **[DEVELOPERS.md](../../DEVELOPERS.md)** · AI guide: **[CLA
 ## Endpoint / bucket
 
 ```
-Endpoint : https://mapx.unepgrid.s3.unige.ch/
-Bucket   : mapx  (UNIGE_S3_BUCKET in .env)
-Public URL: https://mapx.unepgrid.s3.unige.ch/mapx/<key>
+Endpoint : $S3_ENDPOINT   (from .env)
+Bucket   : $S3_BUCKET     (from .env, default: mapx)
+Public URL: $S3_PUBLIC_BASE_URL/<key>
 ```
 
 ## Credentials (encoded automatically by s3_client.py)
 
 ```bash
-ACCESS_KEY=$(echo -n "$UNIGE_S3_USER" | base64)
-SECRET_KEY=$(echo -n "$UNIGE_S3_KEY"  | md5sum | awk '{print $1}')
+ACCESS_KEY=$(echo -n "$S3_USER" | base64)
+SECRET_KEY=$(echo -n "$S3_KEY"  | md5sum | awk '{print $1}')
 ```
 
 ## Public access header (required on every request)
 
 ```bash
 curl -H "Authorization: AWS all_users:" \
-     https://mapx.unepgrid.s3.unige.ch/mapx/maps/world.pmtiles
+     "${S3_PUBLIC_BASE_URL}/maps/world.pmtiles"
 ```
 
 ## List objects (raw curl)
 
 ```bash
-curl -v "${UNIGE_S3_ENDPOINT}/?list-type=2&prefix=maps/" \
+curl -v "${S3_ENDPOINT}/?list-type=2&prefix=maps/" \
   --aws-sigv4 "aws:amz:us-east-1:s3" \
   --user "${ACCESS_KEY}:${SECRET_KEY}"
 ```

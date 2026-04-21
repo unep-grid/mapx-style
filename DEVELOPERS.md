@@ -48,10 +48,12 @@ uv run scripts/s3/upload.py ...  # run any script
 Requires a `.env` file at the repo root (copy from `.env.demo`):
 
 ```
-UNIGE_S3_ENDPOINT=https://mapx.unepgrid.s3.unige.ch/
-UNIGE_S3_USER=<your HCP username>
-UNIGE_S3_KEY=<your HCP password>
-UNIGE_S3_BUCKET=mapx
+S3_ENDPOINT=https://<your-hcp-host>/
+S3_USER=<your HCP username>
+S3_KEY=<your HCP password>
+S3_BUCKET=mapx
+S3_PUBLIC_BASE_URL=https://<your-hcp-host>/mapx
+VITE_MAPX_ASSET_BASE_URL=https://<your-hcp-host>/mapx
 ```
 
 ### JavaScript (demo app)
@@ -67,13 +69,13 @@ npm run preview   # preview dist/ locally
 
 ## S3 storage
 
-Large assets are stored on a **Hitachi Content Platform (HCP)** instance at UNIGE.
+Large assets are stored on a **Hitachi Content Platform (HCP)** S3-compatible store.
 
 | | |
 |---|---|
-| Endpoint | `https://mapx.unepgrid.s3.unige.ch/` |
-| Bucket | `mapx` (set in `.env` as `UNIGE_S3_BUCKET`) |
-| Public URL base | `https://mapx.unepgrid.s3.unige.ch/mapx/<key>` |
+| Endpoint | `S3_ENDPOINT` in `.env` |
+| Bucket | `S3_BUCKET` in `.env` (default: `mapx`) |
+| Public URL base | `S3_PUBLIC_BASE_URL` in `.env` |
 
 `data/catalog.json` is the single source of truth for all uploaded assets and style
 data provenance. Every upload via `upload.py` upserts an entry into this file.
@@ -118,8 +120,8 @@ secret_key  = hashlib.md5(password.encode()).hexdigest()
 
 Bash equivalent:
 ```bash
-ACCESS_KEY=$(echo -n "$UNIGE_S3_USER" | base64)
-SECRET_KEY=$(echo -n "$UNIGE_S3_KEY"  | md5sum | awk '{print $1}')
+ACCESS_KEY=$(echo -n "$S3_USER" | base64)
+SECRET_KEY=$(echo -n "$S3_KEY"  | md5sum | awk '{print $1}')
 ```
 
 `scripts/s3/s3_client.py` handles this automatically. Never pass raw `.env` credentials
@@ -140,7 +142,7 @@ every request. For `curl`:
 
 ```bash
 curl -H "Authorization: AWS all_users:" \
-     https://mapx.unepgrid.s3.unige.ch/mapx/maps/world.pmtiles
+     "${S3_PUBLIC_BASE_URL}/maps/world.pmtiles"
 ```
 
 ### ACL — making objects public

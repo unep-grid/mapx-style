@@ -9,7 +9,7 @@ For the full developer guide (HCP setup, data sources, CI/CD) see [DEVELOPERS.md
 
 1. Run `uv run scripts/s3/catalog.py list` to see what assets already exist in S3.
 2. If `.env` is missing at the repo root: tell the user `cp .env.demo .env` and fill in
-   `UNIGE_S3_USER` / `UNIGE_S3_KEY`.
+   `S3_USER` / `S3_KEY` / `S3_ENDPOINT` / `S3_PUBLIC_BASE_URL` / `VITE_MAPX_ASSET_BASE_URL`.
 
 ---
 
@@ -90,7 +90,7 @@ To release a new style version, bump `style_version.json` then re-run all three 
 
 - Public requests need `Authorization: AWS all_users:` header (MapLibre `transformRequest` and `range_test.py` inject it automatically)
 - Canned ACL strings (`"public-read"`) are ignored — use `--public` flag or `set_acl.py`
-- Public URL format: `https://mapx.unepgrid.s3.unige.ch/<bucket>/<s3_key>` (bucket: `mapx`)
+- Public URL format: `{S3_ENDPOINT}{S3_BUCKET}/{s3_key}` — values come from `.env`
 - CORS and credentials are handled in `s3_client.py` / HCP management UI — not configurable via S3 API
 
 Full HCP details: [DEVELOPERS.md §S3 storage](DEVELOPERS.md).

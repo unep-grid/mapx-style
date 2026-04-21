@@ -17,12 +17,15 @@ import {
   resolveSpriteUrls,
 } from "./theme_assets.js";
 
-const S3_BASE = "https://mapx.unepgrid.s3.unige.ch/mapx";
-const HCP_S3_HOST = "s3.unige.ch";
-const HCP_S3_URL = "https://mapx.unepgrid.s3.unige.ch/";
+import { S3_BASE, S3_HOST, S3_ENDPOINT, S3_REQUEST_HEADERS } from "./config.js";
+
 const DEM_URL = "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp";
 const MASK_URL = `${S3_BASE}/masks/un_2020_countries_mask__v0.geojson`;
 const CSS_EL_ID = "mapx-theme-css";
+
+function _resolveStyle(json) {
+  return JSON.parse(JSON.stringify(json).replaceAll("__S3_BASE__", S3_BASE));
+}
 
 /**
  * MapxStyle — single entry point for the MapX style system.
@@ -124,14 +127,14 @@ export class MapxStyle {
             : input instanceof Request
               ? input.url
               : "";
-        if (url.includes(HCP_S3_HOST)) {
+        if (url.includes(S3_HOST)) {
           const existing =
             init.headers instanceof Headers
               ? Object.fromEntries(init.headers.entries())
               : init.headers || {};
           init = {
             ...init,
-            headers: { ...existing, Authorization: "AWS all_users:" },
+            headers: { ...existing, ...S3_REQUEST_HEADERS },
           };
         }
         return originalFetch(input, init);
@@ -161,8 +164,8 @@ export class MapxStyle {
 
     // ── transformRequest (bound so it can be passed by reference)
     this.transformRequest = (url) => {
-      if (url.startsWith(HCP_S3_URL)) {
-        return { url, headers: { Authorization: "AWS all_users:" } };
+      if (url.startsWith(S3_ENDPOINT)) {
+        return { url, headers: S3_REQUEST_HEADERS };
       }
     };
 
@@ -580,7 +583,7 @@ export class MapxStyle {
    * Pass the result directly to new maplibregl.Map({ style: ... }).
    */
   getStyle() {
-    const style = structuredClone(styleJson);
+    const style = _resolveStyle(styleJson);
     style.glyphs = this._glyphs;
     style.sprite = this._sprite;
     if (this._demSource) build_style(style, this._demSource);
@@ -592,7 +595,7 @@ export class MapxStyle {
    * source resolved. No hillshade layer is included.
    */
   getStyleDebug() {
-    const style = structuredClone(styleDebugJson);
+    const style = _resolveStyle(styleDebugJson);
     style.glyphs = this._glyphs;
     style.sprite = this._sprite;
     if (this._demSource) build_style(style, this._demSource);

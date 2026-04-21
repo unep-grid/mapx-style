@@ -1,21 +1,21 @@
 {
   "version": 8,
   "name": "MapX Style",
-  "glyphs": "https://mapx.unepgrid.s3.unige.ch/mapx/style/v1/glyphs/{fontstack}/{range}.pbf",
+  "glyphs": "__S3_BASE__/style/v1/glyphs/{fontstack}/{range}.pbf",
   "sprite": [],
   "sources": {
     "protomaps_basemap": {
       "type": "vector",
-      "url": "pmtiles://https://mapx.unepgrid.s3.unige.ch/mapx/layers/protomaps_basemap__v0.pmtiles",
+      "url": "pmtiles://__S3_BASE__/layers/protomaps_basemap__v0.pmtiles",
       "attribution": "© <a href='https://openstreetmap.org'>OpenStreetMap</a> contributors"
     },
     "mapx_borders": {
       "type": "vector",
-      "url": "pmtiles://https://mapx.unepgrid.s3.unige.ch/mapx/layers/mapx_borders__v1.pmtiles"
+      "url": "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles"
     },
     "mapx_bathymetry": {
       "type": "vector",
-      "url": "pmtiles://https://mapx.unepgrid.s3.unige.ch/mapx/layers/bathymetry__v0.pmtiles",
+      "url": "pmtiles://__S3_BASE__/layers/bathymetry__v0.pmtiles",
       "attribution": "Bathymetry © <a href='https://www.gebco.net'>GEBCO</a> via <a href='https://versatiles.org'>VersaTiles</a>"
     },
     "terrain": {

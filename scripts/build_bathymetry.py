@@ -86,8 +86,8 @@ def main() -> None:
         description="Global ocean depth zones from GEBCO. Source-layer: bathymetry, property: mindepth (negative meters).",
     )
 
-    endpoint = os.environ.get("UNIGE_S3_ENDPOINT", "").rstrip("/")
-    bucket = os.environ.get("UNIGE_S3_BUCKET", "mapx")
+    endpoint = os.environ.get("S3_ENDPOINT", "").rstrip("/")
+    bucket = os.environ.get("S3_BUCKET", "mapx")
     public_url = f"{endpoint}/{bucket}/{s3_key}"
     console.print("\nVerifying range access…")
     ok = test_range(public_url)
