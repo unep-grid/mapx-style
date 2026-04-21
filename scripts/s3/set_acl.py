@@ -13,7 +13,7 @@ Usage:
   uv run scripts/s3/set_acl.py <s3_key> --public
   uv run scripts/s3/set_acl.py <s3_key> --verify
 
-Import in other skills:
+Import in other scripts:
   from set_acl import set_public_acl
 """
 

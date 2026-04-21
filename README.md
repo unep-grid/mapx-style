@@ -34,7 +34,7 @@ Large files (PMTiles, COG rasters, PBF glyphs) are stored on S3 — see [DEVELOP
 npm install
 npm run dev        # http://localhost:5173
 
-# Python (skills)
+# Python scripts
 uv sync
 npm run download:fonts                   # fetch TTF sources (gitignored)
 npm run build:fonts                      # verify bundled webfont sources

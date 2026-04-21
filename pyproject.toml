@@ -1,7 +1,7 @@
 [project]
 name = "mapx-style"
 version = "0.1.0"
-description = "MapX style assets and S3 management skills"
+description = "MapX style assets and S3 management scripts"
 requires-python = ">=3.11"
 dependencies = [
     "boto3>=1.34",

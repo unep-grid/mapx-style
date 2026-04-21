@@ -1,5 +1,5 @@
 {
-  "comment": "Font download manifest. Run `uv run skills/download_fonts.py` to fetch all TTF files into data/fonts/files/. Each entry maps a Google Fonts family to the stem naming used in combinations.json.",
+  "comment": "Font download manifest. Run `uv run scripts/download_fonts.py` to fetch all TTF files into data/fonts/files/. Each entry maps a Google Fonts family to the stem naming used in combinations.json.",
 
   "weight_map": {
     "comment": "Maps weight name used in filenames to CSS numeric weight.",

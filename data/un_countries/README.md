@@ -27,8 +27,8 @@ tippecanoe \
   -L "un_2020_borders_line:data/un_countries/un_2020_countries_lines.geojson" \
   -L "un_2020_labels_countries_point:data/un_countries/un_2020_countries_points.geojson"
 
-uv run skills/s3/upload.py /tmp/mapx_borders__v0.pmtiles layers/mapx_borders__v0.pmtiles --type pmtiles --public
-uv run skills/s3/range_test.py https://mapx.unepgrid.s3.unige.ch/mapx/layers/mapx_borders__v0.pmtiles
+uv run scripts/s3/upload.py /tmp/mapx_borders__v0.pmtiles layers/mapx_borders__v0.pmtiles --type pmtiles --public
+uv run scripts/s3/range_test.py https://mapx.unepgrid.s3.unige.ch/mapx/layers/mapx_borders__v0.pmtiles
 rm /tmp/mapx_borders__v0.pmtiles
 ```
 

@@ -34,7 +34,7 @@ curl -v "${UNIGE_S3_ENDPOINT}/?list-type=2&prefix=maps/" \
   --user "${ACCESS_KEY}:${SECRET_KEY}"
 ```
 
-## Skills (run from repo root)
+## Scripts (run from repo root)
 
 ```bash
 uv run scripts/s3/upload.py <file> [s3_key] [--type TYPE] [--public] [--name NAME]

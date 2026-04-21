@@ -6,7 +6,7 @@ Run as a CLI:
   uv run scripts/s3/catalog.py show <id>
   uv run scripts/s3/catalog.py remove <id>
 
-Import in other skills:
+Import in other scripts:
   import sys
   from pathlib import Path
   sys.path.insert(0, str(Path(__file__).parent))

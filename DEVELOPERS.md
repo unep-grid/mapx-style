@@ -21,7 +21,7 @@ mapx-style/
 │   │   ├── maki/               SVG sources — Maki icon set
 │   │   ├── geology/            SVG sources — geology icons
 │   │   ├── patterns/           SVG sources — fill patterns
-│   │   └── generated/          Built sprite sheets (PNG + JSON) — output of build_sprites skill
+│   │   └── generated/          Built sprite sheets (PNG + JSON) — output of build_sprites.py
 │   ├── fonts/                  Font list and metadata JSON
 │   └── style/                  MapLibre base style JSON
 ├── borders/                    UN border documentation and metadata (data not distributed)
@@ -29,7 +29,7 @@ mapx-style/
 │   ├── s3/                     S3 upload, catalog, ACL management
 │   └── ...                     Sprite building, glyph generation, style updates
 ├── dist/                       Vite build output — gitignored, deployed to gh-pages by CI
-├── pyproject.toml              Python environment (uv) — shared by all skills
+├── pyproject.toml              Python environment (uv) — shared by all scripts
 ├── package.json                Node environment (npm/vite)
 └── .github/workflows/ci.yml   Build + screenshot + regression + deploy
 ```
@@ -38,11 +38,11 @@ mapx-style/
 
 ## Environments
 
-### Python (skills)
+### Python scripts
 
 ```bash
 uv sync                         # install deps into .venv/
-uv run scripts/s3/upload.py ...  # run any skill
+uv run scripts/s3/upload.py ...  # run any script
 ```
 
 Requires a `.env` file at the repo root (copy from `.env.demo`):
@@ -78,7 +78,7 @@ Large assets are stored on a **Hitachi Content Platform (HCP)** instance at UNIG
 `data/catalog.json` is the single source of truth for all uploaded assets and style
 data provenance. Every upload via `upload.py` upserts an entry into this file.
 
-### S3 skills
+### S3 scripts
 
 Run from the repo root with `uv run`:
 
@@ -195,7 +195,7 @@ Restricted datasets are referenced in the catalog with `"storage": "remote"` and
 3. Compare screenshot against reference image for regression
 4. Deploy `dist/` to `gh-pages` branch → GitHub Pages
 
-To update the reference screenshot after an intentional style change, run the screenshot skill locally and commit the new reference.
+To update the reference screenshot after an intentional style change, run `npm run test:visual:update` locally and commit the new reference.
 
 ---
 

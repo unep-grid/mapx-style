@@ -16,7 +16,7 @@ __pycache__/
 # Credentials
 .env
 
-# Large geo files (use skills/s3/ to upload these)
+# Large geo files (use scripts/s3/ to upload these)
 *.gpkg
 *.geojson
 *.tif
