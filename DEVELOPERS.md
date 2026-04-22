@@ -103,8 +103,8 @@ Run from the repo root with `uv run`:
 |---|---|
 | `npm run build:patterns` | Generate pattern SVGs → `public/sprites/patterns/` |
 | `uv run scripts/build_sprites.py` | SVGs → sprite sheets → upload to S3 |
-| `npm run download:fonts` | Fetch TTF sources from Google Fonts → `data/fonts/files/` (gitignored, only needed for glyph build) |
-| `uv run scripts/build_glyphs.py` | TTFs → PBF glyphs → upload to S3 |
+| `npm run convert:fonts` | Convert `@fontsource/*` WOFF2 → TTF → `data/fonts/files/` (gitignored, no internet needed) |
+| `uv run scripts/build_glyphs.py` | TTFs → PBF glyphs → upload to S3 (run `convert:fonts` first) |
 | `uv run scripts/build_borders.py` | UN GeoJSONs → PMTiles → upload to S3 |
 | `uv run scripts/build_basemap.py [--date YYYYMMDD] [--version N]` | Stream Protomaps basemap (~134 GB) → S3, resumable |
 

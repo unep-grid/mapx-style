@@ -18,7 +18,7 @@ Style assets for [MapX](https://mapx.org) — sprites, glyphs, fonts, MapLibre b
 | `data/catalog.json` | Catalog of all S3 assets |
 | `data/fonts/sources.json` | Font download manifest (families, weights, stems) |
 | `data/fonts/combinations.json` | Maps MapLibre font names → TTF stems for glyph build |
-| `data/fonts/files/` | TTF sources — gitignored, only needed for `build_glyphs.py` (fetch with `npm run download:fonts`) |
+| `data/fonts/files/` | TTF sources — gitignored, only needed for `build_glyphs.py` (generate with `npm run convert:fonts`) |
 | `data/un_countries/` | UN border metadata (data restricted — see `data/un_countries/README.md`) |
 | `scripts/s3/` | Upload, catalog, ACL, range test, progress monitoring |
 | `scripts/build_*.py` | Build sprites, glyphs, borders, bathymetry, basemap |
@@ -36,7 +36,7 @@ npm run dev        # http://localhost:5173
 
 # Python scripts
 uv sync
-npm run download:fonts                   # fetch TTF sources (gitignored) — only needed for glyph build
+npm run convert:fonts                    # WOFF2→TTF from node_modules (no internet) — only needed for glyph build
 npm run build:glyphs -- --no-upload      # validate/list glyph outputs
 npm run build:sprites -- --no-upload     # validate/list sprite outputs
 npm run build:style -- --no-upload       # validate/list style uploads

@@ -10,7 +10,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "download:fonts": "uv run scripts/download_fonts.py",
+    "convert:fonts": "uv run scripts/convert_fonts.py",
     "build:glyphs": "uv run scripts/build_glyphs.py",
     "build:patterns": "node scripts/patterns/index.cjs",
     "build:sprites": "uv run scripts/build_sprites.py",

@@ -1,112 +1,183 @@
 {
-  "comment": "Maps MapLibre text-font names → TTF file stems (first entry = highest priority for glyph overlap). Used by build_glyphs.py --combinations flag. Each key must exactly match what the style uses as text-font value.",
-
+  "comment": "Maps MapLibre text-font names \u2192 TTF file stems (first entry = highest priority for glyph overlap). Used by build_glyphs.py --combinations flag. Each key must exactly match what the style uses as text-font value.",
   "Noto Sans Regular": [
-    "NotoSans-Regular",
-    "NotoSansArmenian-Regular",
-    "NotoSansSC-Regular",
-    "NotoSansArabic-Regular",
-    "NotoSansBengali-Regular"
+    "noto-sans-latin-400-normal",
+    "noto-sans-armenian-armenian-400-normal",
+    "noto-sans-sc-chinese-simplified-400-normal",
+    "noto-sans-arabic-arabic-400-normal",
+    "noto-sans-bengali-bengali-400-normal"
   ],
   "Noto Sans Medium": [
-    "NotoSans-Medium",
-    "NotoSansArmenian-Medium",
-    "NotoSansSC-Medium",
-    "NotoSansArabic-Medium",
-    "NotoSansBengali-Medium"
+    "noto-sans-latin-500-normal",
+    "noto-sans-armenian-armenian-500-normal",
+    "noto-sans-sc-chinese-simplified-500-normal",
+    "noto-sans-arabic-arabic-500-normal",
+    "noto-sans-bengali-bengali-500-normal"
   ],
   "Noto Sans Bold": [
-    "NotoSans-Bold",
-    "NotoSansArmenian-Bold",
-    "NotoSansSC-Bold",
-    "NotoSansArabic-Bold",
-    "NotoSansBengali-Bold"
+    "noto-sans-latin-700-normal",
+    "noto-sans-armenian-armenian-700-normal",
+    "noto-sans-sc-chinese-simplified-700-normal",
+    "noto-sans-arabic-arabic-700-normal",
+    "noto-sans-bengali-bengali-700-normal"
   ],
   "Noto Sans Light": [
-    "NotoSans-Light",
-    "NotoSansArmenian-Light",
-    "NotoSansSC-Light",
-    "NotoSansArabic-Light",
-    "NotoSansBengali-Light"
+    "noto-sans-latin-300-normal",
+    "noto-sans-armenian-armenian-300-normal",
+    "noto-sans-sc-chinese-simplified-300-normal",
+    "noto-sans-arabic-arabic-300-normal",
+    "noto-sans-bengali-bengali-300-normal"
   ],
   "Noto Sans SemiBold": [
-    "NotoSans-SemiBold",
-    "NotoSansArmenian-SemiBold",
-    "NotoSansSC-SemiBold",
-    "NotoSansArabic-SemiBold",
-    "NotoSansBengali-SemiBold"
+    "noto-sans-latin-600-normal",
+    "noto-sans-armenian-armenian-600-normal",
+    "noto-sans-sc-chinese-simplified-600-normal",
+    "noto-sans-arabic-arabic-600-normal",
+    "noto-sans-bengali-bengali-600-normal"
   ],
   "Noto Sans ExtraBold": [
-    "NotoSans-ExtraBold",
-    "NotoSansArmenian-ExtraBold",
-    "NotoSansSC-ExtraBold",
-    "NotoSansArabic-ExtraBold",
-    "NotoSansBengali-ExtraBold"
+    "noto-sans-latin-800-normal",
+    "noto-sans-armenian-armenian-800-normal",
+    "noto-sans-sc-chinese-simplified-800-normal",
+    "noto-sans-arabic-arabic-800-normal",
+    "noto-sans-bengali-bengali-800-normal"
   ],
   "Noto Sans ExtraLight": [
-    "NotoSans-ExtraLight",
-    "NotoSansArmenian-ExtraLight",
-    "NotoSansSC-ExtraLight",
-    "NotoSansArabic-ExtraLight",
-    "NotoSansBengali-ExtraLight"
+    "noto-sans-latin-200-normal",
+    "noto-sans-armenian-armenian-200-normal",
+    "noto-sans-sc-chinese-simplified-200-normal",
+    "noto-sans-arabic-arabic-200-normal",
+    "noto-sans-bengali-bengali-200-normal"
   ],
   "Noto Sans Black": [
-    "NotoSans-Black",
-    "NotoSansArmenian-Black",
-    "NotoSansSC-Black",
-    "NotoSansArabic-Black",
-    "NotoSansBengali-Black"
+    "noto-sans-latin-900-normal",
+    "noto-sans-armenian-armenian-900-normal",
+    "noto-sans-sc-chinese-simplified-900-normal",
+    "noto-sans-arabic-arabic-900-normal",
+    "noto-sans-bengali-bengali-900-normal"
   ],
   "Noto Sans Thin": [
-    "NotoSans-Thin",
-    "NotoSansArmenian-Thin",
-    "NotoSansSC-Thin",
-    "NotoSansArabic-Thin",
-    "NotoSansBengali-Thin"
+    "noto-sans-latin-100-normal",
+    "noto-sans-armenian-armenian-100-normal",
+    "noto-sans-sc-chinese-simplified-100-normal",
+    "noto-sans-arabic-arabic-100-normal",
+    "noto-sans-bengali-bengali-100-normal"
   ],
-
-  "Noto Sans Italic": ["NotoSans-Italic"],
-  "Noto Sans Medium Italic": ["NotoSans-MediumItalic"],
-  "Noto Sans Bold Italic": ["NotoSans-BoldItalic"],
-  "Noto Sans Light Italic": ["NotoSans-LightItalic"],
-  "Noto Sans SemiBold Italic": ["NotoSans-SemiBoldItalic"],
-  "Noto Sans ExtraBold Italic": ["NotoSans-ExtraBoldItalic"],
-  "Noto Sans ExtraLight Italic": ["NotoSans-ExtraLightItalic"],
-  "Noto Sans Black Italic": ["NotoSans-BlackItalic"],
-  "Noto Sans Thin Italic": ["NotoSans-ThinItalic"],
-
-  "Noto Sans Mono Regular": ["NotoSansMono-Regular"],
-  "Noto Sans Mono Bold": ["NotoSansMono-Bold"],
-  "Noto Sans Mono Thin": ["NotoSansMono-Thin"],
-
-  "Libre Baskerville Regular": ["LibreBaskerville-Regular"],
-  "Libre Baskerville Bold": ["LibreBaskerville-Bold"],
-  "Libre Baskerville Italic": ["LibreBaskerville-Italic"],
-
-  "Roboto Regular": ["Roboto-Regular"],
-  "Roboto Medium": ["Roboto-Medium"],
-  "Roboto Bold": ["Roboto-Bold"],
-  "Roboto Light": ["Roboto-Light"],
-  "Roboto Thin": ["Roboto-Thin"],
-  "Roboto Black": ["Roboto-Black"],
-  "Roboto Italic": ["Roboto-Italic"],
-  "Roboto Medium Italic": ["Roboto-MediumItalic"],
-  "Roboto Bold Italic": ["Roboto-BoldItalic"],
-  "Roboto Light Italic": ["Roboto-LightItalic"],
-  "Roboto Thin Italic": ["Roboto-ThinItalic"],
-  "Roboto Black Italic": ["Roboto-BlackItalic"],
-
-  "Titillium Web Regular": ["TitilliumWeb-Regular"],
-  "Titillium Web Bold": ["TitilliumWeb-Bold"],
-  "Titillium Web Black": ["TitilliumWeb-Black"],
-  "Titillium Web SemiBold": ["TitilliumWeb-SemiBold"],
-  "Titillium Web Light": ["TitilliumWeb-Light"],
-  "Titillium Web ExtraLight": ["TitilliumWeb-ExtraLight"],
-  "Titillium Web Italic": ["TitilliumWeb-Italic"],
-  "Titillium Web Bold Italic": ["TitilliumWeb-BoldItalic"],
-  "Titillium Web SemiBold Italic": ["TitilliumWeb-SemiBoldItalic"],
-  "Titillium Web Light Italic": ["TitilliumWeb-LightItalic"],
-  "Titillium Web ExtraLight Italic": ["TitilliumWeb-ExtraLightItalic"],
-
-  "Varela Round Regular": ["VarelaRound-Regular"]
+  "Noto Sans Italic": [
+    "noto-sans-latin-400-italic"
+  ],
+  "Noto Sans Medium Italic": [
+    "noto-sans-latin-500-italic"
+  ],
+  "Noto Sans Bold Italic": [
+    "noto-sans-latin-700-italic"
+  ],
+  "Noto Sans Light Italic": [
+    "noto-sans-latin-300-italic"
+  ],
+  "Noto Sans SemiBold Italic": [
+    "noto-sans-latin-600-italic"
+  ],
+  "Noto Sans ExtraBold Italic": [
+    "noto-sans-latin-800-italic"
+  ],
+  "Noto Sans ExtraLight Italic": [
+    "noto-sans-latin-200-italic"
+  ],
+  "Noto Sans Black Italic": [
+    "noto-sans-latin-900-italic"
+  ],
+  "Noto Sans Thin Italic": [
+    "noto-sans-latin-100-italic"
+  ],
+  "Noto Sans Mono Regular": [
+    "noto-sans-mono-latin-400-normal"
+  ],
+  "Noto Sans Mono Bold": [
+    "noto-sans-mono-latin-700-normal"
+  ],
+  "Noto Sans Mono Thin": [
+    "noto-sans-mono-latin-100-normal"
+  ],
+  "Libre Baskerville Regular": [
+    "libre-baskerville-latin-400-normal"
+  ],
+  "Libre Baskerville Bold": [
+    "libre-baskerville-latin-700-normal"
+  ],
+  "Libre Baskerville Italic": [
+    "libre-baskerville-latin-400-italic"
+  ],
+  "Roboto Regular": [
+    "roboto-latin-400-normal"
+  ],
+  "Roboto Medium": [
+    "roboto-latin-500-normal"
+  ],
+  "Roboto Bold": [
+    "roboto-latin-700-normal"
+  ],
+  "Roboto Light": [
+    "roboto-latin-300-normal"
+  ],
+  "Roboto Thin": [
+    "roboto-latin-100-normal"
+  ],
+  "Roboto Black": [
+    "roboto-latin-900-normal"
+  ],
+  "Roboto Italic": [
+    "roboto-latin-400-italic"
+  ],
+  "Roboto Medium Italic": [
+    "roboto-latin-500-italic"
+  ],
+  "Roboto Bold Italic": [
+    "roboto-latin-700-italic"
+  ],
+  "Roboto Light Italic": [
+    "roboto-latin-300-italic"
+  ],
+  "Roboto Thin Italic": [
+    "roboto-latin-100-italic"
+  ],
+  "Roboto Black Italic": [
+    "roboto-latin-900-italic"
+  ],
+  "Titillium Web Regular": [
+    "titillium-web-latin-400-normal"
+  ],
+  "Titillium Web Bold": [
+    "titillium-web-latin-700-normal"
+  ],
+  "Titillium Web Black": [
+    "titillium-web-latin-900-normal"
+  ],
+  "Titillium Web SemiBold": [
+    "titillium-web-latin-600-normal"
+  ],
+  "Titillium Web Light": [
+    "titillium-web-latin-300-normal"
+  ],
+  "Titillium Web ExtraLight": [
+    "titillium-web-latin-200-normal"
+  ],
+  "Titillium Web Italic": [
+    "titillium-web-latin-400-italic"
+  ],
+  "Titillium Web Bold Italic": [
+    "titillium-web-latin-700-italic"
+  ],
+  "Titillium Web SemiBold Italic": [
+    "titillium-web-latin-600-italic"
+  ],
+  "Titillium Web Light Italic": [
+    "titillium-web-latin-300-italic"
+  ],
+  "Titillium Web ExtraLight Italic": [
+    "titillium-web-latin-200-italic"
+  ],
+  "Varela Round Regular": [
+    "varela-round-latin-400-normal"
+  ]
 }

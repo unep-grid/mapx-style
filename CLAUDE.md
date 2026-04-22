@@ -121,10 +121,9 @@ After uploading a PMTiles or COG: always verify with `range_test.py`.
 
 ```bash
 npm run build:patterns              # generate pattern SVGs → packages/theme-core/assets/sprites/patterns/ (gitignored)
-npm run download:fonts               # fetch TTF sources from Google Fonts → data/fonts/files/ (gitignored)
-npm run build:fonts                  # verify bundled TTF sources used by theme-core
+npm run convert:fonts                # WOFF2 → TTF from node_modules/@fontsource/* → data/fonts/files/ (gitignored, no internet needed)
 npm run build:sprites                # SVGs → sprite sheets + sprite-index.json → upload to S3
-npm run build:glyphs                 # TTFs → PBF glyphs → upload to S3 (requires fonts to be downloaded first)
+npm run build:glyphs                 # TTFs → PBF glyphs → upload to S3 (run convert:fonts first)
 npm run build:style                  # upload style.json + style_debug.json to S3 (style/v{N}/)
 uv run scripts/build_borders.py      # UN GeoJSONs → PMTiles → upload to S3 (layers/)
 uv run scripts/build_mask.py         # UN mask GeoJSON → upload to S3 (masks/) for within() filter

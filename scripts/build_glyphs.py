@@ -113,12 +113,13 @@ def main() -> None:
         f"{combinations_path.relative_to(REPO_ROOT)}"
     )
 
-    family_dirs = sorted(d for d in fonts_dir.iterdir() if d.is_dir())
-    ttf_count = len(list(fonts_dir.rglob("*.ttf")))
+    ttf_count = len(list(fonts_dir.glob("*.ttf")))
     console.print(
-        f"Found [cyan]{ttf_count}[/cyan] TTF files across "
-        f"[cyan]{len(family_dirs)}[/cyan] families in {fonts_dir.relative_to(REPO_ROOT)}"
+        f"Found [cyan]{ttf_count}[/cyan] TTF files in {fonts_dir.relative_to(REPO_ROOT)}"
     )
+    if ttf_count == 0:
+        console.print("[red]No TTF files found. Run `npm run convert:fonts` first.[/red]")
+        sys.exit(1)
 
     # Write a temporary combinations JSON without the comment key
     # (build_pbf_glyphs expects {"FontName": ["stem1", ...]} only)
@@ -131,23 +132,19 @@ def main() -> None:
 
     console.print(f"Generating glyphs → [cyan]{out_dir}[/cyan]")
     try:
-        for family_dir in family_dirs:
-            result = subprocess.run(
-                [
-                    "build_pbf_glyphs",
-                    "--combinations", str(combinations_tmp),
-                    str(family_dir),
-                    str(out_dir),
-                ],
-                capture_output=True,
-                text=True,
-            )
-            if result.returncode != 0:
-                console.print(
-                    f"[red]build_pbf_glyphs failed for {family_dir.name}:[/red]\n{result.stderr}"
-                )
-                sys.exit(result.returncode)
-            console.print(f"  [cyan]{family_dir.name}[/cyan] done")
+        result = subprocess.run(
+            [
+                "build_pbf_glyphs",
+                "--combinations", str(combinations_tmp),
+                str(fonts_dir),
+                str(out_dir),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            console.print(f"[red]build_pbf_glyphs failed:[/red]\n{result.stderr}")
+            sys.exit(result.returncode)
     finally:
         combinations_tmp.unlink(missing_ok=True)
 
