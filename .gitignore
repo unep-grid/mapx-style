@@ -15,6 +15,11 @@ __pycache__/
 
 # Credentials
 .env
+.env.*.local
+.env.local
+
+# Exclude generated env types file
+env.d.ts
 
 # Large geo files (use scripts/s3/ to upload these)
 *.gpkg

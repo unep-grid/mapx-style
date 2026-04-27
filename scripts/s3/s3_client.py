@@ -13,15 +13,9 @@ Usage:
 import base64
 import hashlib
 import os
-from pathlib import Path
 
 import boto3
 from botocore.config import Config
-from dotenv import load_dotenv
-
-# .env lives at repo root — three levels up from scripts/s3/
-_ENV_PATH = Path(__file__).parent.parent.parent / ".env"
-load_dotenv(_ENV_PATH)
 
 
 def _encode_credentials(username: str, password: str) -> tuple[str, str]:

@@ -17,10 +17,7 @@ import json
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
 from rich.console import Console
-
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
 from rich.table import Table
 
 # Repo-root paths

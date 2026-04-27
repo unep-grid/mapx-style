@@ -93,8 +93,6 @@ _SPRITE_FILES = [
 
 sys.path.insert(0, str(REPO_ROOT / "scripts/s3"))
 
-from dotenv import load_dotenv
-load_dotenv(REPO_ROOT / ".env")
 S3_BASE = os.environ.get("S3_PUBLIC_BASE_URL", "").rstrip("/")
 
 

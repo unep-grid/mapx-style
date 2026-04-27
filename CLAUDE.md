@@ -7,9 +7,9 @@ For the full developer guide (HCP setup, data sources, CI/CD) see [DEVELOPERS.md
 
 ## Session start
 
-1. Run `uv run scripts/s3/catalog.py list` to see what assets already exist in S3.
-2. If `.env` is missing at the repo root: tell the user `cp .env.demo .env` and fill in
-   `S3_USER` / `S3_KEY` / `S3_ENDPOINT` / `S3_PUBLIC_BASE_URL` / `VITE_MAPX_ASSET_BASE_URL`.
+1. Run `varlock run -- uv run scripts/s3/catalog.py list` to see what assets already exist in S3.
+2. Credentials (`S3_USER`, `S3_KEY`, `PROTOMAPS_KEY`) are fetched automatically via `exec(pass://...)` in `.env.schema` — no `.env` file needed for credentials.
+   If `VITE_MAPX_ASSET_BASE_URL` needs a custom value, create a `.env` file at repo root with just that variable.
 
 ---
 
@@ -23,7 +23,6 @@ For the full developer guide (HCP setup, data sources, CI/CD) see [DEVELOPERS.md
 | `packages/theme-core/assets/sprites/geology/` | Geology SVG icon sources (SDF sprite) |
 | `packages/theme-core/assets/sprites/patterns/` | Pattern SVG sources (non-SDF sprite) — **gitignored**, generate with `npm run build:patterns` |
 | `packages/theme-core/assets/sprites/generated/` | Generated sprite sheets — **gitignored**, built by `build_sprites.py`, uploaded to S3 |
-| `public/fonts/fonts.json` | Font family catalog — GitHub Pages CDN |
 | `data/catalog.json` | Single catalog for all assets (S3 uploads + style provenance) |
 | `data/fonts/sources.json` | Font download manifest — which families/weights to fetch from Google Fonts |
 | `data/fonts/combinations.json` | Font combinations — maps MapLibre font names → TTF stems; used by `build_glyphs.py` |
@@ -58,9 +57,9 @@ npm run release
 
 ```bash
 # 1. Edit style_version.json: { "version": 2 }
-uv run scripts/build_glyphs.py
-uv run scripts/build_sprites.py
-uv run scripts/build_style.py
+npm run build:glyphs
+npm run build:sprites
+npm run build:style
 ```
 
 This is separate from the npm release — do it only when the on-S3 asset layout changes.
@@ -86,71 +85,44 @@ To release a new style version, bump `style_version.json` then re-run all three 
 
 ---
 
-## S3 — HCP key facts
-
-- Public requests need `Authorization: AWS all_users:` header (MapLibre `transformRequest` and `range_test.py` inject it automatically)
-- Canned ACL strings (`"public-read"`) are ignored — use `--public` flag or `set_acl.py`
-- Public URL format: `{S3_ENDPOINT}{S3_BUCKET}/{s3_key}` — values come from `.env`
-- CORS and credentials are handled in `s3_client.py` / HCP management UI — not configurable via S3 API
-
-Full HCP details: [DEVELOPERS.md §S3 storage](DEVELOPERS.md).
-
----
-
 ## Scripts — quick reference
 
-### S3 / asset management
-
-```bash
-uv run scripts/s3/upload.py <file> [s3_key] [--type TYPE] [--public] [--name NAME]
-uv run scripts/s3/stream_upload.py <url> [s3_key] [--type TYPE] [--public] [--name NAME] [--chunk-mb N]
-uv run scripts/s3/stream_upload_progress.py          # monitor a running stream upload
-uv run scripts/s3/stream_upload_progress.py --watch 5 # refresh every 5 s
-uv run scripts/s3/list_objects.py [--prefix <prefix>]
-uv run scripts/s3/set_acl.py <s3_key> --public
-uv run scripts/s3/set_acl.py <s3_key> --verify
-uv run scripts/s3/range_test.py <public_url>
-uv run scripts/s3/catalog.py list
-uv run scripts/s3/catalog.py show <id>
-uv run scripts/s3/catalog.py remove <id>
-```
-
-After uploading a PMTiles or COG: always verify with `range_test.py`.
+Scripts that write to S3 need env vars. Use `npm run` for build scripts (varlock is wired in); prefix direct `uv run` calls with `varlock run --`.
 
 ### Build pipeline
 
 ```bash
 npm run build:patterns              # generate pattern SVGs → packages/theme-core/assets/sprites/patterns/ (gitignored)
-npm run convert:fonts                # WOFF2 → TTF from node_modules/@fontsource/* → data/fonts/files/ (gitignored, no internet needed)
-npm run build:sprites                # SVGs → sprite sheets + sprite-index.json → upload to S3
-npm run build:glyphs                 # TTFs → PBF glyphs → upload to S3 (run convert:fonts first)
-npm run build:style                  # upload style.json + style_debug.json to S3 (style/v{N}/)
-uv run scripts/build_borders.py      # UN GeoJSONs → PMTiles → upload to S3 (layers/)
-uv run scripts/build_mask.py         # UN mask GeoJSON → upload to S3 (masks/) for within() filter
-uv run scripts/build_bathymetry.py   # VersaTiles bathymetry → PMTiles → upload to S3 (layers/)
-uv run scripts/build_basemap.py      # stream Protomaps basemap (~134 GB) → S3, resumable
+npm run convert:fonts               # WOFF2 → TTF from node_modules/@fontsource/* → data/fonts/files/ (gitignored, no internet needed)
+npm run build:sprites               # SVGs → sprite sheets + sprite-index.json → upload to S3
+npm run build:glyphs                # TTFs → PBF glyphs → upload to S3 (run convert:fonts first)
+npm run build:style                 # upload style.json + style_debug.json to S3 (style/v{N}/)
+varlock run -- uv run scripts/build_borders.py      # UN GeoJSONs → PMTiles → upload to S3 (layers/)
+varlock run -- uv run scripts/build_mask.py         # UN mask GeoJSON → upload to S3 (masks/) for within() filter
+varlock run -- uv run scripts/build_bathymetry.py   # VersaTiles bathymetry → PMTiles → upload to S3 (layers/)
+varlock run -- uv run scripts/build_basemap.py      # stream Protomaps basemap (~134 GB) → S3, resumable
 ```
 
-Style build scripts (`build_sprites`, `build_glyphs`, `build_style`) read the version from
-`style_version.json` automatically. Pass `--version N` to override, `--no-upload` to skip S3.
+Pass `--version N` to override style version, `--no-upload` to skip S3.
 
-### Large remote uploads (resumable)
-
-`stream_upload.py` uses chunked HTTP range requests (default 100 MB/part) + S3 multipart.
-State is saved to `/tmp/mapx_stream_<hash>.json` — re-run the same command to resume after failure.
+### S3 / asset management
 
 ```bash
-# Stream a large remote file
-uv run scripts/s3/stream_upload.py \
-  https://build.protomaps.com/20260323.pmtiles \
-  layers/protomaps_basemap__v0.pmtiles --type pmtiles --public
-
-# Monitor progress in another terminal
-uv run scripts/s3/stream_upload_progress.py --watch 10
-
-# Build and upload Protomaps basemap (wrapper around stream_upload)
-uv run scripts/build_basemap.py [--date YYYYMMDD] [--version N] [--no-upload]
+varlock run -- uv run scripts/s3/upload.py <file> [s3_key] [--type TYPE] [--public] [--name NAME]
+varlock run -- uv run scripts/s3/stream_upload.py <url> [s3_key] [--type TYPE] [--public] [--name NAME] [--chunk-mb N]
+uv run scripts/s3/stream_upload_progress.py [--watch 5]
+varlock run -- uv run scripts/s3/list_objects.py [--prefix <prefix>]
+varlock run -- uv run scripts/s3/set_acl.py <s3_key> --public
+varlock run -- uv run scripts/s3/set_acl.py <s3_key> --verify
+varlock run -- uv run scripts/s3/range_test.py <public_url>
+varlock run -- uv run scripts/s3/catalog.py list
+varlock run -- uv run scripts/s3/catalog.py show <id>
+varlock run -- uv run scripts/s3/catalog.py remove <id>
 ```
+
+After uploading a PMTiles or COG: always verify with `range_test.py`.
+
+See [DEVELOPERS.md](DEVELOPERS.md) for HCP setup, resumable uploads, CORS, and credential encoding details.
 
 ---
 

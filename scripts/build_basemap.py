@@ -2,7 +2,7 @@
 build_basemap.py — Stream the Protomaps basemap PMTiles directly to S3.
 
 No local storage required — streams from Protomaps CDN multipart into HCP S3.
-File is ~7 GB; ensure PROTOMAPS_KEY is set in .env.
+File is ~7 GB; ensure PROTOMAPS_KEY is set in .env.schema.
 
 Usage:
   uv run scripts/build_basemap.py
@@ -11,7 +11,7 @@ Usage:
   uv run scripts/build_basemap.py --no-upload       # dry-run: print URL only, skip upload
 
 Source:
-  https://build.protomaps.com/{date}.pmtiles  (requires PROTOMAPS_KEY in .env)
+  https://build.protomaps.com/{date}.pmtiles  (requires PROTOMAPS_KEY in .env.schema)
 
 S3 output:
   layers/protomaps_basemap__v{N}.pmtiles
@@ -39,12 +39,10 @@ def _source_url(date: str) -> str:
 
 
 def main() -> None:
-    from dotenv import load_dotenv
     from range_test import test_range
     from rich.console import Console
     from stream_upload import stream_upload
 
-    load_dotenv(REPO_ROOT / ".env")
     console = Console()
 
     parser = argparse.ArgumentParser(description="Stream Protomaps basemap to S3")

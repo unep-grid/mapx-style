@@ -7,14 +7,14 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "varlock run -- vite",
+    "build": "varlock run -- vite build",
+    "preview": "varlock run -- vite preview",
     "convert:fonts": "uv run scripts/convert_fonts.py",
-    "build:glyphs": "uv run scripts/build_glyphs.py",
+    "build:glyphs": "varlock run -- uv run scripts/build_glyphs.py",
     "build:patterns": "node scripts/patterns/index.cjs",
-    "build:sprites": "uv run scripts/build_sprites.py",
-    "build:style": "uv run scripts/build_style.py",
+    "build:sprites": "varlock run -- uv run scripts/build_sprites.py",
+    "build:style": "varlock run -- uv run scripts/build_style.py",
     "validate": "gl-style-validate packages/theme-core/src/style/style.json",
     "release": "release-it",
     "test": "vitest run",
@@ -28,7 +28,11 @@
     "@unep-grid/mapx-style": "*",
     "maplibre-contour": "^0.1.0",
     "maplibre-gl": "^5.0.0",
-    "pmtiles": "^4.0.0"
+    "pmtiles": "^4.0.0",
+    "varlock": "^0.9.1"
+  },
+  "varlock": {
+    "loadPath": "./"
   },
   "devDependencies": {
     "@fontsource/libre-baskerville": "^5.2.10",
@@ -45,6 +49,8 @@
     "@playwright/test": "^1",
     "@release-it/bumper": "^7.0.5",
     "@release-it/conventional-changelog": "^10.0.6",
+    "@varlock/proton-pass-plugin": "^0.0.3",
+    "@varlock/vite-integration": "^0.2.10",
     "@vitest/coverage-v8": "^3",
     "d3": "^5.0.0",
     "jsdom": "^16.7.0",

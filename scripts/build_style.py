@@ -61,7 +61,7 @@ def main() -> None:
 
     s3_base = os.environ.get("S3_PUBLIC_BASE_URL", "").rstrip("/")
     if not s3_base:
-        console.print("[red]S3_PUBLIC_BASE_URL is not set in .env[/red]")
+        console.print("[red]S3_PUBLIC_BASE_URL is not set in .env.schema[/red]")
         sys.exit(1)
 
     s3, bucket = make_client()

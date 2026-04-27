@@ -16,18 +16,23 @@ The demo app (`src/`) is built with Vite + MapLibre GL JS. On every push to `mai
 ```
 mapx-style/
 ├── src/                        Vite demo app (MapLibre + layer inspector)
-├── public/                     Static assets committed to git
-│   ├── sprites/
-│   │   ├── maki/               SVG sources — Maki icon set
-│   │   ├── geology/            SVG sources — geology icons
-│   │   ├── patterns/           SVG sources — fill patterns
-│   │   └── generated/          Built sprite sheets (PNG + JSON) — output of build_sprites.py
-│   ├── fonts/                  Font list and metadata JSON
-│   └── style/                  MapLibre base style JSON
-├── borders/                    UN border documentation and metadata (data not distributed)
-├── scripts/                     Operational scripts
+├── public/                     Static assets served via GitHub Pages
+│   └── fonts/                  Font family catalog JSON
+├── packages/theme-core/        MapxStyle library (npm: @unep-grid/mapx-style)
+│   ├── src/style/              MapLibre base style JSON (source of truth)
+│   └── assets/sprites/
+│       ├── maki/               SVG sources — Maki icon set
+│       ├── geology/            SVG sources — geology icons
+│       ├── patterns/           SVG sources — fill patterns (gitignored, generate with npm run build:patterns)
+│       └── generated/          Built sprite sheets (gitignored, output of build_sprites.py)
+├── data/
+│   ├── catalog.json            Single source of truth for all S3 assets
+│   ├── fonts/                  Font manifests and TTF sources (gitignored)
+│   └── un_countries/           UN border docs (data not distributed)
+├── scripts/                    Operational scripts
 │   ├── s3/                     S3 upload, catalog, ACL management
 │   └── ...                     Sprite building, glyph generation, style updates
+├── .env.schema                 Env definition (varlock) — credentials via exec(pass://...)
 ├── dist/                       Vite build output — gitignored, deployed to gh-pages by CI
 ├── pyproject.toml              Python environment (uv) — shared by all scripts
 ├── package.json                Node environment (npm/vite)
@@ -42,19 +47,12 @@ mapx-style/
 
 ```bash
 uv sync                         # install deps into .venv/
-uv run scripts/s3/upload.py ...  # run any script
+varlock run -- uv run scripts/s3/upload.py ...  # run any script that needs env vars
 ```
 
-Requires a `.env` file at the repo root (copy from `.env.demo`):
+Credentials are defined in `.env.schema` and fetched automatically via `exec(pass://...)` when you prefix commands with `varlock run --`. No `.env` file required for credentials.
 
-```
-S3_ENDPOINT=https://<your-hcp-host>/
-S3_USER=<your HCP username>
-S3_KEY=<your HCP password>
-S3_BUCKET=mapx
-S3_PUBLIC_BASE_URL=https://<your-hcp-host>/mapx
-VITE_MAPX_ASSET_BASE_URL=https://<your-hcp-host>/mapx
-```
+If you need to override `VITE_MAPX_ASSET_BASE_URL` locally, create a `.env` file at the repo root with just that variable.
 
 ### JavaScript (demo app)
 
@@ -73,40 +71,43 @@ Large assets are stored on a **Hitachi Content Platform (HCP)** S3-compatible st
 
 | | |
 |---|---|
-| Endpoint | `S3_ENDPOINT` in `.env` |
-| Bucket | `S3_BUCKET` in `.env` (default: `mapx`) |
-| Public URL base | `S3_PUBLIC_BASE_URL` in `.env` |
+| Endpoint | `S3_ENDPOINT` in `.env.schema` |
+| Bucket | `S3_BUCKET` in `.env.schema` (default: `mapx`) |
+| Public URL base | `S3_PUBLIC_BASE_URL` in `.env.schema` |
 
 `data/catalog.json` is the single source of truth for all uploaded assets and style
 data provenance. Every upload via `upload.py` upserts an entry into this file.
 
 ### S3 scripts
 
-Run from the repo root with `uv run`:
+Prefix all S3-writing commands with `varlock run --` to resolve credentials from `.env.schema`.
 
 | Command | Purpose |
 |---|---|
-| `uv run scripts/s3/upload.py <file> [key] [--public]` | Upload local file + ACL + catalog |
-| `uv run scripts/s3/stream_upload.py <url> [key] [--public] [--chunk-mb N]` | Stream remote URL → S3 (chunked, resumable) |
+| `varlock run -- uv run scripts/s3/upload.py <file> [key] [--public]` | Upload local file + ACL + catalog |
+| `varlock run -- uv run scripts/s3/stream_upload.py <url> [key] [--public] [--chunk-mb N]` | Stream remote URL → S3 (chunked, resumable) |
 | `uv run scripts/s3/stream_upload_progress.py [--watch N]` | Monitor a running stream upload |
-| `uv run scripts/s3/list_objects.py [--prefix <p>]` | List objects in bucket |
-| `uv run scripts/s3/set_acl.py <key> --public` | Make existing object public |
-| `uv run scripts/s3/set_acl.py <key> --verify` | Check if public ACL is set |
-| `uv run scripts/s3/range_test.py <url>` | Verify HTTP 206 (PMTiles/COG) |
-| `uv run scripts/s3/catalog.py list` | Print catalog table |
-| `uv run scripts/s3/catalog.py show <id>` | Print one catalog entry |
-| `uv run scripts/s3/catalog.py remove <id>` | Remove catalog entry |
+| `varlock run -- uv run scripts/s3/list_objects.py [--prefix <p>]` | List objects in bucket |
+| `varlock run -- uv run scripts/s3/set_acl.py <key> --public` | Make existing object public |
+| `varlock run -- uv run scripts/s3/set_acl.py <key> --verify` | Check if public ACL is set |
+| `varlock run -- uv run scripts/s3/range_test.py <url>` | Verify HTTP 206 (PMTiles/COG) |
+| `varlock run -- uv run scripts/s3/catalog.py list` | Print catalog table |
+| `varlock run -- uv run scripts/s3/catalog.py show <id>` | Print one catalog entry |
+| `varlock run -- uv run scripts/s3/catalog.py remove <id>` | Remove catalog entry |
 
 ### Build pipeline
 
+`npm run` scripts have varlock wired in. For direct `uv run` calls, prefix with `varlock run --`.
+
 | Command | Purpose |
 |---|---|
-| `npm run build:patterns` | Generate pattern SVGs → `public/sprites/patterns/` |
-| `uv run scripts/build_sprites.py` | SVGs → sprite sheets → upload to S3 |
-| `npm run convert:fonts` | Convert `@fontsource/*` WOFF2 → TTF → `data/fonts/files/` (gitignored, no internet needed) |
-| `uv run scripts/build_glyphs.py` | TTFs → PBF glyphs → upload to S3 (run `convert:fonts` first) |
-| `uv run scripts/build_borders.py` | UN GeoJSONs → PMTiles → upload to S3 |
-| `uv run scripts/build_basemap.py [--date YYYYMMDD] [--version N]` | Stream Protomaps basemap (~134 GB) → S3, resumable |
+| `npm run build:patterns` | Generate pattern SVGs → `packages/theme-core/assets/sprites/patterns/` |
+| `npm run convert:fonts` | Convert `@fontsource/*` WOFF2 → TTF → `data/fonts/files/` (no internet needed) |
+| `npm run build:sprites` | SVGs → sprite sheets → upload to S3 |
+| `npm run build:glyphs` | TTFs → PBF glyphs → upload to S3 (run `convert:fonts` first) |
+| `npm run build:style` | Upload `style.json` + `style_debug.json` → S3 |
+| `varlock run -- uv run scripts/build_borders.py` | UN GeoJSONs → PMTiles → upload to S3 |
+| `varlock run -- uv run scripts/build_basemap.py [--date YYYYMMDD] [--version N]` | Stream Protomaps basemap (~134 GB) → S3, resumable |
 
 Pass `--no-upload` to any build script to generate locally without touching S3.
 
@@ -125,7 +126,7 @@ ACCESS_KEY=$(echo -n "$S3_USER" | base64)
 SECRET_KEY=$(echo -n "$S3_KEY"  | md5sum | awk '{print $1}')
 ```
 
-`scripts/s3/s3_client.py` handles this automatically. Never pass raw `.env` credentials
+`scripts/s3/s3_client.py` handles this automatically. Never pass raw credentials
 directly to the AWS SDK.
 
 ### Public object access
