@@ -5,8 +5,11 @@ import { MapxStyle } from "@unep-grid/mapx-style";
 import { MapCompare } from "./mapcompare.js";
 import { buildSpriteDemo, showPatterns, hidePatterns, showIcons, hideIcons } from "./sprite_demo.js";
 
-const env = import.meta.env.DEV ? "dev" : "prod";
-const mxStyle = new MapxStyle({ env, maplibregl, mlcontour });
+const mxStyle = new MapxStyle({
+  maplibregl,
+  mlcontour,
+  baseUrl: import.meta.env.VITE_MAPX_ASSET_BASE_URL,
+});
 
 const styleProd = mxStyle.getStyle();
 const styleDebug = mxStyle.getStyleDebug();

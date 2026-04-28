@@ -17,35 +17,25 @@ import {
   resolveSpriteUrls,
 } from "./theme_assets.js";
 
-import { S3_BASE, S3_HOST, S3_ENDPOINT, S3_REQUEST_HEADERS } from "./config.js";
+import { S3_BASE } from "./config.js";
 
 const DEM_URL = "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp";
-const MASK_URL = `${S3_BASE}/masks/un_2020_countries_mask__v0.geojson`;
 const CSS_EL_ID = "mapx-theme-css";
-
-function _resolveStyle(json) {
-  return JSON.parse(JSON.stringify(json).replaceAll("__S3_BASE__", S3_BASE));
-}
 
 /**
  * MapxStyle — single entry point for the MapX style system.
  *
- * Handles: HCP S3 fetch auth, PMTiles protocol, DEM source, transformRequest,
- * sprite URL resolution, style building, theme state, and CSS custom property
- * injection. Call destroy() to tear down.
+ * Handles: PMTiles protocol, DEM source, sprite URL resolution, style building,
+ * theme state, and CSS custom property injection. Call destroy() to tear down.
  *
  * @example
- * const mxStyle = new MapxStyle({ maplibregl, mlcontour, theme: "classic_light" });
- * const map = new maplibregl.Map({
- *   style: mxStyle.getStyle(),
- *   transformRequest: mxStyle.transformRequest,
- * });
+ * const mxStyle = new MapxStyle({ maplibregl, mlcontour, baseUrl: "https://api.mapx.org/s3" });
+ * const map = new maplibregl.Map({ style: mxStyle.getStyle() });
  * mxStyle.attachMap(map);
- * // on teardown:
- * mxStyle.destroy();
+ * mxStyle.destroy(); // on teardown
  *
  * @param {object} [opt]
- * @param {"prod"|"staging"|"dev"} [opt.env="prod"] - S3 env for sprite URL.
+ * @param {string} [opt.baseUrl] - S3 proxy base URL. Defaults to VITE_MAPX_ASSET_BASE_URL.
  * @param {object} [opt.maplibregl] - maplibre-gl module (protocol + DEM setup).
  * @param {object} [opt.mlcontour]  - maplibre-contour module (DemSource).
  * @param {string|object} [opt.theme] - Theme id or full theme object.
@@ -59,7 +49,6 @@ export class MapxStyle {
   static HILLSHADE_LAYER = "hillshade";
   static CONTOUR_LAYERS = ["contour-lines", "contour-labels"];
   static SATELLITE_LAYER = "satellite";
-  static MASK_URL = MASK_URL;
   static PLACES_MASK_LAYERS = [
     "places_locality_capital",
     "places_locality_regional",
@@ -85,9 +74,11 @@ export class MapxStyle {
     "country_un_0_label_0",
   ];
 
-  constructor({ maplibregl, mlcontour, theme, language } = {}) {
-    this._glyphs = resolveGlyphsUrl();
-    this._sprite = resolveSpriteUrls();
+  constructor({ maplibregl, mlcontour, theme, language, baseUrl } = {}) {
+    const s3Base = baseUrl || S3_BASE;
+    this._s3Base = s3Base;
+    this._glyphs = resolveGlyphsUrl({ baseUrl: s3Base });
+    this._sprite = resolveSpriteUrls({ baseUrl: s3Base });
     this._spriteIndex = null;
     this._theme = null;
     this._map = null;
@@ -99,7 +90,7 @@ export class MapxStyle {
     this._contoursEnabled = true;
     this._satelliteEnabled = false;
     this._maskEnabled = true; // on by default
-    this._maskUrl = MASK_URL;
+    this._maskUrl = `${s3Base}/masks/un_2020_countries_mask__v0.geojson`;
     this._maskGeojson = null; // loaded lazily on first use
     this._maskOriginalFilters = {};
 
@@ -113,34 +104,9 @@ export class MapxStyle {
       );
     }
 
-    // ── Patch window.fetch for HCP S3 auth — once per page
-    // PMTiles FetchSource calls window.fetch directly, bypassing transformRequest.
+    // ── PMTiles protocol — once per page
     if (maplibregl && !MapxStyle._registered) {
       MapxStyle._registered = true;
-
-      const originalFetch = window.fetch.bind(window);
-      this._originalFetch = originalFetch;
-      window.fetch = (input, init = {}) => {
-        const url =
-          typeof input === "string"
-            ? input
-            : input instanceof Request
-              ? input.url
-              : "";
-        if (url.includes(S3_HOST)) {
-          const existing =
-            init.headers instanceof Headers
-              ? Object.fromEntries(init.headers.entries())
-              : init.headers || {};
-          init = {
-            ...init,
-            headers: { ...existing, ...S3_REQUEST_HEADERS },
-          };
-        }
-        return originalFetch(input, init);
-      };
-
-      // ── PMTiles protocol
       const pmtilesProtocol = new Protocol();
       maplibregl.addProtocol(
         "pmtiles",
@@ -161,13 +127,6 @@ export class MapxStyle {
       });
       this._demSource.setupMaplibre(maplibregl);
     }
-
-    // ── transformRequest (bound so it can be passed by reference)
-    this.transformRequest = (url) => {
-      if (url.startsWith(S3_ENDPOINT)) {
-        return { url, headers: S3_REQUEST_HEADERS };
-      }
-    };
 
     if (theme) {
       this.setTheme(theme);
@@ -583,7 +542,7 @@ export class MapxStyle {
    * Pass the result directly to new maplibregl.Map({ style: ... }).
    */
   getStyle() {
-    const style = _resolveStyle(styleJson);
+    const style = this._resolveStyle(styleJson);
     style.glyphs = this._glyphs;
     style.sprite = this._sprite;
     if (this._demSource) build_style(style, this._demSource);
@@ -595,22 +554,22 @@ export class MapxStyle {
    * source resolved. No hillshade layer is included.
    */
   getStyleDebug() {
-    const style = _resolveStyle(styleDebugJson);
+    const style = this._resolveStyle(styleDebugJson);
     style.glyphs = this._glyphs;
     style.sprite = this._sprite;
     if (this._demSource) build_style(style, this._demSource);
     return style;
   }
 
-  /** Restore patched globals and remove injected CSS. Call when tearing down (tests, HMR). */
+  _resolveStyle(json) {
+    return JSON.parse(JSON.stringify(json).replaceAll("__S3_BASE__", this._s3Base));
+  }
+
+  /** Remove injected CSS and unregister protocols. Call when tearing down (tests, HMR). */
   destroy() {
     this.detachMap();
     if (typeof document !== "undefined") {
       document.getElementById(CSS_EL_ID)?.remove();
-    }
-    if (this._originalFetch) {
-      window.fetch = this._originalFetch;
-      this._originalFetch = null;
     }
     if (this._maplibregl) {
       this._maplibregl.removeProtocol("pmtiles");
