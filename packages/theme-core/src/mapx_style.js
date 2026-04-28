@@ -437,7 +437,7 @@ export class MapxStyle {
    */
   async getSpriteIndex() {
     if (!this._spriteIndex) {
-      const url = resolveSpriteIndexUrl();
+      const url = resolveSpriteIndexUrl({ baseUrl: this._s3Base });
       this._spriteIndex = await fetch(url).then((r) => r.json());
     }
     return this._spriteIndex;
