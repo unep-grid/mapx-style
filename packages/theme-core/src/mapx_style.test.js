@@ -179,7 +179,17 @@ describe("MapxStyle sprite index (mocked fetch)", () => {
     sprites: { default: "https://example.com/sprite", patterns: "https://example.com/sprite_patterns" },
     count: 2,
     icons: [
-      { id: "maki-airport-11", group: "maki",    sprite: "default",  x: 0,  y: 0,  w: 11, h: 11, sdf: true },
+      {
+        id: "maki-airport-11",
+        group: "maki",
+        sprite: "default",
+        x: 0,
+        y: 0,
+        w: 17,
+        h: 17,
+        sdf: true,
+        svg: '<svg width="11px" height="11px" viewBox="0 0 11 11"><path fill="currentColor"></path></svg>',
+      },
       { id: "t_b_lines_01",    group: "pattern",  sprite: "patterns", x: 0,  y: 0,  w: 32, h: 32, sdf: false },
     ],
   };
@@ -221,7 +231,7 @@ describe("MapxStyle sprite index (mocked fetch)", () => {
 
   describe("getIconDimensions", () => {
     it("returns {w, h} for a known icon", async () => {
-      expect(await mx.getIconDimensions("maki-airport-11")).toEqual({ w: 11, h: 11 });
+      expect(await mx.getIconDimensions("maki-airport-11")).toEqual({ w: 17, h: 17 });
     });
     it("returns {w, h} for a known pattern", async () => {
       expect(await mx.getIconDimensions("t_b_lines_01")).toEqual({ w: 32, h: 32 });
@@ -233,6 +243,28 @@ describe("MapxStyle sprite index (mocked fetch)", () => {
       await mx.getIconDimensions("maki-airport-11");
       await mx.getIconDimensions("t_b_lines_01");
       expect(globalThis.fetch).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("getIconMetrics", () => {
+    it("returns padded tile and visible SVG dimensions for SDF icons", async () => {
+      expect(await mx.getIconMetrics("maki-airport-11")).toEqual({
+        w: 17,
+        h: 17,
+        contentW: 11,
+        contentH: 11,
+        sdf: true,
+      });
+    });
+
+    it("falls back to tile dimensions for patterns", async () => {
+      expect(await mx.getIconMetrics("t_b_lines_01")).toEqual({
+        w: 32,
+        h: 32,
+        contentW: 32,
+        contentH: 32,
+        sdf: false,
+      });
     });
   });
 });

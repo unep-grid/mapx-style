@@ -21,6 +21,17 @@ import { S3_BASE } from "./config.js";
 
 const DEM_URL = "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp";
 const CSS_EL_ID = "mapx-theme-css";
+const SVG_SIZE_RE = /\s(?:width|height)=["']?([0-9.]+)(?:px)?["']?/gi;
+
+function getSvgSize(svg) {
+  if (!svg) return null;
+  const size = {};
+  for (const match of svg.matchAll(SVG_SIZE_RE)) {
+    const attr = match[0].includes("width") ? "w" : "h";
+    size[attr] = Number(match[1]);
+  }
+  return Number.isFinite(size.w) && Number.isFinite(size.h) ? size : null;
+}
 
 /**
  * MapxStyle — single entry point for the MapX style system.
@@ -475,6 +486,27 @@ export class MapxStyle {
   }
 
   /**
+   * Returns sprite tile dimensions and visible SVG dimensions when available.
+   * SDF icons include padding in the sprite sheet, while their inline SVG is
+   * unpadded. Consumers that render the SVG directly can use contentW/contentH
+   * to match the map's visible icon size.
+   * @param {string} id - bare sprite image id
+   * @returns {Promise<{ w: number, h: number, contentW: number, contentH: number, sdf: boolean } | null>}
+   */
+  async getIconMetrics(id) {
+    const icon = await this.getIcon(id);
+    if (!icon) return null;
+    const svgSize = getSvgSize(icon.svg);
+    return {
+      w: icon.w,
+      h: icon.h,
+      contentW: svgSize?.w || icon.w,
+      contentH: svgSize?.h || icon.h,
+      sdf: !!icon.sdf,
+    };
+  }
+
+  /**
    * Resolves a bare sprite id to the fully-qualified name MapLibre expects in
    * style expressions ("fill-pattern", "icon-image", etc.).
    *
@@ -494,18 +526,13 @@ export class MapxStyle {
   }
 
   /**
-   * Renders a sprite image to a PNG data URL for use in legend thumbnails etc.
-   * Uses the public map.getImage() API — no access to internal imageManager.
-   *
-   * For SDF icons: pass rgba to recolor visible pixels (same as MapLibre's
-   * runtime icon-color, but applied to a canvas for CSS background-image use).
-   * For raster patterns: pass rgba=null to return the raw image.
-   *
+   * Renders a raster sprite image to a PNG data URL via the map's image store.
+   * MapLibre decodes and crops each sprite tile at load time, so this returns
+   * just the tile — no atlas math needed. SDF icons should use getSvgDataUrl instead.
    * @param {string} id - bare sprite image id
-   * @param {[number, number, number, number] | null} rgba - RGBA 0-255, or null
    * @returns {string | null} PNG data URL, or null if image not found
    */
-  getImageDataUrl(id, rgba = null) {
+  getImageDataUrl(id) {
     if (!this._map || !id) return null;
     const img = this._map.getImage(id) ?? this._map.getImage(`patterns:${id}`);
     if (!img) return null;
@@ -514,25 +541,28 @@ export class MapxStyle {
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext("2d");
-    // img.data.data is Uint8Array; ImageData requires Uint8ClampedArray
-    const imData = new ImageData(
-      new Uint8ClampedArray(img.data.data),
-      width,
-      height,
+    ctx.putImageData(
+      new ImageData(new Uint8ClampedArray(img.data.data), width, height),
+      0, 0,
     );
-    if (rgba && img.sdf) {
-      const [r, g, b, a] = rgba;
-      for (let i = 0; i < imData.data.length; i += 4) {
-        if (imData.data[i + 3] > 0) {
-          imData.data[i] = r;
-          imData.data[i + 1] = g;
-          imData.data[i + 2] = b;
-          imData.data[i + 3] = a;
-        }
-      }
-    }
-    ctx.putImageData(imData, 0, 0);
     return canvas.toDataURL("image/png");
+  }
+
+
+
+  /**
+   * Returns a data URI for a colored SVG icon, using the SVG source inlined in
+   * the sprite index by build_sprites.py. Suitable for CSS background-image.
+   * Only works for SDF icons (sdf: true); returns null for patterns or unknown ids.
+   * @param {string} id - bare sprite image id (e.g. "maki-airport-11")
+   * @param {string} [color="black"] - any CSS color string
+   * @returns {Promise<string | null>}
+   */
+  async getSvgDataUrl(id, color = "black") {
+    const icon = await this.getIcon(id);
+    if (!icon?.svg) return null;
+    const colored = icon.svg.replaceAll("currentColor", color);
+    return `data:image/svg+xml,${encodeURIComponent(colored)}`;
   }
 
   // ── Style building ───────────────────────────────────────────────────────────

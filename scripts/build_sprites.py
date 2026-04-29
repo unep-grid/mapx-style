@@ -58,6 +58,7 @@ sprite-index.json — combined catalog for icon picker:
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -96,6 +97,23 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/s3"))
 S3_BASE = os.environ.get("S3_PUBLIC_BASE_URL", "").rstrip("/")
 
 
+def _read_svg_inline(icon_id: str) -> str | None:
+    """Read, normalize and return an SVG string for inline embedding in sprite-index.json.
+    Looks up the source file from SVG_DIRS_SDF by icon id. Returns None if not found."""
+    for source_dir in SVG_DIRS_SDF:
+        path = source_dir / f"{icon_id}.svg"
+        if path.exists():
+            text = path.read_text(encoding="utf-8")
+            # Strip XML declaration
+            text = re.sub(r"<\?xml[^?]*\?>", "", text)
+            # Normalize Mapbox parameterized fill to CSS currentColor
+            text = text.replace('style="fill:param(fill)"', 'fill="currentColor"')
+            # Minify: collapse whitespace between tags
+            text = re.sub(r">\s+<", "><", text).strip()
+            return text
+    return None
+
+
 def _icon_meta(name: str) -> tuple[str, str]:
     """Return (group, sprite_id) for an icon name."""
     if name.startswith("maki-"):
@@ -124,6 +142,7 @@ def _generate_index(version: int) -> Path:
             "w":      entry["width"],
             "h":      entry["height"],
             "sdf":    True,
+            "svg":    _read_svg_inline(name),
         })
 
     # Non-SDF patterns
