@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.3](https://github.com/unep-grid/mapx-style/compare/v0.4.2...v0.4.3) (2026-04-30)
+
+### Bug Fixes
+
+* varlock -> global ([f5181ef](https://github.com/unep-grid/mapx-style/commit/f5181efd1737d4cc4fed13c6eeecb4ba2e78db76))
+
 ## [0.4.2](https://github.com/unep-grid/mapx-style/compare/v0.4.1...v0.4.2) (2026-04-30)
 
 ### Bug Fixes
