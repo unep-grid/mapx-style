@@ -1,6 +1,11 @@
 # Build output
 dist/
 
+# Test output
+coverage/
+test-results/
+playwright-report/
+
 # JS deps
 node_modules/
 

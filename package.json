@@ -21,7 +21,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:visual": "playwright test",
-    "test:visual:update": "playwright test --update-snapshots"
+    "test:visual:update": "playwright test --update-snapshots",
+    "test:all": "npm test && npm run test:visual"
   },
   "dependencies": {
     "@maplibre/maplibre-gl-compare": "^0.5.0",
