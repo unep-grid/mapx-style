@@ -96,7 +96,6 @@ export class MapxStyle {
     this._language = language || "en";
     this._terrainEnabled = false;
     this._terrainCfg = MapxStyle.TERRAIN_CFG;
-    this._onPitchEnd = this._handlePitchEnd.bind(this);
     this._hillshadeEnabled = true;
     this._contoursEnabled = true;
     this._satelliteEnabled = false;
@@ -104,6 +103,16 @@ export class MapxStyle {
     this._maskUrl = `${s3Base}/masks/un_2020_countries_mask__v0.geojson`;
     this._maskGeojson = null; // loaded lazily on first use
     this._maskOriginalFilters = {};
+
+    // ── Readiness state
+    this._dirty = false;
+    this._readyPromise = null;
+    this._readyResolve = null;
+    this._readyCallbacks = [];
+
+    // ── Bound handlers
+    this._onPitchEnd = this._handlePitchEnd.bind(this);
+    this._onMapIdle = this._handleMapIdle.bind(this);
 
     // ── RTL text plugin — once per page (Arabic, Hebrew, etc.)
     if (maplibregl && !MapxStyle._rtlRegistered) {
@@ -151,6 +160,8 @@ export class MapxStyle {
     this._map = map;
     this._scaler = new MapScaler(map);
     map.on("pitchend", this._onPitchEnd);
+    map.on("idle", this._onMapIdle);
+    this._markDirty();
     const apply = () => {
       this._applyLayers(map, this._theme);
       this._applyLanguage(map);
@@ -165,17 +176,71 @@ export class MapxStyle {
     }
   }
 
-  /** Unlink the attached map. */
+  /** Unlink the attached map. Resolves any pending whenReady(). */
   detachMap() {
     if (this._map) {
       this._map.off("pitchend", this._onPitchEnd);
-      this._map.off("error", this._onMapError);
+      this._map.off("idle", this._onMapIdle);
     }
     if (this._scaler) {
       this._scaler.destroy();
       this._scaler = null;
     }
+    // Resolve pending readiness — idle will never fire after detach.
+    this._dirty = false;
+    this._readyResolve?.();
+    this._readyPromise = null;
+    this._readyResolve = null;
     this._map = null;
+  }
+
+  // ── Readiness API ────────────────────────────────────────────────────────────
+
+  /**
+   * Returns a Promise that resolves when the map is idle after the last
+   * mutating operation, or immediately if the instance is already settled.
+   * Rejects after timeoutMs if idle never fires (network failure, MapLibre bug).
+   * @param {number} [timeoutMs=20000]
+   * @returns {Promise<void>}
+   */
+  whenReady(timeoutMs = 20000) {
+    if (!this._dirty) return Promise.resolve();
+    return Promise.race([
+      this._readyPromise,
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("MapxStyle.whenReady timed out")),
+          timeoutMs,
+        ),
+      ),
+    ]);
+  }
+
+  /**
+   * Register a callback invoked on every ready transition (dirty → idle).
+   * Returns an unsubscribe function.
+   * @param {Function} fn
+   * @returns {Function} unsubscribe
+   */
+  onReady(fn) {
+    this._readyCallbacks.push(fn);
+    return () => {
+      this._readyCallbacks = this._readyCallbacks.filter((cb) => cb !== fn);
+    };
+  }
+
+  /**
+   * Returns a snapshot of current readiness state for test diagnostics.
+   * @returns {{ dirty: boolean, theme: string|null, language: string, mapAttached: boolean, mapLoaded: boolean|null }}
+   */
+  getDiagnostics() {
+    return {
+      dirty: this._dirty,
+      theme: this._theme?.id ?? null,
+      language: this._language,
+      mapAttached: !!this._map,
+      mapLoaded: this._map?.loaded() ?? null,
+    };
   }
 
   // ── Terrain / 3D ─────────────────────────────────────────────────────────────
@@ -189,6 +254,7 @@ export class MapxStyle {
     if (!this._map) return;
     if (cfg) this._terrainCfg = cfg;
     this._terrainEnabled = true;
+    this._markDirty();
     this._map.setTerrain(this._terrainCfg);
     if (this._map.getPitch() < MapxStyle.TERRAIN_PITCH)
       this._map.easeTo({ pitch: MapxStyle.TERRAIN_PITCH });
@@ -200,6 +266,7 @@ export class MapxStyle {
   disableTerrain() {
     if (!this._map) return;
     this._terrainEnabled = false;
+    this._markDirty();
     this._map.setTerrain(null);
     this._map.easeTo({ pitch: 0 });
   }
@@ -272,6 +339,7 @@ export class MapxStyle {
   async enableMask() {
     this._maskEnabled = true;
     if (this._map && this._map.isStyleLoaded()) {
+      this._markDirty();
       await this._loadAndApplyMask(this._map);
     }
   }
@@ -282,6 +350,7 @@ export class MapxStyle {
   disableMask() {
     this._maskEnabled = false;
     if (this._map && this._map.isStyleLoaded()) {
+      this._markDirty();
       this._removeMask(this._map);
     }
   }
@@ -300,6 +369,7 @@ export class MapxStyle {
     this._maskUrl = url;
     this._maskGeojson = null;
     if (this._maskEnabled && this._map && this._map.isStyleLoaded()) {
+      this._markDirty();
       this._loadAndApplyMask(this._map);
     }
   }
@@ -332,6 +402,7 @@ export class MapxStyle {
 
     this._theme = theme;
     if (this._map) {
+      this._markDirty();
       const apply = () => this._applyLayers(this._map, theme);
       if (this._map.isStyleLoaded()) {
         apply();
@@ -404,6 +475,7 @@ export class MapxStyle {
    */
   setLanguage(lang) {
     this._language = lang;
+    if (this._map) this._markDirty();
     this._applyLanguage();
   }
 
@@ -543,12 +615,11 @@ export class MapxStyle {
     const ctx = canvas.getContext("2d");
     ctx.putImageData(
       new ImageData(new Uint8ClampedArray(img.data.data), width, height),
-      0, 0,
+      0,
+      0,
     );
     return canvas.toDataURL("image/png");
   }
-
-
 
   /**
    * Returns a data URI for a colored SVG icon, using the SVG source inlined in
@@ -610,6 +681,24 @@ export class MapxStyle {
 
   // ── Private helpers ──────────────────────────────────────────────────────────
 
+  _markDirty() {
+    this._dirty = true;
+    if (!this._readyPromise) {
+      this._readyPromise = new Promise((resolve) => {
+        this._readyResolve = resolve;
+      });
+    }
+  }
+
+  _handleMapIdle() {
+    if (!this._dirty) return;
+    this._dirty = false;
+    this._readyResolve?.();
+    this._readyPromise = null;
+    this._readyResolve = null;
+    for (const fn of this._readyCallbacks) fn();
+  }
+
   async _loadAndApplyMask(map) {
     if (!this._maskGeojson)
       this._maskGeojson = await fetch(this._maskUrl).then((r) => r.json());
@@ -642,6 +731,7 @@ export class MapxStyle {
 
   _setLayersVisibility(ids, visibility) {
     if (!this._map) return;
+    this._markDirty();
     for (const id of [].concat(ids))
       if (this._map.getLayer(id))
         this._map.setLayoutProperty(id, "visibility", visibility);
@@ -653,9 +743,11 @@ export class MapxStyle {
     const pitch = this._map.getPitch();
     if (pitch > MapxStyle.TERRAIN_THRESH && !this._terrainEnabled) {
       this._terrainEnabled = true;
+      this._markDirty();
       this._map.setTerrain(this._terrainCfg);
     } else if (pitch < MapxStyle.TERRAIN_THRESH && this._terrainEnabled) {
       this._terrainEnabled = false;
+      this._markDirty();
       this._map.setTerrain(null);
     }
   }

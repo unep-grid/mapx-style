@@ -62,8 +62,9 @@ const mapDebug = new maplibregl.Map({
 // Only attach prod — debug is intentionally unthemed (x-ray mode)
 mxStyle.attachMap(mapProd);
 
-// Expose prod map for Playwright tests
+// Expose prod map and style instance for Playwright visual tests
 window.__mapProd = mapProd;
+window.__mapxStyle = mxStyle;
 
 mapProd.on("moveend", () => saveViewport(mapProd));
 
