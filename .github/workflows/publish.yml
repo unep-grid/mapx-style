@@ -25,7 +25,7 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: "@unep-grid"
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       - run: npm install --no-save @rollup/rollup-linux-x64-gnu
 
       - name: Build library
