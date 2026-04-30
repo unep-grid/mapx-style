@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.2](https://github.com/unep-grid/mapx-style/compare/v0.4.1...v0.4.2) (2026-04-30)
+
+### Bug Fixes
+
+* legacy peers deps for varlock module ([daab0c1](https://github.com/unep-grid/mapx-style/commit/daab0c1d3cd3213e5fc5926d1719334025559957))
+
 ## [0.4.1](https://github.com/unep-grid/mapx-style/compare/v0.4.0...v0.4.1) (2026-04-30)
 
 ### Bug Fixes
