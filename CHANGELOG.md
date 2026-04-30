@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.1](https://github.com/unep-grid/mapx-style/compare/v0.4.0...v0.4.1) (2026-04-30)
+
+### Bug Fixes
+
+* env issue (use varlock) and fonts references ([5284785](https://github.com/unep-grid/mapx-style/commit/52847857469a914d0fab025167c0614446856719))
+* icons size for legends ([9792950](https://github.com/unep-grid/mapx-style/commit/9792950c5559851964a18a43b8800572a055aacc))
+* missing s3 base for sprites ([2a40624](https://github.com/unep-grid/mapx-style/commit/2a40624ec51595f65bed3e6ab29cb0d73ef39d8f))
+* visual tests ([a20b657](https://github.com/unep-grid/mapx-style/commit/a20b657f2feb5a4c5581c020a930c11619ae915a))
+
 ## [0.4.0](https://github.com/unep-grid/mapx-style/compare/v0.3.0...v0.4.0) (2026-04-20)
 
 ### Features
