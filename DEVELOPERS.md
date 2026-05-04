@@ -218,6 +218,15 @@ To update the reference screenshot after an intentional style change, run `npm r
 
 ---
 
+## Load testing (optional, not CI)
+
+`npm run test:load` runs an `ab` throughput check against the S3 proxy — useful when
+debugging proxy performance or after a proxy configuration change. Not part of the normal
+test suite. Requires a running local dev proxy (see `.env.development.local`). Pass an
+override URL as the first argument: `bash tests/load/ab.sh https://api.mapx.org/s3`.
+
+---
+
 ## Adding a new data layer
 
 1. If the file is large, upload it: `uv run scripts/s3/upload.py <file> --type pmtiles --public`
