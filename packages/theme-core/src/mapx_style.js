@@ -66,6 +66,19 @@ export class MapxStyle {
     "places_locality_minor",
   ];
 
+  static BOUNDARY_UN_LAYERS = [
+    "boundary_un_1",
+    "boundary_un_2",
+    "boundary_un_3",
+    "boundary_un_4",
+    "boundary_un_8",
+    "boundary_un_9",
+    "boundary_un_6",
+  ];
+  static BOUNDARY_WMO_LAYERS = ["wmo_borders_line", "wmo_borders_poly"];
+  static BOUNDARY_OSM_LAYERS = ["boundary_osm"];
+  static BOUNDARY_TYPES = ["un", "wmo", "osm", "none"];
+
   // All layers with translatable name labels (excludes contour-labels which shows elevation).
   static LABEL_LAYERS = [
     "road-label",
@@ -101,6 +114,7 @@ export class MapxStyle {
     this._satelliteEnabled = false;
     this._maskEnabled = true; // on by default
     this._maskUrl = `${s3Base}/masks/un_2020_countries_mask__v0.geojson`;
+    this._boundaryType = "un";
     this._maskGeojson = null; // loaded lazily on first use
     this._maskOriginalFilters = {};
 
@@ -165,6 +179,7 @@ export class MapxStyle {
     const apply = () => {
       this._applyLayers(map, this._theme);
       this._applyLanguage(map);
+      this.setBoundaryType(this._boundaryType);
       if (this._maskEnabled) {
         this._loadAndApplyMask(map);
       }
@@ -327,6 +342,36 @@ export class MapxStyle {
   /** Toggle satellite imagery on/off. */
   toggleSatellite() {
     this._satelliteEnabled ? this.disableSatellite() : this.enableSatellite();
+  }
+
+  // ── Boundary type ────────────────────────────────────────────────────────────
+
+  /**
+   * Switch between boundary datasets. Only one set of boundary layers is
+   * visible at a time. UN boundaries are the default.
+   * @param {"un"|"wmo"|"osm"|"none"} type
+   */
+  setBoundaryType(type = "un") {
+    const show = {
+      un: MapxStyle.BOUNDARY_UN_LAYERS,
+      wmo: MapxStyle.BOUNDARY_WMO_LAYERS,
+      osm: MapxStyle.BOUNDARY_OSM_LAYERS,
+      none: [],
+    }[type] ?? MapxStyle.BOUNDARY_UN_LAYERS;
+
+    const all = [
+      ...MapxStyle.BOUNDARY_UN_LAYERS,
+      ...MapxStyle.BOUNDARY_WMO_LAYERS,
+      ...MapxStyle.BOUNDARY_OSM_LAYERS,
+    ];
+    this._setLayersVisibility(all, "none");
+    this._setLayersVisibility(show, "visible");
+    this._boundaryType = type;
+  }
+
+  /** Returns the current boundary type ("un", "wmo", "osm", or "none"). */
+  getBoundaryType() {
+    return this._boundaryType;
   }
 
   // ── Places mask (within expression) ─────────────────────────────────────────

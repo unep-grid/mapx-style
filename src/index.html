@@ -66,6 +66,7 @@
         accent-color: var(--mx_ui_input_accent);
       }
 
+      #boundary-type-picker,
       #theme-picker,
       #language-picker {
         background: var(--mx_ui_background_contrast);
@@ -192,6 +193,14 @@
         <input type="checkbox" id="toggle-place-mask" checked />
         Place name mask
       </label>
+
+      <div class="section-title">Boundary type</div>
+      <select id="boundary-type-picker">
+        <option value="un" selected>UN Official</option>
+        <option value="wmo">WMO Official</option>
+        <option value="osm">OSM</option>
+        <option value="none">None</option>
+      </select>
 
       <div class="section-title">Terrain</div>
       <label class="layer-toggle">

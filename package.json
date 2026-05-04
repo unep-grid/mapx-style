@@ -15,6 +15,7 @@
     "build:patterns": "node scripts/patterns/index.cjs",
     "build:sprites": "varlock run -- uv run scripts/build_sprites.py",
     "build:style": "varlock run -- uv run scripts/build_style.py",
+    "build:borders:wmo": "varlock run -- uv run scripts/build_borders_wmo.py",
     "validate": "gl-style-validate packages/theme-core/src/style/style.json",
     "release": "release-it",
     "test": "vitest run",

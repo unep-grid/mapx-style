@@ -38,6 +38,10 @@
       "tiles": ["__contours_tiles_placeholder__"],
       "maxzoom": 15
     },
+    "mapx_wmo_borders": {
+      "type": "vector",
+      "url": "pmtiles://__S3_BASE__/layers/wmo_borders__v0.pmtiles"
+    },
     "satellite": {
       "type": "raster",
       "tiles": [
@@ -269,6 +273,39 @@
           22,
           1
         ]
+      }
+    },
+    {
+      "id": "wmo_borders_poly",
+      "type": "fill",
+      "source": "mapx_wmo_borders",
+      "source-layer": "wmo_borders_poly",
+      "layout": { "visibility": "none" },
+      "paint": { "fill-color": "rgba(0,0,0,0)", "fill-opacity": 0 }
+    },
+    {
+      "id": "wmo_borders_line",
+      "type": "line",
+      "source": "mapx_wmo_borders",
+      "source-layer": "wmo_borders_poly",
+      "layout": { "visibility": "none", "line-join": "bevel" },
+      "paint": {
+        "line-color": "rgba(38,38,38,0.3)",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 22, 2],
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.9, 6, 1]
+      }
+    },
+    {
+      "id": "boundary_osm",
+      "type": "line",
+      "source": "protomaps_basemap",
+      "source-layer": "boundaries",
+      "filter": ["==", ["get", "kind"], "country"],
+      "layout": { "visibility": "none", "line-join": "bevel" },
+      "paint": {
+        "line-color": "rgba(38,38,38,0.3)",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 22, 2],
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.9, 6, 1]
       }
     },
     {

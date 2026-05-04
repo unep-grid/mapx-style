@@ -234,6 +234,19 @@
       "size_bytes": 22078,
       "description": "UN 2020 country boundaries mask (MultiPolygon). Used with MapLibre within() expression to suppress OSM place labels over territories of UN member states that requested label suppression.",
       "source": ""
+    },
+    {
+      "id": "wmo_borders__v0_eee80e",
+      "name": "WMO Borders PMTiles v0",
+      "type": "pmtiles",
+      "storage": "s3",
+      "s3_key": "layers/wmo_borders__v0.pmtiles",
+      "public_url": "https://mapx.unepgrid.s3.unige.ch/mapx/layers/wmo_borders__v0.pmtiles",
+      "etag": "b7555743af823fd95636e88d5c6578a6a360ce2034f1179811968a0da1f086c5-4",
+      "last_modified": "2026-04-30T11:28:40+00:00",
+      "size_bytes": 25272599,
+      "description": "WMO member-state boundaries — polygons",
+      "source": ""
     }
   ]
 }

@@ -30,6 +30,10 @@
       "tiles": ["__contours_tiles_placeholder__"],
       "maxzoom": 15
     },
+    "mapx_wmo_borders": {
+      "type": "vector",
+      "url": "pmtiles://__S3_BASE__/layers/wmo_borders__v0.pmtiles"
+    },
     "satellite": {
       "type": "raster",
       "tiles": ["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg"],
@@ -149,6 +153,38 @@
         "text-halo-color": "#000000",
         "text-halo-width": 1
       }
+    },
+
+    {
+      "_comment": "── WMO BORDERS — cyan wireframe ────────────────────────────────────",
+
+      "id": "debug_wmo_poly",
+      "type": "fill",
+      "source": "mapx_wmo_borders",
+      "source-layer": "wmo_borders_poly",
+      "paint": {
+        "fill-color": "rgba(0,255,200,0.04)",
+        "fill-outline-color": "#00ffc8"
+      }
+    },
+    {
+      "id": "debug_wmo_line",
+      "type": "line",
+      "source": "mapx_wmo_borders",
+      "source-layer": "wmo_borders_poly",
+      "layout": { "line-join": "round" },
+      "paint": { "line-color": "#00ffc8", "line-width": 1.5, "line-opacity": 1 }
+    },
+
+    {
+      "_comment": "── OSM COUNTRY BOUNDARIES — lime green ─────────────────────────────",
+      "id": "debug_osm_boundary",
+      "type": "line",
+      "source": "protomaps_basemap",
+      "source-layer": "boundaries",
+      "filter": ["==", ["get", "kind"], "country"],
+      "layout": { "line-join": "round" },
+      "paint": { "line-color": "#00ff88", "line-width": 1.5, "line-opacity": 1 }
     },
 
     {

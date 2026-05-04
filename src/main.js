@@ -116,6 +116,10 @@ document.getElementById("toggle-place-mask").addEventListener("change", (e) => {
   e.target.checked ? mxStyle.enableMask() : mxStyle.disableMask();
 });
 
+document.getElementById("boundary-type-picker").addEventListener("change", (e) => {
+  mxStyle.setBoundaryType(e.target.value);
+});
+
 document.getElementById("toggle-hillshade").addEventListener("change", (e) => {
   e.target.checked ? mxStyle.enableHillshade() : mxStyle.disableHillshade();
 });
