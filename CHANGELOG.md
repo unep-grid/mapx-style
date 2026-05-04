@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.0](https://github.com/unep-grid/mapx-style/compare/v0.4.3...v0.5.0) (2026-05-04)
+
+### Features
+
+* wmo borders + tests + setting to chose borders type ([9e7dba0](https://github.com/unep-grid/mapx-style/commit/9e7dba0d76ee3b9be270224127a2200336be2f8c))
+
+### Bug Fixes
+
+* missing env var to s3 asset ([b965608](https://github.com/unep-grid/mapx-style/commit/b965608b23720442f51bfde4f25ab36f6006bc45))
+
 ## [0.4.3](https://github.com/unep-grid/mapx-style/compare/v0.4.2...v0.4.3) (2026-04-30)
 
 ### Bug Fixes
