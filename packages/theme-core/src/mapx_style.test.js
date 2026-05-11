@@ -220,6 +220,16 @@ describe("MapxStyle sprite index (mocked fetch)", () => {
     expect(icons).toEqual(FAKE_INDEX.icons);
   });
 
+  it("getSprites filters by group", async () => {
+    const sprites = await mx.getSprites({ groups: ["maki"] });
+    expect(sprites).toEqual([FAKE_INDEX.icons[0]]);
+  });
+
+  it("getSprites returns all icons without groups", async () => {
+    const sprites = await mx.getSprites();
+    expect(sprites).toEqual(FAKE_INDEX.icons);
+  });
+
   it("getIcon finds an icon by id", async () => {
     const icon = await mx.getIcon("maki-airport-11");
     expect(icon).toEqual(FAKE_INDEX.icons[0]);

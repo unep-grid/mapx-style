@@ -582,6 +582,20 @@ export class MapxStyle {
   }
 
   /**
+   * Returns sprite entries from the sprite index, optionally filtered by group.
+   * @param {{ groups?: string[] }} [opt]
+   * @returns {Promise<Array>}
+   */
+  async getSprites(opt = {}) {
+    const { groups } = opt;
+    const icons = await this.getIcons();
+    if (!Array.isArray(groups) || groups.length === 0) {
+      return icons;
+    }
+    return icons.filter((icon) => groups.includes(icon.group));
+  }
+
+  /**
    * Returns a single icon entry by id, or undefined if not found.
    * @param {string} id
    * @returns {Promise<object|undefined>}
