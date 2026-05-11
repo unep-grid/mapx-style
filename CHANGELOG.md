@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/unep-grid/mapx-style/compare/v0.5.0...v0.6.0) (2026-05-11)
+
+### Features
+
+* **svg:** upload svg as individual assets for external use, e.g. geosrver ([9ddd21b](https://github.com/unep-grid/mapx-style/commit/9ddd21b90b56a85d1ddde828646d15d135136f11))
+* **symbolpicker:** added symbol picker module ([1b5a01f](https://github.com/unep-grid/mapx-style/commit/1b5a01f516d58581acfba361f5021db9d6c864d8))
+
 ## [0.5.0](https://github.com/unep-grid/mapx-style/compare/v0.4.3...v0.5.0) (2026-05-04)
 
 ### Features
