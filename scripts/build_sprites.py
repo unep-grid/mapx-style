@@ -33,6 +33,7 @@ S3 output (versioned):
   style/v{N}/sprites/sprite_patterns@2x.json
   style/v{N}/sprites/sprite_patterns@2x.png
   style/v{N}/sprites/sprite-index.json
+  style/v{N}/svg/<id>.svg
 
 sprite-index.json — combined catalog for icon picker:
   {
@@ -92,6 +93,8 @@ _SPRITE_FILES = [
     ("sprite-index.json",         "application/json"),
 ]
 
+_SVG_CONTENT_TYPE = "image/svg+xml"
+
 sys.path.insert(0, str(REPO_ROOT / "scripts/s3"))
 
 S3_BASE = os.environ.get("S3_PUBLIC_BASE_URL", "").rstrip("/")
@@ -114,6 +117,11 @@ def _read_svg_inline(icon_id: str) -> str | None:
     return None
 
 
+def _svg_url(icon_id: str, version: int) -> str:
+    """Return the versioned public/proxy SVG URL written into sprite-index.json."""
+    return f"{S3_BASE}/style/v{version}/svg/{icon_id}.svg"
+
+
 def _icon_meta(name: str) -> tuple[str, str]:
     """Return (group, sprite_id) for an icon name."""
     if name.startswith("maki-"):
@@ -129,7 +137,7 @@ def _generate_index(version: int) -> Path:
     """Build combined sprite-index.json from both sprite JSON files."""
     icons = []
 
-    # SDF icons (maki + geology)
+    # SDF icons
     sdf_data = json.loads((OUTPUT_DIR / "sprite.json").read_text())
     for name, entry in sorted(sdf_data.items()):
         group, sprite_id = _icon_meta(name)
@@ -143,6 +151,7 @@ def _generate_index(version: int) -> Path:
             "h":      entry["height"],
             "sdf":    True,
             "svg":    _read_svg_inline(name),
+            "url":    _svg_url(name, version),
         })
 
     # Non-SDF patterns
@@ -158,6 +167,7 @@ def _generate_index(version: int) -> Path:
             "w":      entry["width"],
             "h":      entry["height"],
             "sdf":    False,
+            "url":    _svg_url(name, version),
         })
 
     index = {
@@ -187,6 +197,23 @@ def _upload_version(version: int, console) -> None:
         s3.upload_file(str(local), bucket, s3_key, ExtraArgs={"ContentType": content_type})
         set_public_acl(s3_key)
     console.print(f"[green]Uploaded sprites to style/v{version}/sprites/[/green]")
+
+    svg_count = 0
+    for source_dir in SVG_DIRS_SDF + SVG_DIRS_PATTERNS:
+        if not source_dir.exists():
+            continue
+        for local in sorted(source_dir.glob("*.svg")):
+            s3_key = f"style/v{version}/svg/{local.name}"
+            console.print(f"  [cyan]{local.name}[/cyan] → [cyan]{s3_key}[/cyan]")
+            s3.upload_file(
+                str(local),
+                bucket,
+                s3_key,
+                ExtraArgs={"ContentType": _SVG_CONTENT_TYPE},
+            )
+            set_public_acl(s3_key)
+            svg_count += 1
+    console.print(f"[green]Uploaded {svg_count} SVGs to style/v{version}/svg/[/green]")
 
 
 def _spreet(cmd: list[str], console) -> None:

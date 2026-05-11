@@ -24,4 +24,5 @@ export {
   resolveGlyphsUrl,
   resolveSpriteIndexUrl,
   resolveSpriteUrls,
+  resolveSvgUrl,
 } from "./theme_assets.js";
