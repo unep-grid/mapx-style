@@ -22,6 +22,7 @@ import { S3_BASE } from "./config.js";
 const DEM_URL = "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp";
 const CSS_EL_ID = "mapx-theme-css";
 const SVG_SIZE_RE = /\s(?:width|height)=["']?([0-9.]+)(?:px)?["']?/gi;
+const MAPTERHORN_TILE_RE = /https:\/\/tiles\.mapterhorn\.com\/\d+\/\d+\/\d+\.webp/;
 
 function getSvgSize(svg) {
   if (!svg) return null;
@@ -33,6 +34,15 @@ function getSvgSize(svg) {
   return Number.isFinite(size.w) && Number.isFinite(size.h) ? size : null;
 }
 
+function isExpectedMapterhorn404(e) {
+  const status = e?.status || e?.error?.status;
+  const message = e?.message || e?.error?.message || "";
+  return (
+    (status === 404 || /\b404\b/.test(message)) &&
+    MAPTERHORN_TILE_RE.test(message)
+  );
+}
+
 /**
  * MapxStyle — single entry point for the MapX style system.
  *
@@ -42,7 +52,7 @@ function getSvgSize(svg) {
  * @example
  * const mxStyle = new MapxStyle({ maplibregl, mlcontour, baseUrl: "https://api.mapx.org/s3" });
  * const map = new maplibregl.Map({ style: mxStyle.getStyle() });
- * mxStyle.attachMap(map);
+ * await mxStyle.attachMap(map);
  * mxStyle.destroy(); // on teardown
  *
  * @param {object} [opt]
@@ -127,6 +137,7 @@ export class MapxStyle {
     // ── Bound handlers
     this._onPitchEnd = this._handlePitchEnd.bind(this);
     this._onMapIdle = this._handleMapIdle.bind(this);
+    this._onMapError = this._handleMapError.bind(this);
 
     // ── RTL text plugin — once per page (Arabic, Hebrew, etc.)
     if (maplibregl && !MapxStyle._rtlRegistered) {
@@ -169,10 +180,11 @@ export class MapxStyle {
 
   // ── Map lifecycle ────────────────────────────────────────────────────────────
 
-  /** Link a map instance. Applies the current theme immediately if one is set. */
-  attachMap(map) {
+  /** Link a map instance. Applies the current theme after style load. */
+  async attachMap(map) {
     this._map = map;
     this._scaler = new MapScaler(map);
+    map.on("error", this._onMapError);
     map.on("pitchend", this._onPitchEnd);
     map.on("idle", this._onMapIdle);
     this._markDirty();
@@ -187,13 +199,15 @@ export class MapxStyle {
     if (map.isStyleLoaded()) {
       apply();
     } else {
-      map.once("load", apply);
+      await new Promise((resolve) => map.once("load", resolve));
+      apply();
     }
   }
 
   /** Unlink the attached map. Resolves any pending whenReady(). */
   detachMap() {
     if (this._map) {
+      this._map.off("error", this._onMapError);
       this._map.off("pitchend", this._onPitchEnd);
       this._map.off("idle", this._onMapIdle);
     }
@@ -746,6 +760,19 @@ export class MapxStyle {
       this._readyPromise = new Promise((resolve) => {
         this._readyResolve = resolve;
       });
+    }
+  }
+
+  _handleMapError(e) {
+    if (!isExpectedMapterhorn404(e)) {
+      return;
+    }
+    e._mapxStyleIgnore = true;
+    if (e.error && typeof e.error === "object") {
+      e.error._mapxStyleIgnore = true;
+    }
+    if (typeof e.preventDefault === "function") {
+      e.preventDefault();
     }
   }
 

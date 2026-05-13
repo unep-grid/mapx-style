@@ -142,6 +142,101 @@ describe("MapxStyle language application", () => {
     );
   });
 
+  it("waits for map load before applying stored language", async () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    let loadHandler;
+    const map = {
+      isStyleLoaded: vi.fn(() => false),
+      on: vi.fn(),
+      once: vi.fn((event, handler) => {
+        if (event === "load") loadHandler = handler;
+      }),
+      getLayer: vi.fn((id) => id === "road-label"),
+      setLayoutProperty: vi.fn(),
+    };
+
+    mx.setLanguage("fr");
+    const attached = mx.attachMap(map);
+
+    expect(map.setLayoutProperty).not.toHaveBeenCalled();
+
+    loadHandler();
+    await attached;
+
+    expect(map.setLayoutProperty).toHaveBeenCalledWith(
+      "road-label",
+      "text-field",
+      [
+        "coalesce",
+        ["get", "name:fr"],
+        ["get", "name_fr"],
+        ["get", "name:en"],
+        ["get", "name_en"],
+        ["get", "name"],
+      ],
+    );
+  });
+
+  it("marks expected Mapterhorn terrain 404s as ignored", async () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    let errorHandler;
+    const map = {
+      isStyleLoaded: vi.fn(() => true),
+      on: vi.fn((event, handler) => {
+        if (event === "error") errorHandler = handler;
+      }),
+      once: vi.fn(),
+      getLayer: vi.fn(() => null),
+      setLayoutProperty: vi.fn(),
+      setPaintProperty: vi.fn(),
+    };
+    const event = {
+      error: {
+        message: "Bad response: 404 for https://tiles.mapterhorn.com/6/30/16.webp",
+      },
+      preventDefault: vi.fn(),
+    };
+
+    await mx.attachMap(map);
+    errorHandler(event);
+
+    expect(event._mapxStyleIgnore).toBe(true);
+    expect(event.error._mapxStyleIgnore).toBe(true);
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("keeps unrelated map errors visible", async () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    let errorHandler;
+    const map = {
+      isStyleLoaded: vi.fn(() => true),
+      on: vi.fn((event, handler) => {
+        if (event === "error") errorHandler = handler;
+      }),
+      once: vi.fn(),
+      getLayer: vi.fn(() => null),
+      setLayoutProperty: vi.fn(),
+      setPaintProperty: vi.fn(),
+    };
+    const event = {
+      error: {
+        status: 404,
+        message: "Bad response: 404 for https://example.com/6/30/16.webp",
+      },
+      preventDefault: vi.fn(),
+    };
+
+    await mx.attachMap(map);
+    errorHandler(event);
+
+    expect(event._mapxStyleIgnore).toBeUndefined();
+    expect(event.error._mapxStyleIgnore).toBeUndefined();
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
   it("applies language immediately when a map is already attached", () => {
     const mx = new MapxStyle();
     mx._maskEnabled = false;
@@ -350,7 +445,7 @@ describe("MapxStyle getImageDataUrl (mock map, null-guard paths)", () => {
 });
 
 describe("MapxStyle attachMap without theme", () => {
-  it("does not throw when no theme was set", () => {
+  it("resolves when no theme was set", async () => {
     const mx = new MapxStyle();
     mx._maskEnabled = false;
 
@@ -364,6 +459,6 @@ describe("MapxStyle attachMap without theme", () => {
       setPaintProperty: vi.fn(),
     };
 
-    expect(() => mx.attachMap(map)).not.toThrow();
+    await expect(mx.attachMap(map)).resolves.toBeUndefined();
   });
 });
