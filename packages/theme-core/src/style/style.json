@@ -381,16 +381,34 @@
       "type": "fill",
       "source": "mapx_bathymetry",
       "source-layer": "bathymetry",
+      "filter": ["all", ["==", ["geometry-type"], "Polygon"]],
       "paint": {
-        "fill-outline-color": "rgba(0,0,0,0)",
-        "fill-color": [
+        "fill-antialias": true,
+        "fill-opacity": [
           "interpolate",
           ["linear"],
-          ["get", "mindepth"],
-          -9000,
-          "rgba(11,16,19,0.5)",
+          ["zoom"],
           0,
-          "rgba(109,156,190,0.5)"
+          1,
+          5,
+          0.17,
+          7,
+          0.1,
+          8,
+          0.09,
+          15,
+          0.09,
+          22,
+          0
+        ],
+        "fill-color": [
+          "interpolate",
+          ["cubic-bezier", 0, 0.5, 1, 0.5],
+          ["get", "depth"],
+          200,
+          "rgba(100,100,100,0)",
+          9000,
+          "rgba(20,20,20,0)"
         ]
       }
     },
