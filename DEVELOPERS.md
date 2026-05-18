@@ -4,10 +4,10 @@
 
 This repository manages all static style assets for MapX:
 
-- **Small files** (SVGs, sprite sheets, style JSON, font metadata) — committed to git, served via GitHub Pages CDN
-- **Large files** (PBF glyphs, PMTiles borders, COG rasters) — stored on S3, referenced in the catalog
+- **Source assets** (SVGs, style JSON, font metadata) — committed to git
+- **Generated and large assets** (sprite sheets, PBF glyphs, PMTiles borders, COG rasters) — stored on S3, referenced in the catalog
 
-The demo app (`src/`) is built with Vite + MapLibre GL JS. On every push to `main`, CI builds it, takes a screenshot, runs regression checks, and deploys to GitHub Pages.
+The demo app (`src/`) is built with Vite + MapLibre GL JS. On every push to `main`, CI builds it and deploys the generated root `dist/` to GitHub Pages.
 
 ---
 
@@ -16,10 +16,11 @@ The demo app (`src/`) is built with Vite + MapLibre GL JS. On every push to `mai
 ```
 mapx-style/
 ├── src/                        Vite demo app (MapLibre + layer inspector)
-├── public/                     Static assets served via GitHub Pages
+├── public/                     Static files bundled into the demo app
 │   └── fonts/                  Font family catalog JSON
 ├── packages/theme-core/        MapxStyle library (npm: @unep-grid/mapx-style)
 │   ├── src/style/              MapLibre base style JSON (source of truth)
+│   ├── dist/                   Library build output — gitignored, built before npm publish
 │   └── assets/sprites/
 │       ├── maki/               SVG sources — Maki icon set
 │       ├── geology/            SVG sources — geology icons
@@ -33,10 +34,10 @@ mapx-style/
 │   ├── s3/                     S3 upload, catalog, ACL management
 │   └── ...                     Sprite building, glyph generation, style updates
 ├── .env.schema                 Env definition (varlock) — credentials via exec(pass://...)
-├── dist/                       Vite build output — gitignored, deployed to gh-pages by CI
+├── dist/                       Demo app build output — gitignored, deployed to GitHub Pages by CI
 ├── pyproject.toml              Python environment (uv) — shared by all scripts
 ├── package.json                Node environment (npm/vite)
-└── .github/workflows/ci.yml   Build + screenshot + regression + deploy
+└── .github/workflows/          Demo deploy and package publish workflows
 ```
 
 ---
@@ -62,6 +63,15 @@ npm run dev       # dev server at http://localhost:5173
 npm run build     # output to dist/
 npm run preview   # preview dist/ locally
 ```
+
+### JavaScript (theme package)
+
+```bash
+cd packages/theme-core
+npm run build:lib  # output to packages/theme-core/dist/ (gitignored)
+```
+
+The package publish workflow builds this directory before `npm publish`; do not commit generated package bundles.
 
 ---
 
@@ -207,14 +217,21 @@ Restricted datasets are referenced in the catalog with `"storage": "remote"` and
 
 ## CI / CD
 
-`.github/workflows/ci.yml` runs on push to `main`:
+`.github/workflows/deploy.yml` runs on push to `main`:
 
-1. `npm install && npm run build` — Vite build to `dist/`
-2. Screenshot the MapLibre demo via headless browser
-3. Compare screenshot against reference image for regression
-4. Deploy `dist/` to `gh-pages` branch → GitHub Pages
+1. `npm ci`
+2. `npm run build` — Vite demo build to root `dist/`
+3. Upload `dist/` as the GitHub Pages artifact
+4. Deploy the artifact to GitHub Pages
 
 To update the reference screenshot after an intentional style change, run `npm run test:visual:update` locally and commit the new reference.
+
+`.github/workflows/publish.yml` runs on version tags and manual dispatch:
+
+1. `npm ci`
+2. `npm run build:lib` in `packages/theme-core`
+3. `npm publish` to GitHub Packages
+4. Create the GitHub release
 
 ---
 
