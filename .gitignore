@@ -1,5 +1,6 @@
 # Build output
 dist/
+tmp/
 
 # Test output
 coverage/
@@ -35,6 +36,10 @@ env.d.ts
 *.geotiff
 *.mbtiles
 *.pmtiles
+
+# Generated S3 inventory snapshots
+data/catalog.json
+data/s3_catalog*.json
 
 # Rust build output
 target/

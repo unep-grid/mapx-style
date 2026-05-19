@@ -25,7 +25,6 @@ Layer name ↔ GeoJSON mapping (edit LAYERS below when source files or style cha
 
 These names must stay in sync with:
   - public/style/style.json  (source-layer values for the mapx_borders source)
-  - legacy/mapx/app/src/data/style/style_mapx.json  (live mapx app, Phase 1 compatibility)
 """
 
 import argparse
@@ -98,6 +97,7 @@ def build(out_path: Path, console) -> None:
 def main() -> None:
     from rich.console import Console
     from upload import upload_file
+    from s3_utils import public_url
 
     console = Console()
 
@@ -123,18 +123,11 @@ def main() -> None:
         local_path=out_path,
         s3_key=s3_key,
         make_public=True,
-        resource_type="pmtiles",
-        name=f"MapX Borders PMTiles v{args.version}",
-        description="UN 2020 country boundaries — polygons, lines, centroids",
     )
 
     from range_test import test_range
-    import os
-    endpoint = os.environ.get("S3_ENDPOINT", "").rstrip("/")
-    bucket = os.environ.get("S3_BUCKET", "mapx")
-    public_url = f"{endpoint}/{bucket}/{s3_key}"
     console.print(f"\nVerifying range access…")
-    ok = test_range(public_url)
+    ok = test_range(public_url(s3_key))
     if not ok:
         console.print("[yellow]Warning: range test failed — check HCP ACL settings.[/yellow]")
 

@@ -29,7 +29,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/s3"))
 
 
 def main() -> None:
-    from catalog import read_style_version
+    from style_version import read_style_version
     from rich.console import Console
     from s3_client import make_client
     from set_acl import set_public_acl

@@ -27,11 +27,10 @@ tippecanoe \
   -L "un_2020_borders_line:data/un_countries/un_2020_countries_lines.geojson" \
   -L "un_2020_labels_countries_point:data/un_countries/un_2020_countries_points.geojson"
 
-uv run scripts/s3/upload.py /tmp/mapx_borders__v0.pmtiles layers/mapx_borders__v0.pmtiles --type pmtiles --public
+uv run scripts/s3/upload.py /tmp/mapx_borders__v0.pmtiles layers/mapx_borders__v0.pmtiles --public
 uv run scripts/s3/range_test.py "${S3_PUBLIC_BASE_URL}/layers/mapx_borders__v0.pmtiles"
 rm /tmp/mapx_borders__v0.pmtiles
 ```
 
-Layer names match both `public/style/style.json` and `legacy/mapx/app/src/data/style/style_mapx.json`.
-
-See `data/catalog.json` for the full source-to-layer mapping.
+Layer names match the `mapx_borders` source in `packages/theme-core/src/style/style.json`.
+Use `uv run scripts/s3/get_catalog.py --prefix layers/` to inspect uploaded PMTiles.

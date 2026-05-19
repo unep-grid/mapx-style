@@ -4,11 +4,11 @@ delete.py — Delete S3 objects by exact key or by prefix (bulk).
 Usage:
   uv run scripts/s3/delete.py <s3_key>             # delete a single object
   uv run scripts/s3/delete.py <prefix> --prefix    # delete all under prefix
-  uv run scripts/s3/delete.py glyphs/Roboto --prefix --yes  # skip confirmation
+  uv run scripts/s3/delete.py style/v1/glyphs/Roboto --prefix --yes  # skip confirmation
 
 Examples:
   uv run scripts/s3/delete.py layers/old_borders__v0.pmtiles
-  uv run scripts/s3/delete.py style/prod/assets/glyphs/Noto_Sans_Arabic --prefix
+  uv run scripts/s3/delete.py style/v1/glyphs/Noto_Sans_Arabic --prefix
 """
 
 import argparse
@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from rich.console import Console
 
 from s3_client import make_client
+from s3_utils import list_s3_objects
 
 console = Console()
 
@@ -33,11 +34,7 @@ def delete_object(s3_key: str) -> None:
 def delete_prefix(prefix: str, yes: bool = False) -> None:
     s3, bucket = make_client()
 
-    paginator = s3.get_paginator("list_objects_v2")
-    keys: list[str] = []
-    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
-        for obj in page.get("Contents", []):
-            keys.append(obj["Key"])
+    keys = [obj["Key"] for obj in list_s3_objects(prefix)]
 
     if not keys:
         console.print(f"[yellow]No objects found under prefix:[/yellow] {prefix}")

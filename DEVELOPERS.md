@@ -5,7 +5,7 @@
 This repository manages all static style assets for MapX:
 
 - **Source assets** (SVGs, style JSON, font metadata) — committed to git
-- **Generated and large assets** (sprite sheets, PBF glyphs, PMTiles borders, COG rasters) — stored on S3, referenced in the catalog
+- **Generated and large assets** (style JSON, sprite sheets, PBF glyphs, PMTiles borders, COG rasters) — stored on S3 and listed live from the bucket
 
 The demo app (`src/`) is built with Vite + MapLibre GL JS. On every push to `main`, CI builds it and deploys the generated root `dist/` to GitHub Pages.
 
@@ -27,11 +27,10 @@ mapx-style/
 │       ├── patterns/           SVG sources — fill patterns (gitignored, generate with npm run build:patterns)
 │       └── generated/          Built sprite sheets (gitignored, output of build_sprites.py)
 ├── data/
-│   ├── catalog.json            Single source of truth for all S3 assets
 │   ├── fonts/                  Font manifests and TTF sources (gitignored)
 │   └── un_countries/           UN border docs (data not distributed)
 ├── scripts/                    Operational scripts
-│   ├── s3/                     S3 upload, catalog, ACL management
+│   ├── s3/                     S3 upload, inventory, ACL management
 │   └── ...                     Sprite building, glyph generation, style updates
 ├── .env.schema                 Env definition (varlock) — credentials via exec(pass://...)
 ├── dist/                       Demo app build output — gitignored, deployed to GitHub Pages by CI
@@ -48,10 +47,10 @@ mapx-style/
 
 ```bash
 uv sync                         # install deps into .venv/
-varlock run -- uv run scripts/s3/upload.py ...  # run any script that needs env vars
+npx varlock run -- uv run scripts/s3/upload.py ...  # run any script that needs env vars
 ```
 
-Credentials are defined in `.env.schema` and fetched automatically via `exec(pass://...)` when you prefix commands with `varlock run --`. No `.env` file required for credentials.
+Credentials are defined in `.env.schema` and fetched automatically via `exec(pass://...)` when you prefix commands with `npx varlock run --`. No `.env` file required for credentials.
 
 If you need to override `VITE_MAPX_ASSET_BASE_URL` locally, create a `.env` file at the repo root with just that variable.
 
@@ -85,29 +84,37 @@ Large assets are stored on a **Hitachi Content Platform (HCP)** S3-compatible st
 | Bucket | `S3_BUCKET` in `.env.schema` (default: `mapx`) |
 | Public URL base | `S3_PUBLIC_BASE_URL` in `.env.schema` |
 
-`data/catalog.json` is the single source of truth for all uploaded assets and style
-data provenance. Every upload via `upload.py` upserts an entry into this file.
+S3 is the catalog. Use `get_catalog.py` to list the bucket live before uploading,
+instead of maintaining a committed snapshot that can drift from the real bucket.
+
+Current bucket namespaces:
+
+| Namespace | Produced by | Notes |
+|---|---|---|
+| `style/v{N}/style.json` and `style/v{N}/style_debug.json` | `build_style.py` | Rendered style JSON with S3 base URL injected |
+| `style/v{N}/glyphs/.../*.pbf` | `build_glyphs.py` | MapLibre glyph ranges |
+| `style/v{N}/sprites/...` and `style/v{N}/svg/...` | `build_sprites.py` | Sprite sheets, metadata, and uploaded SVG sources |
+| `layers/{name}__v{N}.pmtiles` | Basemap, borders, WMO borders, bathymetry builders | Versioned PMTiles layers |
+| `masks/{name}__v{N}.geojson` | `build_mask.py` | GeoJSON masks |
+| `maps/` | Not used by current style | May appear in inventory; avoid for new uploads |
 
 ### S3 scripts
 
-Prefix all S3-writing commands with `varlock run --` to resolve credentials from `.env.schema`.
+Prefix all S3-writing commands with `npx varlock run --` to resolve credentials from `.env.schema`.
 
 | Command | Purpose |
 |---|---|
-| `varlock run -- uv run scripts/s3/upload.py <file> [key] [--public]` | Upload local file + ACL + catalog |
-| `varlock run -- uv run scripts/s3/stream_upload.py <url> [key] [--public] [--chunk-mb N]` | Stream remote URL → S3 (chunked, resumable) |
+| `npx varlock run -- uv run scripts/s3/get_catalog.py [--prefix <p>] [--limit N\|--all] [--format table\|json]` | Generate live S3 inventory summary; JSON returns all rows |
+| `npx varlock run -- uv run scripts/s3/upload.py <file> [key] [--public]` | Upload local file + ACL |
+| `npx varlock run -- uv run scripts/s3/stream_upload.py <url> [key] [--public] [--chunk-mb N]` | Stream remote URL → S3 (chunked, resumable) |
 | `uv run scripts/s3/stream_upload_progress.py [--watch N]` | Monitor a running stream upload |
-| `varlock run -- uv run scripts/s3/list_objects.py [--prefix <p>]` | List objects in bucket |
-| `varlock run -- uv run scripts/s3/set_acl.py <key> --public` | Make existing object public |
-| `varlock run -- uv run scripts/s3/set_acl.py <key> --verify` | Check if public ACL is set |
-| `varlock run -- uv run scripts/s3/range_test.py <url>` | Verify HTTP 206 (PMTiles/COG) |
-| `varlock run -- uv run scripts/s3/catalog.py list` | Print catalog table |
-| `varlock run -- uv run scripts/s3/catalog.py show <id>` | Print one catalog entry |
-| `varlock run -- uv run scripts/s3/catalog.py remove <id>` | Remove catalog entry |
+| `npx varlock run -- uv run scripts/s3/set_acl.py <key> --public` | Make existing object public |
+| `npx varlock run -- uv run scripts/s3/set_acl.py <key> --verify` | Check if public ACL is set |
+| `npx varlock run -- uv run scripts/s3/range_test.py <url>` | Verify HTTP 206 (PMTiles/COG) |
 
 ### Build pipeline
 
-`npm run` scripts have varlock wired in. For direct `uv run` calls, prefix with `varlock run --`.
+`npm run` scripts have varlock wired in. For direct `uv run` calls, prefix with `npx varlock run --`.
 
 | Command | Purpose |
 |---|---|
@@ -116,8 +123,8 @@ Prefix all S3-writing commands with `varlock run --` to resolve credentials from
 | `npm run build:sprites` | SVGs → sprite sheets → upload to S3 |
 | `npm run build:glyphs` | TTFs → PBF glyphs → upload to S3 (run `convert:fonts` first) |
 | `npm run build:style` | Upload `style.json` + `style_debug.json` → S3 |
-| `varlock run -- uv run scripts/build_borders.py` | UN GeoJSONs → PMTiles → upload to S3 |
-| `varlock run -- uv run scripts/build_basemap.py [--date YYYYMMDD] [--version N]` | Stream Protomaps basemap (~134 GB) → S3, resumable |
+| `npx varlock run -- uv run scripts/build_borders.py` | UN GeoJSONs → PMTiles → upload to S3 |
+| `npx varlock run -- uv run scripts/build_basemap.py [--date YYYYMMDD] [--version N]` | Stream Protomaps basemap (~134 GB) → S3, resumable |
 
 Pass `--no-upload` to any build script to generate locally without touching S3.
 
@@ -154,7 +161,7 @@ every request. For `curl`:
 
 ```bash
 curl -H "Authorization: AWS all_users:" \
-     "${S3_PUBLIC_BASE_URL}/maps/world.pmtiles"
+     "${S3_PUBLIC_BASE_URL}/layers/mapx_borders__v1.pmtiles"
 ```
 
 ### ACL — making objects public
@@ -211,7 +218,7 @@ External consumers of `@unep-grid/mapx-style` should install the peer dependenci
 | UN border PMTiles | UN Geospatial | Cannot be redistributed — see `data/un_countries/README.md` |
 | UN border GeoPackage | UN Geospatial | Source file for PMTiles generation — same restriction |
 
-Restricted datasets are referenced in the catalog with `"storage": "remote"` and documented in `data/un_countries/`. Anyone forking this repo who needs these layers must obtain the source data manually — instructions are in `data/un_countries/README.md`.
+Restricted datasets are documented in `data/un_countries/`. Anyone forking this repo who needs these layers must obtain the source data manually — instructions are in `data/un_countries/README.md`.
 
 ---
 
@@ -246,9 +253,10 @@ override URL as the first argument: `bash tests/load/ab.sh https://api.mapx.org/
 
 ## Adding a new data layer
 
-1. If the file is large, upload it: `uv run scripts/s3/upload.py <file> --type pmtiles --public`
-2. Add the layer to the MapLibre style: `uv run scripts/update_style.py add-layer --source <catalog-id>`
-3. Rebuild and preview: `npm run dev`
-4. Commit `public/style/style.json` and the updated `data/catalog.json`
+1. If the file is large, upload it: `uv run scripts/s3/upload.py <file> layers/<name>__vN.pmtiles --public`
+2. Check the live inventory: `uv run scripts/s3/get_catalog.py --prefix layers/`
+3. Add the layer source/layers to the MapLibre style.
+4. Rebuild and preview: `npm run dev`
+5. Commit source/style changes only; do not commit generated S3 inventory snapshots.
 
 For AI-assisted workflows see [CLAUDE.md](CLAUDE.md).

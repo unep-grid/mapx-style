@@ -244,7 +244,7 @@ def _merge_svgs(source_dirs: list[Path], tmp_path: Path, console) -> int:
 
 
 def main() -> None:
-    from catalog import read_style_version
+    from style_version import read_style_version
     from rich.console import Console
 
     console = Console()

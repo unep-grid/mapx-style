@@ -1,5 +1,5 @@
 /**
- * Pattern SVG generator — ported from legacy/mapx.
+ * Pattern SVG generator for MapX fill styles.
  * Reads config.json (same dir) and writes SVGs to config.out resolved from repo root.
  *
  * Usage (from any directory):

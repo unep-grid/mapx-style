@@ -11,14 +11,13 @@ completed parts. Re-run the same command after a failure to resume automatically
 Falls back to a single streaming request for servers without range support.
 
 Usage:
-  uv run scripts/s3/stream_upload.py <url> [s3_key] [--type TYPE] [--public]
-                                    [--name NAME] [--description DESC]
+  uv run scripts/s3/stream_upload.py <url> [s3_key] [--public]
                                     [--chunk-mb N]  # default 100
 
 Example:
   uv run scripts/s3/stream_upload.py \\
     https://build.protomaps.com/20260323.pmtiles \\
-    layers/protomaps_basemap__v0.pmtiles --type pmtiles --public
+    layers/protomaps_basemap__v0.pmtiles --public
 
 Protomaps note:
   If PROTOMAPS_KEY is set in .env, it is appended as ?key=<KEY> to any
@@ -32,7 +31,6 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
 
@@ -51,8 +49,8 @@ from rich.progress import (
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from catalog import upsert_entry
 from s3_client import make_client
+from s3_utils import metadata_from_head, print_metadata
 from set_acl import set_public_acl
 
 console = Console()
@@ -73,12 +71,6 @@ _EXT_MAP = {
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
-
-def _make_id(s3_key: str) -> str:
-    slug = Path(s3_key).stem.lower().replace(" ", "_").replace("-", "_")
-    short_hash = hashlib.sha1(s3_key.encode()).hexdigest()[:6]
-    return f"{slug}_{short_hash}"
-
 
 def _add_protomaps_key(url: str) -> str:
     key = os.environ.get("PROTOMAPS_KEY", "")
@@ -283,18 +275,13 @@ def stream_upload(
     url: str,
     s3_key: str,
     make_public: bool = False,
-    resource_type: str | None = None,
-    name: str | None = None,
-    description: str = "",
     chunk_mb: int = DEFAULT_CHUNK_MB,
 ) -> dict:
-    """Stream <url> to <s3_key> on HCP S3. Returns the catalog entry dict."""
+    """Stream <url> to <s3_key> on HCP S3. Returns live S3 object metadata."""
     s3, bucket = make_client()
-    endpoint = os.environ.get("S3_ENDPOINT", "").rstrip("/")
 
     ext = Path(s3_key).suffix.lower()
-    content_type, default_type = _EXT_MAP.get(ext, ("application/octet-stream", "other"))
-    resource_type = resource_type or default_type
+    content_type, _default_type = _EXT_MAP.get(ext, ("application/octet-stream", "other"))
 
     fetch_url = _add_protomaps_key(url)
 
@@ -326,43 +313,20 @@ def stream_upload(
         _stream_upload(fetch_url, s3_key, content_type, total, s3, bucket)
 
     head = s3.head_object(Bucket=bucket, Key=s3_key)
-    etag = head.get("ETag", "").strip('"')
-    last_modified = head.get("LastModified", datetime.now(timezone.utc)).isoformat()
-    size_bytes = head.get("ContentLength", 0)
 
     if make_public:
         set_public_acl(s3_key)
 
-    public_url = f"{endpoint}/{bucket}/{s3_key}" if make_public else ""
-
-    entry = {
-        "id":            _make_id(s3_key),
-        "name":          name or Path(s3_key).stem,
-        "type":          resource_type,
-        "storage":       "s3",
-        "source_url":    url,
-        "s3_key":        s3_key,
-        "public_url":    public_url,
-        "etag":          etag,
-        "last_modified": last_modified,
-        "size_bytes":    size_bytes,
-        "description":   description,
-    }
-    upsert_entry(entry)
-    console.print(f"[green]Catalog updated.[/green]  id=[cyan]{entry['id']}[/cyan]")
-    if public_url:
-        console.print(f"URL: {public_url}")
-    return entry
+    metadata = metadata_from_head(s3_key, head, include_url=make_public)
+    print_metadata(metadata)
+    return metadata
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Stream-upload a remote URL to HCP S3")
     parser.add_argument("url",           help="Remote URL to stream")
     parser.add_argument("s3_key",        nargs="?", help="S3 key (default: URL filename)")
-    parser.add_argument("--type",        dest="rtype", help="Catalog type override")
     parser.add_argument("--public",      action="store_true", help="Make object publicly readable")
-    parser.add_argument("--name",        default=None, help="Human-readable name for catalog")
-    parser.add_argument("--description", default="", help="Description for catalog")
     parser.add_argument("--chunk-mb",    type=int, default=DEFAULT_CHUNK_MB,
                         help=f"Chunk size in MB for range-capable servers (default: {DEFAULT_CHUNK_MB})")
     args = parser.parse_args()
@@ -376,9 +340,6 @@ def main() -> None:
         url=args.url,
         s3_key=s3_key,
         make_public=args.public,
-        resource_type=args.rtype,
-        name=args.name,
-        description=args.description,
         chunk_mb=args.chunk_mb,
     )
 

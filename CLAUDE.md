@@ -7,7 +7,7 @@ For the full developer guide (HCP setup, data sources, CI/CD) see [DEVELOPERS.md
 
 ## Session start
 
-1. Run `varlock run -- uv run scripts/s3/catalog.py list` to see what assets already exist in S3.
+1. Run `npx varlock run -- uv run scripts/s3/get_catalog.py` to see what assets already exist in S3.
 2. Credentials (`S3_USER`, `S3_KEY`, `PROTOMAPS_KEY`) are fetched automatically via `exec(pass://...)` in `.env.schema` — no `.env` file needed for credentials.
    If `VITE_MAPX_ASSET_BASE_URL` needs a custom value, create a `.env` file at repo root with just that variable.
 
@@ -23,12 +23,12 @@ For the full developer guide (HCP setup, data sources, CI/CD) see [DEVELOPERS.md
 | `packages/theme-core/assets/sprites/geology/` | Geology SVG icon sources (SDF sprite) |
 | `packages/theme-core/assets/sprites/patterns/` | Pattern SVG sources (non-SDF sprite) — **gitignored**, generate with `npm run build:patterns` |
 | `packages/theme-core/assets/sprites/generated/` | Generated sprite sheets — **gitignored**, built by `build_sprites.py`, uploaded to S3 |
-| `data/catalog.json` | Single catalog for all assets (S3 uploads + style provenance) |
+| `scripts/s3/get_catalog.py` | Live S3 inventory generator; S3 is the catalog |
 | `data/fonts/sources.json` | Font download manifest — which families/weights to fetch from Google Fonts |
 | `data/fonts/combinations.json` | Font combinations — maps MapLibre font names → TTF stems; used by `build_glyphs.py` |
 | `data/fonts/files/` | Font TTF sources — **gitignored**, populate with `uv run scripts/download_fonts.py` |
 | `data/un_countries/` | UN border GeoJSONs (restricted — not committed, see §Guardrails) |
-| `scripts/s3/` | S3 upload, catalog, ACL, range test, progress monitoring |
+| `scripts/s3/` | S3 upload, inventory, ACL, range test, progress monitoring |
 | `scripts/patterns/` | Pattern SVG generator (index.cjs + config.json) |
 | `scripts/style/` | Road layer generator |
 | `src/` | Vite + MapLibre demo app (production vs debug compare view) |
@@ -77,9 +77,13 @@ All style assets (glyphs, sprites, style JSON) are uploaded under a single versi
 | Glyphs | `style/v{N}/glyphs/` | `style/v1/glyphs/{fontstack}/{range}.pbf` |
 | Sprites (SDF icons) | `style/v{N}/sprites/` | `style/v1/sprites/sprite.json` |
 | Sprites (patterns) | `style/v{N}/sprites/` | `style/v1/sprites/sprite_patterns.json` |
+| Sprite SVG sources | `style/v{N}/svg/` | Uploaded source SVGs for sprite inspection |
 | Layers (PMTiles/COG) | `layers/` | `{layer-name}__v{N}.pmtiles` |
 | Masks | `masks/` | `{mask-name}__v{N}.geojson` |
 | User data | `data/{context}/{user_id}/` | |
+
+`maps/` is not used by the current style. It may appear in the live inventory, but
+new assets should use the namespaces above.
 
 To release a new style version, bump `style_version.json` then re-run all three style build scripts.
 
@@ -87,7 +91,7 @@ To release a new style version, bump `style_version.json` then re-run all three 
 
 ## Scripts — quick reference
 
-Scripts that write to S3 need env vars. Use `npm run` for build scripts (varlock is wired in); prefix direct `uv run` calls with `varlock run --`.
+Scripts that write to S3 need env vars. Use `npm run` for build scripts (varlock is wired in); prefix direct `uv run` calls with `npx varlock run --`.
 
 ### Build pipeline
 
@@ -97,10 +101,10 @@ npm run convert:fonts               # WOFF2 → TTF from node_modules/@fontsourc
 npm run build:sprites               # SVGs → sprite sheets + sprite-index.json → upload to S3
 npm run build:glyphs                # TTFs → PBF glyphs → upload to S3 (run convert:fonts first)
 npm run build:style                 # upload style.json + style_debug.json to S3 (style/v{N}/)
-varlock run -- uv run scripts/build_borders.py      # UN GeoJSONs → PMTiles → upload to S3 (layers/)
-varlock run -- uv run scripts/build_mask.py         # UN mask GeoJSON → upload to S3 (masks/) for within() filter
-varlock run -- uv run scripts/build_bathymetry.py   # VersaTiles bathymetry → PMTiles → upload to S3 (layers/)
-varlock run -- uv run scripts/build_basemap.py      # stream Protomaps basemap (~134 GB) → S3, resumable
+npx varlock run -- uv run scripts/build_borders.py      # UN GeoJSONs → PMTiles → upload to S3 (layers/)
+npx varlock run -- uv run scripts/build_mask.py         # UN mask GeoJSON → upload to S3 (masks/) for within() filter
+npx varlock run -- uv run scripts/build_bathymetry.py   # VersaTiles bathymetry → PMTiles → upload to S3 (layers/)
+npx varlock run -- uv run scripts/build_basemap.py      # stream Protomaps basemap (~134 GB) → S3, resumable
 ```
 
 Pass `--version N` to override style version, `--no-upload` to skip S3.
@@ -108,19 +112,21 @@ Pass `--version N` to override style version, `--no-upload` to skip S3.
 ### S3 / asset management
 
 ```bash
-varlock run -- uv run scripts/s3/upload.py <file> [s3_key] [--type TYPE] [--public] [--name NAME]
-varlock run -- uv run scripts/s3/stream_upload.py <url> [s3_key] [--type TYPE] [--public] [--name NAME] [--chunk-mb N]
+npx varlock run -- uv run scripts/s3/upload.py <file> [s3_key] [--public]
+npx varlock run -- uv run scripts/s3/stream_upload.py <url> [s3_key] [--public] [--chunk-mb N]
+npx varlock run -- uv run scripts/s3/get_catalog.py [--prefix <prefix>] [--limit N|--all] [--format table|json]
 uv run scripts/s3/stream_upload_progress.py [--watch 5]
-varlock run -- uv run scripts/s3/list_objects.py [--prefix <prefix>]
-varlock run -- uv run scripts/s3/set_acl.py <s3_key> --public
-varlock run -- uv run scripts/s3/set_acl.py <s3_key> --verify
-varlock run -- uv run scripts/s3/range_test.py <public_url>
-varlock run -- uv run scripts/s3/catalog.py list
-varlock run -- uv run scripts/s3/catalog.py show <id>
-varlock run -- uv run scripts/s3/catalog.py remove <id>
+npx varlock run -- uv run scripts/s3/set_acl.py <s3_key> --public
+npx varlock run -- uv run scripts/s3/set_acl.py <s3_key> --verify
+npx varlock run -- uv run scripts/s3/range_test.py <public_url>
 ```
 
-After uploading a PMTiles or COG: always verify with `range_test.py`.
+Before uploading, check the live inventory with `get_catalog.py` to avoid duplicate
+keys. The default table output is a bounded head/tail summary; use `--all` for a
+full human listing or `--format json` for a complete machine-readable inventory.
+After uploading a PMTiles or COG, always verify with `range_test.py`. Do not
+maintain committed catalog snapshots; document source provenance in dataset READMEs
+or build-script comments.
 
 See [DEVELOPERS.md](DEVELOPERS.md) for HCP setup, resumable uploads, CORS, and credential encoding details.
 

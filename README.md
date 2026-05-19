@@ -15,15 +15,16 @@ Style assets for [MapX](https://mapx.org) — sprites, glyphs, fonts, MapLibre b
 | `public/sprites/` | SVG icon sources (maki, geology, patterns) + generated sprite sheets |
 | `public/fonts/` | Font metadata and lists (glyph PBFs on S3) |
 | `public/style/` | MapLibre base style JSON + debug style (all S3 PMTiles + Matterhorn contours) |
-| `data/catalog.json` | Catalog of all S3 assets |
+| `scripts/s3/get_catalog.py` | Live S3 inventory generator |
 | `data/fonts/sources.json` | Font download manifest (families, weights, stems) |
 | `data/fonts/combinations.json` | Maps MapLibre font names → TTF stems for glyph build |
 | `data/fonts/files/` | TTF sources — gitignored, only needed for `build_glyphs.py` (generate with `npm run convert:fonts`) |
 | `data/un_countries/` | UN border metadata (data restricted — see `data/un_countries/README.md`) |
-| `scripts/s3/` | Upload, catalog, ACL, range test, progress monitoring |
+| `scripts/s3/` | Upload, inventory, ACL, range test, progress monitoring |
 | `scripts/build_*.py` | Build sprites, glyphs, borders, bathymetry, basemap |
 
 Large files (PMTiles, COG rasters, PBF glyphs) are stored on S3 — see [DEVELOPERS.md](DEVELOPERS.md) for details.
+S3 is the catalog; generated inventory snapshots are not committed.
 
 ---
 
@@ -40,7 +41,7 @@ npm run convert:fonts                    # WOFF2→TTF from node_modules (no int
 npm run build:glyphs -- --no-upload      # validate/list glyph outputs
 npm run build:sprites -- --no-upload     # validate/list sprite outputs
 npm run build:style -- --no-upload       # validate/list style uploads
-uv run scripts/s3/catalog.py list        # what's on S3
+npx varlock run -- uv run scripts/s3/get_catalog.py   # S3 summary
 uv run scripts/s3/upload.py --help
 ```
 

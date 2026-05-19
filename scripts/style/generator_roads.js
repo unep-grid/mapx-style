@@ -3,9 +3,8 @@
  * Author/copyright : 2023-present unepgrid.ch
  *
  * Generate road layers for MapLibre + Protomaps basemap.
- * Ported from legacy/mapx/app/src/data/style/generator_roads.js
  *
- * Changes from legacy (Mapbox → Protomaps):
+ * Protomaps source mapping:
  *   mapSource        : "mapbox_composite" → "protomaps_basemap"
  *   source-layer     : "road"  → "roads"
  *   class filter     : ["get", "class"]     → ["in", ["get", "kind"], ["literal", [...]]]

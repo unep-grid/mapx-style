@@ -41,6 +41,7 @@ def _source_url(date: str) -> str:
 def main() -> None:
     from range_test import test_range
     from rich.console import Console
+    from s3_utils import public_url
     from stream_upload import stream_upload
 
     console = Console()
@@ -71,16 +72,10 @@ def main() -> None:
         url=url,
         s3_key=s3_key,
         make_public=True,
-        resource_type="pmtiles",
-        name=f"Protomaps Basemap {args.date} v{args.version}",
-        description=f"Protomaps planet basemap build {args.date}",
     )
 
-    endpoint = os.environ.get("S3_ENDPOINT", "").rstrip("/")
-    bucket   = os.environ.get("S3_BUCKET", "mapx")
-    public_url = f"{endpoint}/{bucket}/{s3_key}"
     console.print(f"\nVerifying range access…")
-    ok = test_range(public_url)
+    ok = test_range(public_url(s3_key))
     if not ok:
         console.print("[yellow]Warning: range test failed — check HCP ACL settings.[/yellow]")
 

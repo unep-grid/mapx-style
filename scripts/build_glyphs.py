@@ -87,7 +87,7 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=6, help="Upload concurrency (default: 6)")
     args = parser.parse_args()
 
-    from catalog import read_style_version
+    from style_version import read_style_version
     from rich.console import Console
     from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 

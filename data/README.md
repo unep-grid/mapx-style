@@ -17,7 +17,8 @@ Contact the MapX team or the UNEP/GRID-Geneva GIS unit for access to the source 
 Once you have the source GeoPackage(s):
 
 1. Generate PMTiles from the GeoPackage using Tippecanoe or a similar tool.
-2. Upload the PMTiles to S3: `uv run scripts/s3/upload.py <file>.pmtiles maps/borders.pmtiles --type pmtiles --public`
+2. Upload the PMTiles to S3: `uv run scripts/s3/upload.py <file>.pmtiles layers/mapx_borders__vN.pmtiles --public`
 3. Add the layer to `public/style/style.json`.
+4. Check the live S3 inventory: `uv run scripts/s3/get_catalog.py --prefix layers/`.
 
 Never commit `.gpkg`, `.tif`, or `.pmtiles` files — they are gitignored.

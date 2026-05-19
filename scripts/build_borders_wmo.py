@@ -74,6 +74,7 @@ def build(out_path: Path, console) -> None:
 def main() -> None:
     from rich.console import Console
     from upload import upload_file
+    from s3_utils import public_url
 
     console = Console()
 
@@ -99,18 +100,11 @@ def main() -> None:
         local_path=out_path,
         s3_key=s3_key,
         make_public=True,
-        resource_type="pmtiles",
-        name=f"WMO Borders PMTiles v{args.version}",
-        description="WMO member-state boundaries — polygons",
     )
 
     from range_test import test_range
-    import os
-    endpoint = os.environ.get("S3_ENDPOINT", "").rstrip("/")
-    bucket = os.environ.get("S3_BUCKET", "mapx")
-    public_url = f"{endpoint}/{bucket}/{s3_key}"
     console.print(f"\nVerifying range access…")
-    ok = test_range(public_url)
+    ok = test_range(public_url(s3_key))
     if not ok:
         console.print("[yellow]Warning: range test failed — check HCP ACL settings.[/yellow]")
 

@@ -54,6 +54,7 @@ def validate(console) -> None:
 def main() -> None:
     from rich.console import Console
     from upload import upload_file
+    from s3_utils import public_url
 
     console = Console()
 
@@ -83,23 +84,13 @@ def main() -> None:
         local_path=SOURCE,
         s3_key=s3_key,
         make_public=True,
-        resource_type="geojson",
-        name=f"UN Countries Mask GeoJSON v{args.version}",
-        description=(
-            "UN 2020 country boundaries mask (MultiPolygon). "
-            "Used with MapLibre within() expression to suppress OSM place labels "
-            "over territories of UN member states that requested label suppression."
-        ),
     )
 
-    import os
-    endpoint = os.environ.get("S3_ENDPOINT", "").rstrip("/")
-    bucket = os.environ.get("S3_BUCKET", "mapx")
-    public_url = f"{endpoint}/{bucket}/{s3_key}"
-    console.print(f"\n[bold]Public URL:[/bold] [cyan]{public_url}[/cyan]")
+    url = public_url(s3_key)
+    console.print(f"\n[bold]Public URL:[/bold] [cyan]{url}[/cyan]")
     console.print(
         "\n[dim]Usage in MapxStyle:[/dim]\n"
-        f"  mxStyle.enablePlacesMask(\"{public_url}\")"
+        f"  mxStyle.enablePlacesMask(\"{url}\")"
     )
 
 
