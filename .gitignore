@@ -40,6 +40,8 @@ env.d.ts
 # Generated S3 inventory snapshots
 data/catalog.json
 data/s3_catalog*.json
+data/gebco_*.zip
+data/gebco_*/
 
 # Rust build output
 target/

@@ -1,6 +1,6 @@
 # S3 Quick Reference — HCP
 
-Full documentation: **[DEVELOPERS.md](../../DEVELOPERS.md)** · AI guide: **[CLAUDE.md](../../CLAUDE.md)**
+Full documentation and AI guide: **[DEVELOPERS.md](../../DEVELOPERS.md)**
 
 ---
 
