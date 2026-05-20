@@ -53,6 +53,13 @@ describe("layer_resolver", () => {
           }
         }
       });
+
+      it("maps bathymetry line styling to the bathymetry line theme token", () => {
+        const entry = result.find((item) => item.id.includes("bathymetry-lines"));
+
+        expect(entry.layout.visibility).toBe(theme.colors.mx_map_bathymetry_lines.visibility);
+        expect(entry.paint["line-color"]).toBe(theme.colors.mx_map_bathymetry_lines.color);
+      });
     });
   }
 });

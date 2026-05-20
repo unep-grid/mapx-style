@@ -77,8 +77,8 @@ export function layer_resolver(c) {
     },
     {
       id: ["bathymetry-lines"],
-      layout: { visibility: c.mx_map_text_bathymetry_outline.visibility },
-      paint: { "line-color": c.mx_map_text_bathymetry_outline.color },
+      layout: { visibility: c.mx_map_bathymetry_lines.visibility },
+      paint: { "line-color": c.mx_map_bathymetry_lines.color },
     },
     {
       id: ["bathymetry-labels"],
