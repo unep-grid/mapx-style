@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0](https://github.com/unep-grid/mapx-style/compare/v0.6.0...v0.7.0) (2026-05-20)
+
+### Features
+
+* new bathymetry pipeline using GEBCO data ([408ec36](https://github.com/unep-grid/mapx-style/commit/408ec367474b0b951b52f1e7c6dc537290050c96))
+
+### Bug Fixes
+
+* bathymetry line styling ([57f2935](https://github.com/unep-grid/mapx-style/commit/57f2935dcce8a350221caff593aefff9fbb45e1c))
+* **dem:** silent mapterhorn 404 ([de69d48](https://github.com/unep-grid/mapx-style/commit/de69d4892a32b5f44bf4eb1bc4a231e9327e43a5))
+
 ## [0.6.0](https://github.com/unep-grid/mapx-style/compare/v0.5.0...v0.6.0) (2026-05-11)
 
 ### Features
