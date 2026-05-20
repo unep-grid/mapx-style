@@ -16,7 +16,7 @@
     "mapx_bathymetry": {
       "type": "vector",
       "url": "pmtiles://__S3_BASE__/layers/bathymetry__v0.pmtiles",
-      "attribution": "Bathymetry © <a href='https://www.gebco.net'>GEBCO</a> via <a href='https://versatiles.org'>VersaTiles</a>"
+      "attribution": "Bathymetry: GEBCO Bathymetric Compilation Group 2026, GEBCO_2026 Grid"
     },
     "terrain": {
       "type": "raster-dem",
@@ -36,7 +36,9 @@
     },
     "satellite": {
       "type": "raster",
-      "tiles": ["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg"],
+      "tiles": [
+        "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg"
+      ],
       "tileSize": 256,
       "maxzoom": 14,
       "attribution": "Sentinel-2 cloudless - <a href='https://s2maps.eu'>s2maps.eu</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2024)"
@@ -92,21 +94,12 @@
         "fill-outline-color": "#ff00ff"
       }
     },
-
     {
       "_comment": "── BATHYMETRY — neon blue depth zones ─────────────────────",
-
-      "id": "debug_bathymetry_fill",
-      "type": "fill",
-      "source": "mapx_bathymetry",
-      "source-layer": "bathymetry",
-      "paint": { "fill-color": "#4488ff", "fill-opacity": 0.08 }
-    },
-    {
-      "id": "debug_bathymetry_lines",
+      "id": "debug_bathymetry",
       "type": "line",
       "source": "mapx_bathymetry",
-      "source-layer": "bathymetry",
+      "source-layer": "bathymetry_fill",
       "paint": {
         "line-color": "#4488ff",
         "line-width": 0.5,

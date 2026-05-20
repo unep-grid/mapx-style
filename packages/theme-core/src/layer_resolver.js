@@ -69,17 +69,24 @@ export function layer_resolver(c) {
       paint: {
         "fill-color": [
           "interpolate", ["linear"],
-          ["get", "mindepth"],
-          -9000, c.mx_map_bathymetry_low.color,
-          0,     c.mx_map_bathymetry_high.color,
+          ["get", "depth_m"],
+          0,    c.mx_map_bathymetry_high.color,
+          9000, c.mx_map_bathymetry_low.color,
         ],
       },
     },
-    // Bathymetry zone contour lines
     {
       id: ["bathymetry-lines"],
-      layout: { visibility: c.mx_map_bathymetry_lines.visibility },
-      paint: { "line-color": c.mx_map_bathymetry_lines.color },
+      layout: { visibility: c.mx_map_text_bathymetry_outline.visibility },
+      paint: { "line-color": c.mx_map_text_bathymetry_outline.color },
+    },
+    {
+      id: ["bathymetry-labels"],
+      layout: {
+        visibility: c.mx_map_text_bathymetry.visibility,
+        "text-font": fontFallback(c.mx_map_text_bathymetry.font),
+      },
+      paint: { "text-color": c.mx_map_text_bathymetry.color },
     },
     // Contours (added dynamically after map load)
     {
@@ -223,6 +230,10 @@ export function layer_resolver(c) {
     {
       id: ["water-label-line", "water-label-point", "waterway-label"],
       paint: { "text-halo-color": c.mx_map_text_water_outline.color },
+    },
+    {
+      id: ["bathymetry-labels"],
+      paint: { "text-halo-color": c.mx_map_text_bathymetry_outline.color },
     },
     {
       id: [
