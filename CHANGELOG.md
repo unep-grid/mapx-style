@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.7.1](https://github.com/unep-grid/mapx-style/compare/v0.7.0...v0.7.1) (2026-05-20)
+
 ## [0.7.0](https://github.com/unep-grid/mapx-style/compare/v0.6.0...v0.7.0) (2026-05-20)
 
 ### Features
