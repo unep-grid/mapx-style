@@ -26,6 +26,7 @@ jobs:
           scope: "@unep-grid"
 
       - run: npm ci
+      - run: npm run test:unit
       - run: npm install --no-save @rollup/rollup-linux-x64-gnu
 
       - name: Build library

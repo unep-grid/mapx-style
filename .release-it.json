@@ -1,7 +1,7 @@
 {
   "$schema": "https://unpkg.com/release-it/schema/release-it.json",
   "hooks": {
-    "before:init": ["npm run test:all"]
+    "before:init": ["npm run test:unit"]
   },
   "git": {
     "tagName": "v${version}",

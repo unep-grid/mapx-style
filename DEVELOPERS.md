@@ -253,18 +253,23 @@ Restricted datasets are documented in `data/un_countries/`. Anyone forking this 
 `.github/workflows/deploy.yml` runs on push to `main`:
 
 1. `npm ci`
-2. `npm run build` — Vite demo build to root `dist/`
-3. Upload `dist/` as the GitHub Pages artifact
-4. Deploy the artifact to GitHub Pages
+2. `npm run test:unit`
+3. `npm run build` — Vite demo build to root `dist/`
+4. Upload `dist/` as the GitHub Pages artifact
+5. Deploy the artifact to GitHub Pages
 
-To update the reference screenshot after an intentional style change, run `npm run test:visual:update` locally and commit the new reference.
+Visual Playwright tests are intentionally outside the default release and CI gate.
+Run `npm run test:visual` when reviewing rendering changes. To update reference
+screenshots after an intentional style change, run `npm run test:visual:update`
+locally and commit the new references.
 
 `.github/workflows/publish.yml` runs on version tags and manual dispatch:
 
 1. `npm ci`
-2. `npm run build:lib` in `packages/theme-core`
-3. `npm publish` to GitHub Packages
-4. Create the GitHub release
+2. `npm run test:unit`
+3. `npm run build:lib` in `packages/theme-core`
+4. `npm publish` to GitHub Packages
+5. Create the GitHub release
 
 ---
 
