@@ -43,6 +43,17 @@ mapx-style/
 
 ## Environments
 
+### Session start
+
+Before changing uploaded assets or S3-backed style references, inspect the live
+bucket inventory:
+
+```bash
+npx varlock run -- uv run scripts/s3/get_catalog.py
+```
+
+S3 is the catalog; do not rely on committed inventory snapshots.
+
 ### Python scripts
 
 ```bash
@@ -71,6 +82,21 @@ npm run build:lib  # output to packages/theme-core/dist/ (gitignored)
 ```
 
 The package publish workflow builds this directory before `npm publish`; do not commit generated package bundles.
+
+---
+
+## Versioning
+
+This repo has three independent version numbers. Do not conflate them.
+
+| File | Kind | When to bump |
+|---|---|---|
+| `style_version.json` | S3 style path integer | Only when the on-S3 style asset layout breaks. Bumping creates a new `style/v{N}/` prefix and requires rebuilding glyphs, sprites, and style JSON. Not semver. |
+| `packages/theme-core/package.json` | npm semver for `@unep-grid/mapx-style` | On normal package releases, managed via `npm run release`. |
+| `package.json` | private workspace/demo app version | Normally never; it is not published. |
+
+`npm run release` bumps the theme package, builds `packages/theme-core/dist/`,
+commits, tags, and lets the publish workflow publish the package and release.
 
 ---
 
@@ -259,4 +285,51 @@ override URL as the first argument: `bash tests/load/ab.sh https://api.mapx.org/
 4. Rebuild and preview: `npm run dev`
 5. Commit source/style changes only; do not commit generated S3 inventory snapshots.
 
-For AI-assisted workflows see [CLAUDE.md](CLAUDE.md).
+## Operational guardrails
+
+Ask before acting when:
+
+- an S3 key or destination path is ambiguous
+- an asset type cannot be inferred from the file extension
+- a key already exists and would be overwritten with different content
+- a large file, roughly over 100 MB, would be made public
+- a task involves UN border data, because redistribution is restricted and the user must confirm rights
+
+## Bathymetry iteration
+
+The base bathymetry layer is generated from a local GEBCO raster, smoothed at
+multiple scales, converted to vector contours/fills, and packed as PMTiles.
+It is cartographic data for basemap display, not a navigation product.
+
+```bash
+uv run scripts/build_bathymetry.py \
+  --input data/gebco_2026_sub_ice_topo_geotiff \
+  --bbox -6,35,37,46 \
+  --target-cell-degrees 0.03125 \
+  --max-cells 4000000 \
+  --no-upload
+```
+
+For a default rendering + upload
+
+```bash
+ npx varlock run -- uv run scripts/build_bathymetry.py \
+  --input data/gebco_2026_sub_ice_topo_geotiff
+```
+
+`--input` may point at a single GeoTIFF/VRT or at an extracted GEBCO GeoTIFF
+directory. Directory input is resolved with `gdalbuildvrt` into a temporary VRT
+inside `--work-dir`, so the eight GEBCO regional tiles are treated as one raster.
+
+Remove `--no-upload` only after visual inspection. During early development this
+overwrites `layers/bathymetry__v0.pmtiles` so the style can be tested without
+version churn. The generated PMTiles contains one `bathymetry_fill` source
+layer with positive `depth_m` values.
+
+`--target-cell-degrees` controls the working raster resolution before smoothing
+and isoband extraction. The default `0.03125` keeps bbox and global runs at the
+same cartographic detail. `--max-cells` is a legacy safety hint: the script may
+exceed it when local RAM/disk checks show the target resolution is feasible,
+rather than silently producing an unusably coarse global raster. `--land-mask`
+is accepted by the CLI but is not applied in the current generator; bathymetry is
+expected to be hidden below landmass in the final style.
