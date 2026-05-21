@@ -144,6 +144,11 @@
   width: 28px;
 }
 
+.mapx-symbol-picker-swatch-white-pattern {
+  background: var(--mapx-symbol-picker-white-pattern-background, #444);
+  border-radius: 3px;
+}
+
 .mapx-symbol-picker-swatch svg {
   display: block;
   height: 24px;

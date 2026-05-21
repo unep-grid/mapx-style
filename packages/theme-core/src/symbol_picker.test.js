@@ -18,6 +18,8 @@ const SPRITES = [
   },
   { id: "geol_hatch_diagonal", group: "geology", sdf: false },
   { id: "t_b_lines_01", group: "pattern", sdf: false },
+  { id: "t_o_caps_01", group: "pattern", sdf: false },
+  { id: "t_w_caps_01", group: "pattern", sdf: false },
 ];
 
 describe("SymbolPicker", () => {
@@ -164,5 +166,45 @@ describe("SymbolPicker", () => {
     expect(document.querySelector('[aria-label="t_b_lines_02"]')).toBeTruthy();
     expect(document.querySelector('[aria-label="t_b_lines_04"]')).toBeTruthy();
     expect(picker.count.textContent).toBe("Showing 5 of 5 symbols");
+  });
+
+  it("marks only white pattern previews for an inverted background", () => {
+    const target = document.createElement("div");
+    document.body.appendChild(target);
+    new SymbolPicker({
+      target,
+      sprites: SPRITES,
+      value: "t_w_caps_01",
+      getPreviewUrl: (id) => `/s3/style/v1/svg/${id}.svg`,
+    });
+
+    const whitePreview = document.querySelector(
+      '[aria-label="t_w_caps_01"] .mapx-symbol-picker-swatch',
+    );
+    expect(whitePreview.classList).toContain(
+      "mapx-symbol-picker-swatch-white-pattern",
+    );
+
+    const controlPreview = target.querySelector(
+      ".mapx-symbol-picker-control-swatch .mapx-symbol-picker-swatch",
+    );
+    expect(controlPreview.classList).toContain(
+      "mapx-symbol-picker-swatch-white-pattern",
+    );
+
+    for (const label of [
+      "t_b_lines_01",
+      "t_o_caps_01",
+      "airport",
+      "geol_hatch_diagonal",
+      "none",
+    ]) {
+      const preview = document.querySelector(
+        `[aria-label="${label}"] .mapx-symbol-picker-swatch`,
+      );
+      expect(preview.classList).not.toContain(
+        "mapx-symbol-picker-swatch-white-pattern",
+      );
+    }
   });
 });

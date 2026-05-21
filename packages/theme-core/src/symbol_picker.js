@@ -256,6 +256,9 @@ export class SymbolPicker {
   _buildPreview(id, sprite) {
     const swatch = document.createElement("span");
     swatch.className = "mapx-symbol-picker-swatch";
+    if (isWhitePatternSymbol(id)) {
+      swatch.classList.add("mapx-symbol-picker-swatch-white-pattern");
+    }
 
     if (id === NONE_ID) {
       swatch.classList.add("mapx-symbol-picker-swatch-none");
@@ -402,6 +405,10 @@ function getSpriteLabel(sprite) {
     return NONE_ID;
   }
   return sprite.label || sprite.id;
+}
+
+function isWhitePatternSymbol(id) {
+  return typeof id === "string" && id.startsWith("t_w_");
 }
 
 function getGroupLabel(group) {
