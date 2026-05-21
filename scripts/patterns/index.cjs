@@ -31,7 +31,7 @@ Object.keys(config.colors).forEach(function(c) {
     var n = 0;
     config.linesStrokeWidth.forEach(function(j) {
       n++;
-      var dynSize = config.baseSize * config.linesSize[i];
+      var dynSize = Math.round(config.baseSize * config.linesSize[i]);
       var p = [
         {
           name: 't_' + c + '_lines_' + i + n,
