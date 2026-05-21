@@ -88,7 +88,15 @@
       "layout": { "visibility": "visible" },
       "paint": {
         "line-color": "rgba(255,255,255,0.6)",
-        "line-opacity": ["interpolate", ["linear"], ["zoom"], 8, 0.15, 13, 0.35],
+        "line-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          8,
+          0.15,
+          13,
+          0.35
+        ],
         "line-width": ["interpolate", ["linear"], ["zoom"], 8, 0.4, 16, 1.1],
         "line-dasharray": [1, 4]
       }
@@ -102,22 +110,34 @@
       "filter": ["==", ["geometry-type"], "Polygon"],
       "layout": {
         "visibility": "visible",
-        "text-field": ["concat", ["number-format", ["get", "depth_m"], {}], " m"],
+        "text-field": [
+          "concat",
+          ["number-format", ["get", "depth_m"], {}],
+          " m"
+        ],
         "text-font": ["Noto Sans Regular"],
-        "text-size": 11,
+        "text-size": 10,
         "symbol-placement": "line",
-        "text-padding": 2,
-        "text-max-angle": 25,
         "symbol-spacing": 400,
         "text-allow-overlap": false,
-        "text-ignore-placement": false
+        "text-ignore-placement": false,
+        "text-offset": [-1,1],
+        "text-keep-upright": true
       },
       "paint": {
         "text-color": "rgba(48,48,48,0.9)",
         "text-halo-color": "rgba(255,255,255,0.3)",
-        "text-halo-width": 2,
+        "text-halo-width": 1,
         "text-halo-blur": 1,
-        "text-opacity": ["interpolate", ["linear"], ["zoom"], 8, 0, 13, 0.8, 22, 1]
+        "text-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          8,
+          0.5,
+          13,
+          1
+        ]
       }
     },
 
