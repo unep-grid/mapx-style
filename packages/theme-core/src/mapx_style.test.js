@@ -493,3 +493,92 @@ describe("MapxStyle attachMap without theme", () => {
     await expect(mx.attachMap(map)).resolves.toBeUndefined();
   });
 });
+
+describe("MapxStyle terrain sync", () => {
+  function createMap({ pitch = 0 } = {}) {
+    let currentPitch = pitch;
+    const handlers = {};
+    const map = {
+      isStyleLoaded: vi.fn(() => true),
+      on: vi.fn((event, handler) => {
+        handlers[event] = handler;
+      }),
+      once: vi.fn(),
+      getLayer: vi.fn(() => null),
+      setLayoutProperty: vi.fn(),
+      setPaintProperty: vi.fn(),
+      getPitch: vi.fn(() => currentPitch),
+      setTerrain: vi.fn(),
+      easeTo: vi.fn(),
+      setPitch(pitch) {
+        currentPitch = pitch;
+      },
+      fire(event) {
+        handlers[event]?.();
+      },
+    };
+    return map;
+  }
+
+  it("reports terrain enabled state", async () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    const map = createMap({ pitch: 0 });
+
+    expect(mx.isTerrainEnabled()).toBe(false);
+
+    await mx.attachMap(map);
+    mx.enableTerrain();
+    expect(mx.isTerrainEnabled()).toBe(true);
+
+    mx.disableTerrain();
+    expect(mx.isTerrainEnabled()).toBe(false);
+  });
+
+  it("reports terrain disabled after a low-pitch manual sync", async () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    const map = createMap({ pitch: 45 });
+
+    await mx.attachMap(map);
+    mx.enableTerrain();
+    expect(mx.isTerrainEnabled()).toBe(true);
+
+    map.setPitch(MapxStyle.TERRAIN_THRESH - 1);
+    map.fire("pitchend");
+
+    expect(mx.isTerrainEnabled()).toBe(false);
+    expect(map.setTerrain).toHaveBeenLastCalledWith(null);
+  });
+
+  it("does not re-enable terrain from pitch sync during programmatic disable", async () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    const map = createMap({ pitch: 45 });
+
+    await mx.attachMap(map);
+    mx.enableTerrain();
+    mx.disableTerrain();
+    map.fire("pitchend");
+
+    expect(map.setTerrain).toHaveBeenLastCalledWith(null);
+    expect(map.setTerrain).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps manual pitch terrain sync after the map is flat", async () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    const map = createMap({ pitch: 45 });
+
+    await mx.attachMap(map);
+    mx.enableTerrain();
+    mx.disableTerrain();
+
+    map.setPitch(0);
+    map.fire("pitchend");
+    map.setPitch(45);
+    map.fire("pitchend");
+
+    expect(map.setTerrain).toHaveBeenLastCalledWith(MapxStyle.TERRAIN_CFG);
+  });
+});

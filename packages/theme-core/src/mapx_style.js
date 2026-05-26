@@ -127,6 +127,7 @@ export class MapxStyle {
     this._map = null;
     this._language = language || "en";
     this._terrainEnabled = false;
+    this._terrainPitchSyncPausedUntilFlat = false;
     this._terrainCfg = MapxStyle.TERRAIN_CFG;
     this._hillshadeEnabled = true;
     this._contoursEnabled = true;
@@ -292,6 +293,7 @@ export class MapxStyle {
     if (!this._map) return;
     if (cfg) this._terrainCfg = cfg;
     this._terrainEnabled = true;
+    this._terrainPitchSyncPausedUntilFlat = false;
     this._markDirty();
     this._map.setTerrain(this._terrainCfg);
     if (this._map.getPitch() < MapxStyle.TERRAIN_PITCH)
@@ -304,6 +306,8 @@ export class MapxStyle {
   disableTerrain() {
     if (!this._map) return;
     this._terrainEnabled = false;
+    this._terrainPitchSyncPausedUntilFlat =
+      this._map.getPitch() > MapxStyle.TERRAIN_THRESH;
     this._markDirty();
     this._map.setTerrain(null);
     this._map.easeTo({ pitch: 0 });
@@ -315,6 +319,14 @@ export class MapxStyle {
    */
   toggleTerrain(cfg) {
     this._terrainEnabled ? this.disableTerrain() : this.enableTerrain(cfg);
+  }
+
+  /**
+   * Check whether 3D terrain is currently enabled.
+   * @returns {boolean}
+   */
+  isTerrainEnabled() {
+    return this._terrainEnabled;
   }
 
   // ── Hillshade / Contours ─────────────────────────────────────────────────────
@@ -845,6 +857,14 @@ export class MapxStyle {
   _handlePitchEnd() {
     if (!this._map) return;
     const pitch = this._map.getPitch();
+
+    if (this._terrainPitchSyncPausedUntilFlat) {
+      if (pitch < MapxStyle.TERRAIN_THRESH) {
+        this._terrainPitchSyncPausedUntilFlat = false;
+      }
+      return;
+    }
+
     if (pitch > MapxStyle.TERRAIN_THRESH && !this._terrainEnabled) {
       this._terrainEnabled = true;
       this._markDirty();
