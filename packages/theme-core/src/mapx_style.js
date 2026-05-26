@@ -60,6 +60,7 @@ function isExpectedMapterhorn404(e) {
  * @param {object} [opt.maplibregl] - maplibre-gl module (protocol + DEM setup).
  * @param {object} [opt.mlcontour]  - maplibre-contour module (DemSource).
  * @param {string|object} [opt.theme] - Theme id or full theme object.
+ * @param {object} [opt.sourceOverrides] - MapLibre source definitions keyed by source id.
  */
 export class MapxStyle {
   static _registered = false;
@@ -108,9 +109,17 @@ export class MapxStyle {
     "country_un_0_label_0",
   ];
 
-  constructor({ maplibregl, mlcontour, theme, language, baseUrl } = {}) {
+  constructor({
+    maplibregl,
+    mlcontour,
+    theme,
+    language,
+    baseUrl,
+    sourceOverrides,
+  } = {}) {
     const s3Base = baseUrl || S3_BASE;
     this._s3Base = s3Base;
+    this._sourceOverrides = sourceOverrides || {};
     this._glyphs = resolveGlyphsUrl({ baseUrl: s3Base });
     this._sprite = resolveSpriteUrls({ baseUrl: s3Base });
     this._spriteIndex = null;
@@ -717,6 +726,7 @@ export class MapxStyle {
    */
   getStyle() {
     const style = this._resolveStyle(styleJson);
+    this._applySourceOverrides(style);
     style.glyphs = this._glyphs;
     style.sprite = this._sprite;
     if (this._demSource) build_style(style, this._demSource);
@@ -737,6 +747,14 @@ export class MapxStyle {
 
   _resolveStyle(json) {
     return JSON.parse(JSON.stringify(json).replaceAll("__S3_BASE__", this._s3Base));
+  }
+
+  _applySourceOverrides(style) {
+    for (const [id, source] of Object.entries(this._sourceOverrides)) {
+      if (source && typeof source === "object") {
+        style.sources[id] = JSON.parse(JSON.stringify(source));
+      }
+    }
   }
 
   /** Remove injected CSS and unregister protocols. Call when tearing down (tests, HMR). */

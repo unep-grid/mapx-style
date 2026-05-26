@@ -69,6 +69,21 @@ describe("MapxStyle (no map)", () => {
       const b = mx.getStyle();
       expect(b.layers.find((l) => l.id === "injected")).toBeUndefined();
     });
+    it("applies source overrides to the production style", () => {
+      const satellite = {
+        type: "raster",
+        tiles: ["https://example.test/{z}/{x}/{y}.jpg"],
+        tileSize: 256,
+        maxzoom: 19,
+      };
+      const themed = new MapxStyle({
+        sourceOverrides: { satellite },
+      });
+
+      const style = themed.getStyle();
+      expect(style.sources.satellite).toEqual(satellite);
+      expect(style.sources.satellite).not.toBe(satellite);
+    });
   });
 
   describe("getStyleDebug", () => {
@@ -77,6 +92,22 @@ describe("MapxStyle (no map)", () => {
     });
     it("sprite is an array", () => {
       expect(Array.isArray(mx.getStyleDebug().sprite)).toBe(true);
+    });
+    it("does not apply source overrides to the debug style", () => {
+      const themed = new MapxStyle({
+        sourceOverrides: {
+          satellite: {
+            type: "raster",
+            tiles: ["https://example.test/{z}/{x}/{y}.jpg"],
+            tileSize: 256,
+            maxzoom: 19,
+          },
+        },
+      });
+
+      expect(themed.getStyleDebug().sources.satellite.tiles[0]).toContain(
+        "tiles.maps.eox.at",
+      );
     });
   });
 
