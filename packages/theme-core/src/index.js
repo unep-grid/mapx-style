@@ -1,5 +1,4 @@
 export { MapxStyle } from "./mapx_style.js";
-export { MapScaler } from "./map_scaler.js";
 export { SymbolPicker } from "./symbol_picker.js";
 export {
   DEFAULT_THEME_ID,

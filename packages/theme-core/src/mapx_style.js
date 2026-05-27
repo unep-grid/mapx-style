@@ -4,7 +4,6 @@ import styleDebugJson from "./style/style_debug.json";
 import { build_style } from "./build_style.js";
 import { layer_resolver } from "./layer_resolver.js";
 import { css_resolver } from "./css_resolver.js";
-import { MapScaler } from "./map_scaler.js";
 import {
   cloneTheme,
   listBuiltInThemes,
@@ -190,7 +189,6 @@ export class MapxStyle {
   /** Link a map instance. Applies the current theme after style load. */
   async attachMap(map) {
     this._map = map;
-    this._scaler = new MapScaler(map);
     map.on("error", this._onMapError);
     map.on("idle", this._onMapIdle);
     this._markDirty();
@@ -215,10 +213,6 @@ export class MapxStyle {
     if (this._map) {
       this._map.off("error", this._onMapError);
       this._map.off("idle", this._onMapIdle);
-    }
-    if (this._scaler) {
-      this._scaler.destroy();
-      this._scaler = null;
     }
     // Resolve pending readiness — idle will never fire after detach.
     this._dirty = false;
@@ -553,27 +547,6 @@ export class MapxStyle {
     this._language = lang;
     if (this._map) this._markDirty();
     this._applyLanguage();
-  }
-
-  // ── Map scaling ──────────────────────────────────────────────────────────────
-
-  /**
-   * Scale text-size and/or icon-size on all basemap layers.
-   * @param {number} [value=1] - Scale factor (1 = original size).
-   * @param {string[]} [types=["text","icon"]] - Which sizes to scale.
-   */
-  scale(value = 1, types = ["text", "icon"]) {
-    this._scaler?.update(value, types);
-  }
-
-  /** Scale text-size only on basemap layers. */
-  scaleText(value = 1) {
-    this._scaler?.update(value, ["text"]);
-  }
-
-  /** Scale icon-size only on basemap layers. */
-  scaleIcon(value = 1) {
-    this._scaler?.update(value, ["icon"]);
   }
 
   /** Returns raw layer update array for the given (or current) theme. */
