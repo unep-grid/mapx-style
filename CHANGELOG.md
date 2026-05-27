@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.0](https://github.com/unep-grid/mapx-style/compare/v0.7.1...v0.8.0) (2026-05-27)
+
+### Features
+
+* added sourceOverrides method to allow replacing sources urls ([fa7e9b3](https://github.com/unep-grid/mapx-style/commit/fa7e9b3544e7328a1ce5310996c6892c9b706560))
+
+### Bug Fixes
+
+* bathymetry label placement ([8851d22](https://github.com/unep-grid/mapx-style/commit/8851d2269bc1f13146cdf26e18aaa97e5dbf0580))
+* border visibility and border layers handling for improving theme manager ([721895c](https://github.com/unep-grid/mapx-style/commit/721895c1173577fbc386a05fc3a21cc7f749adc7))
+* improved terrain state handling ([4189f1b](https://github.com/unep-grid/mapx-style/commit/4189f1b0de358f1308383461701903308754e1ad))
+* pattern size fitting poorly on map ([65e80f6](https://github.com/unep-grid/mapx-style/commit/65e80f67fb709f66439327d0ab6577af8ccae801))
+* remove the automatic terrain-on-pitch behaviour to prevent some rendering issue in globe + terrain mode ([60a996f](https://github.com/unep-grid/mapx-style/commit/60a996f7e2aff32ae6f64c3dbdc0cffb61bafeec))
+* symbol picker, better contrast for white patterns ([86be2bf](https://github.com/unep-grid/mapx-style/commit/86be2bf5c3ad6a7e37e453986b9ad9bca036e5f6))
+
 ## [0.7.1](https://github.com/unep-grid/mapx-style/compare/v0.7.0...v0.7.1) (2026-05-20)
 
 ## [0.7.0](https://github.com/unep-grid/mapx-style/compare/v0.6.0...v0.7.0) (2026-05-20)
