@@ -67,7 +67,6 @@ export class MapxStyle {
   static _rtlRegistered = false;
   static TERRAIN_CFG = { source: "terrain", exaggeration: 1 };
   static TERRAIN_PITCH = 30; // degrees applied when enableTerrain() tilts the map
-  static TERRAIN_THRESH = 5; // pitch threshold above which manual tilt enables terrain
   static HILLSHADE_LAYER = "hillshade";
   static CONTOUR_LAYERS = ["contour-lines", "contour-labels"];
   static SATELLITE_LAYER = "satellite";
@@ -127,7 +126,6 @@ export class MapxStyle {
     this._map = null;
     this._language = language || "en";
     this._terrainEnabled = false;
-    this._terrainPitchSyncPausedUntilFlat = false;
     this._terrainCfg = MapxStyle.TERRAIN_CFG;
     this._hillshadeEnabled = true;
     this._contoursEnabled = true;
@@ -145,7 +143,6 @@ export class MapxStyle {
     this._readyCallbacks = [];
 
     // ── Bound handlers
-    this._onPitchEnd = this._handlePitchEnd.bind(this);
     this._onMapIdle = this._handleMapIdle.bind(this);
     this._onMapError = this._handleMapError.bind(this);
 
@@ -195,7 +192,6 @@ export class MapxStyle {
     this._map = map;
     this._scaler = new MapScaler(map);
     map.on("error", this._onMapError);
-    map.on("pitchend", this._onPitchEnd);
     map.on("idle", this._onMapIdle);
     this._markDirty();
     const apply = () => {
@@ -218,7 +214,6 @@ export class MapxStyle {
   detachMap() {
     if (this._map) {
       this._map.off("error", this._onMapError);
-      this._map.off("pitchend", this._onPitchEnd);
       this._map.off("idle", this._onMapIdle);
     }
     if (this._scaler) {
@@ -293,7 +288,6 @@ export class MapxStyle {
     if (!this._map) return;
     if (cfg) this._terrainCfg = cfg;
     this._terrainEnabled = true;
-    this._terrainPitchSyncPausedUntilFlat = false;
     this._markDirty();
     this._map.setTerrain(this._terrainCfg);
     if (this._map.getPitch() < MapxStyle.TERRAIN_PITCH)
@@ -306,8 +300,6 @@ export class MapxStyle {
   disableTerrain() {
     if (!this._map) return;
     this._terrainEnabled = false;
-    this._terrainPitchSyncPausedUntilFlat =
-      this._map.getPitch() > MapxStyle.TERRAIN_THRESH;
     this._markDirty();
     this._map.setTerrain(null);
     this._map.easeTo({ pitch: 0 });
@@ -851,29 +843,6 @@ export class MapxStyle {
     for (const id of [].concat(ids))
       if (this._map.getLayer(id))
         this._map.setLayoutProperty(id, "visibility", visibility);
-  }
-
-  /** Sync terrain state when the user tilts the map manually. No pitch side-effects. */
-  _handlePitchEnd() {
-    if (!this._map) return;
-    const pitch = this._map.getPitch();
-
-    if (this._terrainPitchSyncPausedUntilFlat) {
-      if (pitch < MapxStyle.TERRAIN_THRESH) {
-        this._terrainPitchSyncPausedUntilFlat = false;
-      }
-      return;
-    }
-
-    if (pitch > MapxStyle.TERRAIN_THRESH && !this._terrainEnabled) {
-      this._terrainEnabled = true;
-      this._markDirty();
-      this._map.setTerrain(this._terrainCfg);
-    } else if (pitch < MapxStyle.TERRAIN_THRESH && this._terrainEnabled) {
-      this._terrainEnabled = false;
-      this._markDirty();
-      this._map.setTerrain(null);
-    }
   }
 
   _applyLayers(map, theme) {

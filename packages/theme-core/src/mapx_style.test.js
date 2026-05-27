@@ -494,7 +494,7 @@ describe("MapxStyle attachMap without theme", () => {
   });
 });
 
-describe("MapxStyle terrain sync", () => {
+describe("MapxStyle terrain state", () => {
   function createMap({ pitch = 0 } = {}) {
     let currentPitch = pitch;
     const handlers = {};
@@ -535,50 +535,25 @@ describe("MapxStyle terrain sync", () => {
     expect(mx.isTerrainEnabled()).toBe(false);
   });
 
-  it("reports terrain disabled after a low-pitch manual sync", async () => {
+  it("does not change terrain state after manual pitch changes", async () => {
     const mx = new MapxStyle();
     mx._maskEnabled = false;
-    const map = createMap({ pitch: 45 });
+    const map = createMap({ pitch: 0 });
 
     await mx.attachMap(map);
-    mx.enableTerrain();
-    expect(mx.isTerrainEnabled()).toBe(true);
 
-    map.setPitch(MapxStyle.TERRAIN_THRESH - 1);
-    map.fire("pitchend");
-
-    expect(mx.isTerrainEnabled()).toBe(false);
-    expect(map.setTerrain).toHaveBeenLastCalledWith(null);
-  });
-
-  it("does not re-enable terrain from pitch sync during programmatic disable", async () => {
-    const mx = new MapxStyle();
-    mx._maskEnabled = false;
-    const map = createMap({ pitch: 45 });
-
-    await mx.attachMap(map);
-    mx.enableTerrain();
-    mx.disableTerrain();
-    map.fire("pitchend");
-
-    expect(map.setTerrain).toHaveBeenLastCalledWith(null);
-    expect(map.setTerrain).toHaveBeenCalledTimes(2);
-  });
-
-  it("keeps manual pitch terrain sync after the map is flat", async () => {
-    const mx = new MapxStyle();
-    mx._maskEnabled = false;
-    const map = createMap({ pitch: 45 });
-
-    await mx.attachMap(map);
-    mx.enableTerrain();
-    mx.disableTerrain();
-
-    map.setPitch(0);
-    map.fire("pitchend");
     map.setPitch(45);
     map.fire("pitchend");
 
+    expect(mx.isTerrainEnabled()).toBe(false);
+    expect(map.setTerrain).not.toHaveBeenCalled();
+
+    mx.enableTerrain();
+    map.setPitch(0);
+    map.fire("pitchend");
+
+    expect(mx.isTerrainEnabled()).toBe(true);
+    expect(map.setTerrain).toHaveBeenCalledTimes(1);
     expect(map.setTerrain).toHaveBeenLastCalledWith(MapxStyle.TERRAIN_CFG);
   });
 });
