@@ -170,6 +170,20 @@ export function layer_resolver(c) {
       layout: { visibility: c[`mx_map_boundary_un_${i}`].visibility },
       paint: { "line-color": c[`mx_map_boundary_un_${i}`].color },
     })),
+    {
+      id: ["wmo_borders_line"],
+      layout: { visibility: c.mx_map_boundary_un_1.visibility },
+      paint: { "line-color": c.mx_map_boundary_un_1.color },
+    },
+    {
+      id: ["wmo_borders_poly"],
+      layout: { visibility: c.mx_map_boundary_un_1.visibility },
+    },
+    {
+      id: ["boundary_osm"],
+      layout: { visibility: c.mx_map_boundary_un_1.visibility },
+      paint: { "line-color": c.mx_map_boundary_un_1.color },
+    },
     // Place labels
     {
       id: ["places_locality_capital", "places_locality_regional", "places_locality_minor"],

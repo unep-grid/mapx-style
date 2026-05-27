@@ -379,12 +379,13 @@ export class MapxStyle {
    * @param {"un"|"wmo"|"osm"|"none"} type
    */
   setBoundaryType(type = "un") {
+    const boundaryType = MapxStyle.BOUNDARY_TYPES.includes(type) ? type : "un";
     const show = {
       un: MapxStyle.BOUNDARY_UN_LAYERS,
       wmo: MapxStyle.BOUNDARY_WMO_LAYERS,
       osm: MapxStyle.BOUNDARY_OSM_LAYERS,
       none: [],
-    }[type] ?? MapxStyle.BOUNDARY_UN_LAYERS;
+    }[boundaryType];
 
     const all = [
       ...MapxStyle.BOUNDARY_UN_LAYERS,
@@ -392,8 +393,8 @@ export class MapxStyle {
       ...MapxStyle.BOUNDARY_OSM_LAYERS,
     ];
     this._setLayersVisibility(all, "none");
-    this._setLayersVisibility(show, "visible");
-    this._boundaryType = type;
+    this._setBoundaryLayersVisibility(show);
+    this._boundaryType = boundaryType;
   }
 
   /** Returns the current boundary type ("un", "wmo", "osm", or "none"). */
@@ -475,7 +476,10 @@ export class MapxStyle {
     this._theme = theme;
     if (this._map) {
       this._markDirty();
-      const apply = () => this._applyLayers(this._map, theme);
+      const apply = () => {
+        this._applyLayers(this._map, theme);
+        this.setBoundaryType(this._boundaryType);
+      };
       if (this._map.isStyleLoaded()) {
         apply();
       } else {
@@ -843,6 +847,38 @@ export class MapxStyle {
     for (const id of [].concat(ids))
       if (this._map.getLayer(id))
         this._map.setLayoutProperty(id, "visibility", visibility);
+  }
+
+  _setBoundaryLayersVisibility(ids) {
+    if (!this._map) return;
+    this._markDirty();
+    for (const id of [].concat(ids)) {
+      if (!this._map.getLayer(id)) continue;
+      this._map.setLayoutProperty(
+        id,
+        "visibility",
+        this._getBoundaryVisibility(id),
+      );
+    }
+  }
+
+  _getBoundaryVisibility(id) {
+    const colors = this._theme?.colors;
+    if (!colors) return "visible";
+
+    const unMatch = id.match(/^boundary_un_(\d+)$/);
+    if (unMatch) {
+      return colors[`mx_map_boundary_un_${unMatch[1]}`]?.visibility ?? "visible";
+    }
+
+    if (
+      MapxStyle.BOUNDARY_WMO_LAYERS.includes(id) ||
+      MapxStyle.BOUNDARY_OSM_LAYERS.includes(id)
+    ) {
+      return colors.mx_map_boundary_un_1?.visibility ?? "visible";
+    }
+
+    return "visible";
   }
 
   _applyLayers(map, theme) {

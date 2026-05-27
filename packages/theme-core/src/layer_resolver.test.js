@@ -60,6 +60,23 @@ describe("layer_resolver", () => {
         expect(entry.layout.visibility).toBe(theme.colors.mx_map_bathymetry_lines.visibility);
         expect(entry.paint["line-color"]).toBe(theme.colors.mx_map_bathymetry_lines.color);
       });
+
+      it("maps OSM country boundary styling to the international boundary theme token", () => {
+        const entry = result.find((item) => item.id.includes("boundary_osm"));
+
+        expect(entry.layout.visibility).toBe(theme.colors.mx_map_boundary_un_1.visibility);
+        expect(entry.paint["line-color"]).toBe(theme.colors.mx_map_boundary_un_1.color);
+      });
+
+      it("maps WMO boundary styling to the international boundary theme token", () => {
+        const line = result.find((item) => item.id.includes("wmo_borders_line"));
+        const poly = result.find((item) => item.id.includes("wmo_borders_poly"));
+
+        expect(line.layout.visibility).toBe(theme.colors.mx_map_boundary_un_1.visibility);
+        expect(line.paint["line-color"]).toBe(theme.colors.mx_map_boundary_un_1.color);
+        expect(poly.layout.visibility).toBe(theme.colors.mx_map_boundary_un_1.visibility);
+        expect(poly.paint).toBeUndefined();
+      });
     });
   }
 });

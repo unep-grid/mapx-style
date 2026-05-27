@@ -494,6 +494,85 @@ describe("MapxStyle attachMap without theme", () => {
   });
 });
 
+describe("MapxStyle boundary type", () => {
+  function createMap() {
+    const layers = new Set([
+      ...MapxStyle.BOUNDARY_UN_LAYERS,
+      ...MapxStyle.BOUNDARY_WMO_LAYERS,
+      ...MapxStyle.BOUNDARY_OSM_LAYERS,
+    ]);
+
+    return {
+      isStyleLoaded: vi.fn(() => true),
+      on: vi.fn(),
+      once: vi.fn(),
+      getLayer: vi.fn((id) => (layers.has(id) ? { id } : null)),
+      setLayoutProperty: vi.fn(),
+      setPaintProperty: vi.fn(),
+    };
+  }
+
+  function lastVisibility(map, id) {
+    return [...map.setLayoutProperty.mock.calls]
+      .reverse()
+      .find(([layerId, property]) => layerId === id && property === "visibility")?.[2];
+  }
+
+  it("shows only the selected boundary dataset", async () => {
+    const mx = new MapxStyle({ theme: themes[0] });
+    mx._maskEnabled = false;
+    const map = createMap();
+
+    await mx.attachMap(map);
+    map.setLayoutProperty.mockClear();
+
+    mx.setBoundaryType("osm");
+
+    expect(lastVisibility(map, "boundary_un_1")).toBe("none");
+    expect(lastVisibility(map, "wmo_borders_line")).toBe("none");
+    expect(lastVisibility(map, "wmo_borders_poly")).toBe("none");
+    expect(lastVisibility(map, "boundary_osm")).toBe("visible");
+    expect(mx.getBoundaryType()).toBe("osm");
+  });
+
+  it("respects theme visibility for the active boundary dataset", async () => {
+    const theme = JSON.parse(JSON.stringify(themes[0]));
+    theme.colors.mx_map_boundary_un_1.visibility = "none";
+    const mx = new MapxStyle({ theme });
+    mx._maskEnabled = false;
+    const map = createMap();
+
+    await mx.attachMap(map);
+    map.setLayoutProperty.mockClear();
+
+    mx.setBoundaryType("wmo");
+
+    expect(lastVisibility(map, "boundary_un_1")).toBe("none");
+    expect(lastVisibility(map, "boundary_osm")).toBe("none");
+    expect(lastVisibility(map, "wmo_borders_line")).toBe("none");
+    expect(lastVisibility(map, "wmo_borders_poly")).toBe("none");
+  });
+
+  it("keeps the active boundary dataset after reapplying a theme", async () => {
+    const theme = JSON.parse(JSON.stringify(themes[0]));
+    const mx = new MapxStyle({ theme });
+    mx._maskEnabled = false;
+    const map = createMap();
+
+    await mx.attachMap(map);
+    mx.setBoundaryType("wmo");
+    map.setLayoutProperty.mockClear();
+
+    theme.colors.mx_map_boundary_un_1.color = "rgb(1,2,3)";
+    mx.setTheme(theme);
+
+    expect(lastVisibility(map, "boundary_un_1")).toBe("none");
+    expect(lastVisibility(map, "boundary_osm")).toBe("none");
+    expect(lastVisibility(map, "wmo_borders_line")).toBe("visible");
+    expect(lastVisibility(map, "wmo_borders_poly")).toBe("visible");
+  });
+});
+
 describe("MapxStyle terrain state", () => {
   function createMap({ pitch = 0 } = {}) {
     let currentPitch = pitch;
