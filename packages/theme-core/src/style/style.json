@@ -464,7 +464,7 @@
       "type": "line",
       "source": "contours",
       "source-layer": "contours",
-      "layout": { "visibility": "visible" },
+      "layout": { "visibility": "none" },
       "paint": {
         "line-color": "rgba(90,65,30,0.45)",
         "line-opacity": [
@@ -495,7 +495,7 @@
       "source-layer": "contours",
       "filter": [">", ["get", "level"], 0],
       "layout": {
-        "visibility": "visible",
+        "visibility": "none",
         "symbol-placement": "line",
         "text-size": 10,
         "text-field": ["concat", ["number-format", ["get", "ele"], {}], " m"],

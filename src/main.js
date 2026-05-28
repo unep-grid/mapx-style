@@ -124,11 +124,8 @@ document.getElementById("toggle-hillshade").addEventListener("change", (e) => {
   e.target.checked ? mxStyle.enableHillshade() : mxStyle.disableHillshade();
 });
 
-document.getElementById("toggle-contours").addEventListener("change", (e) => {
-  e.target.checked ? mxStyle.enableContours() : mxStyle.disableContours();
-});
 document.getElementById("toggle-terrain-3d").addEventListener("change", (e) => {
-  e.target.checked ? mxStyle.enableTerrain() : mxStyle.disableTerrain();
+  e.target.checked ? mxStyle.enableTopography() : mxStyle.disableTopography();
 });
 
 mapProd.on("load", () => {

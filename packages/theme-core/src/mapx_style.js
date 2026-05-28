@@ -65,7 +65,6 @@ export class MapxStyle {
   static _registered = false;
   static _rtlRegistered = false;
   static TERRAIN_CFG = { source: "terrain", exaggeration: 1 };
-  static TERRAIN_PITCH = 30; // degrees applied when enableTerrain() tilts the map
   static HILLSHADE_LAYER = "hillshade";
   static CONTOUR_LAYERS = ["contour-lines", "contour-labels"];
   static SATELLITE_LAYER = "satellite";
@@ -127,7 +126,8 @@ export class MapxStyle {
     this._terrainEnabled = false;
     this._terrainCfg = MapxStyle.TERRAIN_CFG;
     this._hillshadeEnabled = true;
-    this._contoursEnabled = true;
+    this._contoursEnabled = false;
+    this._topographyEnabled = false;
     this._satelliteEnabled = false;
     this._maskEnabled = true; // on by default
     this._maskUrl = `${s3Base}/masks/un_2020_countries_mask__v0.geojson`;
@@ -194,6 +194,7 @@ export class MapxStyle {
     this._markDirty();
     const apply = () => {
       this._applyLayers(map, this._theme);
+      this._applyReliefState(map);
       this._applyLanguage(map);
       this.setBoundaryType(this._boundaryType);
       if (this._maskEnabled) {
@@ -275,7 +276,7 @@ export class MapxStyle {
 
   /**
    * Enable 3D terrain on the attached map.
-   * Applies the terrain source and eases the pitch to TERRAIN_PITCH if lower.
+   * Applies the terrain source without changing camera pitch.
    * @param {object} [cfg] - Optional override for the terrain config object.
    */
   enableTerrain(cfg) {
@@ -284,19 +285,16 @@ export class MapxStyle {
     this._terrainEnabled = true;
     this._markDirty();
     this._map.setTerrain(this._terrainCfg);
-    if (this._map.getPitch() < MapxStyle.TERRAIN_PITCH)
-      this._map.easeTo({ pitch: MapxStyle.TERRAIN_PITCH });
   }
 
   /**
-   * Disable 3D terrain on the attached map and ease pitch back to 0.
+   * Disable 3D terrain on the attached map without changing camera pitch.
    */
   disableTerrain() {
     if (!this._map) return;
     this._terrainEnabled = false;
     this._markDirty();
     this._map.setTerrain(null);
-    this._map.easeTo({ pitch: 0 });
   }
 
   /**
@@ -313,6 +311,39 @@ export class MapxStyle {
    */
   isTerrainEnabled() {
     return this._terrainEnabled;
+  }
+
+  // ── Topography ──────────────────────────────────────────────────────────────
+
+  /**
+   * Enable opt-in topography mode: 3D terrain + dynamic contours.
+   * Does not change the current camera pitch.
+   */
+  enableTopography(cfg) {
+    this._topographyEnabled = true;
+    this.enableContours();
+    this.enableTerrain(cfg);
+  }
+
+  /**
+   * Disable opt-in topography mode without changing the current camera pitch.
+   */
+  disableTopography() {
+    this._topographyEnabled = false;
+    this.disableContours();
+    this.disableTerrain();
+  }
+
+  /** Toggle topography mode on/off. */
+  toggleTopography(cfg) {
+    this._topographyEnabled
+      ? this.disableTopography()
+      : this.enableTopography(cfg);
+  }
+
+  /** Check whether topography mode is currently enabled. */
+  isTopographyEnabled() {
+    return this._topographyEnabled;
   }
 
   // ── Hillshade / Contours ─────────────────────────────────────────────────────
@@ -472,6 +503,7 @@ export class MapxStyle {
       this._markDirty();
       const apply = () => {
         this._applyLayers(this._map, theme);
+        this._applyReliefState(this._map);
         this.setBoundaryType(this._boundaryType);
       };
       if (this._map.isStyleLoaded()) {
@@ -715,8 +747,9 @@ export class MapxStyle {
   }
 
   /**
-   * Returns a deep copy of the debug style with sprite URL and DEM contour
-   * source resolved. No hillshade layer is included.
+   * Returns a deep copy of the debug style with sprite URL resolved.
+   * The debug style is limited to self-hosted map assets and does not include
+   * terrain, contours, or hillshade layers.
    */
   getStyleDebug() {
     const style = this._resolveStyle(styleDebugJson);
@@ -865,6 +898,26 @@ export class MapxStyle {
         if (layout)
           for (const [k, v] of Object.entries(layout))
             map.setLayoutProperty(id, k, v);
+      }
+    }
+  }
+
+  _applyReliefState(map = this._map) {
+    if (!map) return;
+    if (map.getLayer(MapxStyle.HILLSHADE_LAYER)) {
+      map.setLayoutProperty(
+        MapxStyle.HILLSHADE_LAYER,
+        "visibility",
+        this._hillshadeEnabled ? "visible" : "none",
+      );
+    }
+    for (const id of MapxStyle.CONTOUR_LAYERS) {
+      if (map.getLayer(id)) {
+        map.setLayoutProperty(
+          id,
+          "visibility",
+          this._contoursEnabled ? "visible" : "none",
+        );
       }
     }
   }

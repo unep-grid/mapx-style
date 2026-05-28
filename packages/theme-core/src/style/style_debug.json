@@ -18,18 +18,6 @@
       "url": "pmtiles://__S3_BASE__/layers/bathymetry__v0.pmtiles",
       "attribution": "Bathymetry: GEBCO Bathymetric Compilation Group 2026, GEBCO_2026 Grid"
     },
-    "terrain": {
-      "type": "raster-dem",
-      "encoding": "terrarium",
-      "tiles": ["__terrain_tiles_placeholder__"],
-      "tileSize": 512,
-      "maxzoom": 14
-    },
-    "contours": {
-      "type": "vector",
-      "tiles": ["__contours_tiles_placeholder__"],
-      "maxzoom": 15
-    },
     "mapx_wmo_borders": {
       "type": "vector",
       "url": "pmtiles://__S3_BASE__/layers/wmo_borders__v0.pmtiles"
@@ -104,47 +92,6 @@
         "line-color": "#4488ff",
         "line-width": 0.5,
         "line-opacity": 0.8
-      }
-    },
-
-    {
-      "_comment": "── CONTOURS (Matterhorn DEM via mlcontour) — neon orange ──",
-
-      "id": "debug_contour_lines",
-      "type": "line",
-      "source": "contours",
-      "source-layer": "contours",
-      "layout": { "line-join": "round" },
-      "paint": {
-        "line-color": [
-          "case",
-          [">", ["get", "level"], 0],
-          "#ff8800",
-          "rgba(255,136,0,0.35)"
-        ],
-        "line-width": ["case", [">", ["get", "level"], 0], 1.5, 0.5],
-        "line-opacity": 1
-      }
-    },
-    {
-      "id": "debug_contour_labels",
-      "type": "symbol",
-      "source": "contours",
-      "source-layer": "contours",
-      "filter": [">", ["get", "level"], 0],
-      "layout": {
-        "symbol-placement": "line",
-        "symbol-spacing": 300,
-        "text-field": ["concat", ["to-string", ["get", "ele"]], "m"],
-        "text-font": ["Noto Sans Regular"],
-        "text-size": 9,
-        "text-allow-overlap": true,
-        "text-ignore-placement": true
-      },
-      "paint": {
-        "text-color": "#ff8800",
-        "text-halo-color": "#000000",
-        "text-halo-width": 1
       }
     },
 

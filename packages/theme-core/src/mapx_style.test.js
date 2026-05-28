@@ -93,6 +93,15 @@ describe("MapxStyle (no map)", () => {
     it("sprite is an array", () => {
       expect(Array.isArray(mx.getStyleDebug().sprite)).toBe(true);
     });
+    it("does not include DEM terrain or contour sources", () => {
+      const style = mx.getStyleDebug();
+      expect(style.sources.terrain).toBeUndefined();
+      expect(style.sources.terrain_hillshade).toBeUndefined();
+      expect(style.sources.contours).toBeUndefined();
+      expect(style.layers.some((layer) => layer.source === "contours")).toBe(
+        false,
+      );
+    });
     it("does not apply source overrides to the debug style", () => {
       const themed = new MapxStyle({
         sourceOverrides: {
@@ -574,7 +583,7 @@ describe("MapxStyle boundary type", () => {
 });
 
 describe("MapxStyle terrain state", () => {
-  function createMap({ pitch = 0 } = {}) {
+  function createMap({ pitch = 0, layers = [] } = {}) {
     let currentPitch = pitch;
     const handlers = {};
     const map = {
@@ -583,12 +592,11 @@ describe("MapxStyle terrain state", () => {
         handlers[event] = handler;
       }),
       once: vi.fn(),
-      getLayer: vi.fn(() => null),
+      getLayer: vi.fn((id) => (layers.includes(id) ? { id } : null)),
       setLayoutProperty: vi.fn(),
       setPaintProperty: vi.fn(),
       getPitch: vi.fn(() => currentPitch),
       setTerrain: vi.fn(),
-      easeTo: vi.fn(),
       setPitch(pitch) {
         currentPitch = pitch;
       },
@@ -634,5 +642,92 @@ describe("MapxStyle terrain state", () => {
     expect(mx.isTerrainEnabled()).toBe(true);
     expect(map.setTerrain).toHaveBeenCalledTimes(1);
     expect(map.setTerrain).toHaveBeenLastCalledWith(MapxStyle.TERRAIN_CFG);
+  });
+
+  it("does not change pitch when enabling or disabling terrain", async () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    const map = createMap({ pitch: 0 });
+
+    await mx.attachMap(map);
+    mx.enableTerrain();
+    mx.disableTerrain();
+
+    expect(map.setTerrain).toHaveBeenNthCalledWith(1, MapxStyle.TERRAIN_CFG);
+    expect(map.setTerrain).toHaveBeenNthCalledWith(2, null);
+    expect(map.getPitch).not.toHaveBeenCalled();
+  });
+
+  it("enables topography without changing pitch", async () => {
+    const mx = new MapxStyle();
+    mx._maskEnabled = false;
+    const map = createMap({
+      pitch: 0,
+      layers: ["contour-lines", "contour-labels", "hillshade"],
+    });
+
+    await mx.attachMap(map);
+    map.setLayoutProperty.mockClear();
+
+    expect(mx.isTopographyEnabled()).toBe(false);
+    expect(mx.isTerrainEnabled()).toBe(false);
+
+    mx.enableTopography();
+
+    expect(mx.isTopographyEnabled()).toBe(true);
+    expect(mx.isTerrainEnabled()).toBe(true);
+    expect(map.setTerrain).toHaveBeenLastCalledWith(MapxStyle.TERRAIN_CFG);
+    expect(map.getPitch).not.toHaveBeenCalled();
+    expect(map.setLayoutProperty).toHaveBeenCalledWith(
+      "contour-lines",
+      "visibility",
+      "visible",
+    );
+    expect(map.setLayoutProperty).toHaveBeenCalledWith(
+      "contour-labels",
+      "visibility",
+      "visible",
+    );
+
+    map.setLayoutProperty.mockClear();
+    mx.disableTopography();
+
+    expect(mx.isTopographyEnabled()).toBe(false);
+    expect(mx.isTerrainEnabled()).toBe(false);
+    expect(map.setTerrain).toHaveBeenLastCalledWith(null);
+    expect(map.getPitch).not.toHaveBeenCalled();
+    expect(map.setLayoutProperty).toHaveBeenCalledWith(
+      "contour-lines",
+      "visibility",
+      "none",
+    );
+    expect(map.setLayoutProperty).toHaveBeenCalledWith(
+      "contour-labels",
+      "visibility",
+      "none",
+    );
+  });
+
+  it("keeps contours hidden when a theme is applied outside topography mode", async () => {
+    const theme = themes[0];
+    const mx = new MapxStyle({ theme });
+    mx._maskEnabled = false;
+    const map = createMap({ layers: ["contour-lines", "contour-labels"] });
+
+    await mx.attachMap(map);
+    map.setLayoutProperty.mockClear();
+
+    mx.setTheme(theme);
+
+    expect(map.setLayoutProperty).toHaveBeenCalledWith(
+      "contour-lines",
+      "visibility",
+      "none",
+    );
+    expect(map.setLayoutProperty).toHaveBeenCalledWith(
+      "contour-labels",
+      "visibility",
+      "none",
+    );
   });
 });
