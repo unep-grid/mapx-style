@@ -88,6 +88,15 @@ export function layer_resolver(c) {
       },
       paint: { "text-color": c.mx_map_text_bathymetry.color },
     },
+    // Raster DEM hillshade. Visibility is controlled by topography state.
+    {
+      id: ["hillshade"],
+      paint: {
+        "hillshade-shadow-color": c.mx_map_hillshade_shadow.color,
+        "hillshade-highlight-color": c.mx_map_hillshade_highlight.color,
+        "hillshade-accent-color": c.mx_map_hillshade_shadow.color,
+      },
+    },
     // Contours (added dynamically after map load)
     {
       id: ["contour-lines"],

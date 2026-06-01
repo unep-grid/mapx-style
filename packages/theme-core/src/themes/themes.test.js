@@ -37,4 +37,28 @@ describe("themes", () => {
       expect(Object.keys(t.colors).length).toBeGreaterThan(0);
     }
   });
+
+  it("uses the standard hillshade colors for light and dark themes", () => {
+    const hillshadeByMode = {
+      dark: {
+        shadow: "rgba(0,0,0,0.36)",
+        highlight: "rgba(110,110,110,0.71)",
+      },
+      light: {
+        shadow: "rgba(28,28,28,0.27)",
+        highlight: "rgb(255,255,255)",
+      },
+    };
+
+    for (const theme of themes) {
+      const expected = theme.dark ? hillshadeByMode.dark : hillshadeByMode.light;
+
+      expect(theme.colors.mx_map_hillshade_shadow.visibility).toBe("visible");
+      expect(theme.colors.mx_map_hillshade_shadow.color).toBe(expected.shadow);
+      expect(theme.colors.mx_map_hillshade_highlight.visibility).toBe("visible");
+      expect(theme.colors.mx_map_hillshade_highlight.color).toBe(
+        expected.highlight,
+      );
+    }
+  });
 });

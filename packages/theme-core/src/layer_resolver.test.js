@@ -61,6 +61,21 @@ describe("layer_resolver", () => {
         expect(entry.paint["line-color"]).toBe(theme.colors.mx_map_bathymetry_lines.color);
       });
 
+      it("maps raster DEM hillshade styling to the hillshade theme tokens", () => {
+        const entry = result.find((item) => item.id.includes("hillshade"));
+
+        expect(entry.layout).toBeUndefined();
+        expect(entry.paint["hillshade-shadow-color"]).toBe(
+          theme.colors.mx_map_hillshade_shadow.color,
+        );
+        expect(entry.paint["hillshade-highlight-color"]).toBe(
+          theme.colors.mx_map_hillshade_highlight.color,
+        );
+        expect(entry.paint["hillshade-accent-color"]).toBe(
+          theme.colors.mx_map_hillshade_shadow.color,
+        );
+      });
+
       it("maps OSM country boundary styling to the international boundary theme token", () => {
         const entry = result.find((item) => item.id.includes("boundary_osm"));
 
