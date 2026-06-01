@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.2](https://github.com/unep-grid/mapx-style/compare/v0.8.1...v0.8.2) (2026-06-01)
+
+### Bug Fixes
+
+* theme disconected hillshade layers ([a2247ec](https://github.com/unep-grid/mapx-style/commit/a2247ecfe51fc33e3bdd5d31022ab002b1174f02))
+
 ## [0.8.1](https://github.com/unep-grid/mapx-style/compare/v0.8.0...v0.8.1) (2026-05-28)
 
 ## [0.8.0](https://github.com/unep-grid/mapx-style/compare/v0.7.1...v0.8.0) (2026-05-27)
