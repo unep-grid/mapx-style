@@ -3,6 +3,11 @@
   "version": "0.8.4",
   "type": "module",
   "description": "MapX style engine: HCP S3 auth, PMTiles protocol, DEM/terrain, themes, and MapLibre layer resolvers",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unep-grid/mapx-style.git",
+    "directory": "packages/theme-core"
+  },
   "exports": {
     ".": {
       "import": "./dist/mapx-style.esm.js",
@@ -12,7 +17,8 @@
   "main": "./dist/mapx-style.umd.js",
   "module": "./dist/mapx-style.esm.js",
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build:lib": "vite build --config vite.config.lib.js"
