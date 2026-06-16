@@ -31,6 +31,10 @@ jobs:
       - run: npm run build
         env:
           VITE_MAPX_ASSET_BASE_URL: ${{ vars.VITE_MAPX_ASSET_BASE_URL }}
+      - run: npm run build:lib --workspace packages/theme-core
+      - run: |
+          mkdir -p dist/packages/theme-core/dist
+          cp packages/theme-core/dist/* dist/packages/theme-core/dist/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
