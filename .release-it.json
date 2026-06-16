@@ -1,7 +1,8 @@
 {
   "$schema": "https://unpkg.com/release-it/schema/release-it.json",
   "hooks": {
-    "before:init": ["npm run test:unit"]
+    "before:init": ["npm run test:unit"],
+    "before:git:release": ["npm run build:lib --workspace packages/theme-core"]
   },
   "git": {
     "tagName": "v${version}",
@@ -16,6 +17,7 @@
       "package.json",
       "package-lock.json",
       "packages/theme-core/package.json",
+      "packages/theme-core/dist",
       "CHANGELOG.md"
     ]
   },
