@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.8.4](https://github.com/unep-grid/mapx-style/compare/v0.8.3...v0.8.4) (2026-06-16)
+
 ## [0.8.3](https://github.com/unep-grid/mapx-style/compare/v0.8.2...v0.8.3) (2026-06-16)
 
 ### Bug Fixes
