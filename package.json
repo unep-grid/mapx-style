@@ -6,6 +6,7 @@
   "workspaces": [
     "packages/*"
   ],
+  "files": [],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -18,6 +19,7 @@
     "build:borders:wmo": "varlock run -- uv run scripts/build_borders_wmo.py",
     "validate": "gl-style-validate packages/theme-core/src/style/style.json",
     "release": "release-it",
+    "prepublishOnly": "node -e \"console.error('Do not publish the repository root. Use: npm publish --workspace packages/theme-core'); process.exit(1)\"",
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:watch": "vitest",

@@ -30,12 +30,10 @@ jobs:
       - run: npm run test:unit
 
       - name: Build library
-        run: npm run build:lib
-        working-directory: packages/theme-core
+        run: npm run build:lib --workspace packages/theme-core
 
       - name: Publish
-        run: npm publish
-        working-directory: packages/theme-core
+        run: npm publish --workspace packages/theme-core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
