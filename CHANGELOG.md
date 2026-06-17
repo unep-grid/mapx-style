@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.8](https://github.com/unep-grid/mapx-style/compare/v0.8.7...v0.8.8) (2026-06-17)
+
+### Bug Fixes
+
+* npm config registry and access ([e4f8829](https://github.com/unep-grid/mapx-style/commit/e4f882918de7b4f8cccd829363640dbd90853be5))
+
 ## [0.8.7](https://github.com/unep-grid/mapx-style/compare/v0.8.6...v0.8.7) (2026-06-17)
 
 ### Bug Fixes
