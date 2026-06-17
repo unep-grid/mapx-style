@@ -1,6 +1,6 @@
 {
   "name": "@unep-grid/mapx-style",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "type": "module",
   "private": false,
   "description": "MapX style engine: HCP S3 auth, PMTiles protocol, DEM/terrain, themes, and MapLibre layer resolvers",

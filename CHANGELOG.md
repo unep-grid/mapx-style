@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.9](https://github.com/unep-grid/mapx-style/compare/v0.8.8...v0.8.9) (2026-06-17)
+
+### Bug Fixes
+
+* lock file ([2bb4a27](https://github.com/unep-grid/mapx-style/commit/2bb4a276a8536674a14974ac7bec5c69394b6e1b))
+
 ## [0.8.8](https://github.com/unep-grid/mapx-style/compare/v0.8.7...v0.8.8) (2026-06-17)
 
 ### Bug Fixes
