@@ -1,7 +1,6 @@
 # Build output
 dist/
-!packages/theme-core/dist/
-!packages/theme-core/dist/**
+packages/theme-core/dist/
 tmp/
 
 # Test output

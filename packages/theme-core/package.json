@@ -22,7 +22,8 @@
     "README.md"
   ],
   "scripts": {
-    "build:lib": "vite build --config vite.config.lib.js"
+    "build:lib": "vite build --config vite.config.lib.js",
+    "prepublishOnly": "node -e \"if (process.env.GITHUB_ACTIONS !== 'true') { console.error('Publishing @unep-grid/mapx-style is only allowed from GitHub Actions trusted publishing.'); process.exit(1); }\""
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

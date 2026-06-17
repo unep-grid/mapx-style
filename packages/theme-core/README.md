@@ -1,26 +1,35 @@
 # @unep-grid/mapx-style
 
-MapX style engine distributed through GitHub Packages.
+MapX style engine distributed through the public npm registry.
 
 ## Install
-
-Configure npm to resolve the `@unep-grid` scope from GitHub Packages:
-
-```ini
-@unep-grid:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
-
-Then install the package:
 
 ```sh
 npm install @unep-grid/mapx-style
 ```
-
-GitHub Packages requires authentication for npm installs. Use a classic personal access token with `read:packages`, or `GITHUB_TOKEN` in GitHub Actions when the workflow has access to the package.
 
 ## Usage
 
 ```js
 import { MapxStyle } from "@unep-grid/mapx-style";
 ```
+
+## Standalone browser test
+
+For a no-build HTML page, load the published bundle from npm through a CDN:
+
+```html
+<script type="module">
+  import { MapxStyle } from "https://cdn.jsdelivr.net/npm/@unep-grid/mapx-style@latest/dist/mapx-style.esm.js";
+</script>
+```
+
+The UMD bundle is also published:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@unep-grid/mapx-style@latest/dist/mapx-style.umd.js"></script>
+```
+
+Load MapLibre GL JS separately and pass it to `MapxStyle` when creating an
+interactive map. Pin a concrete package version instead of `latest` when you
+need reproducible test pages.

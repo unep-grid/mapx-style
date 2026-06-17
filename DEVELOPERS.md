@@ -20,7 +20,7 @@ mapx-style/
 │   └── fonts/                  Font family catalog JSON
 ├── packages/theme-core/        MapxStyle library (npm: @unep-grid/mapx-style)
 │   ├── src/style/              MapLibre base style JSON (source of truth)
-│   ├── dist/                   Library build output — gitignored, built before npm publish
+│   ├── dist/                   Library build output — gitignored, built in CI before npm publish
 │   └── assets/sprites/
 │       ├── maki/               SVG sources — Maki icon set
 │       ├── geology/            SVG sources — geology icons
@@ -81,7 +81,15 @@ cd packages/theme-core
 npm run build:lib  # output to packages/theme-core/dist/ (gitignored)
 ```
 
-The package publish workflow builds this directory before `npm publish`; do not commit generated package bundles.
+The package publish workflow builds this directory before `npm publish`; do not commit generated package bundles. For standalone browser tests, use the npm CDN URL for a published version:
+
+```html
+<script type="module">
+  import { MapxStyle } from "https://cdn.jsdelivr.net/npm/@unep-grid/mapx-style@latest/dist/mapx-style.esm.js";
+</script>
+```
+
+MapLibre GL JS remains a peer/runtime dependency; standalone pages must load it separately. Pin a concrete package version instead of `latest` when you need reproducible test pages.
 
 ---
 
@@ -95,8 +103,8 @@ This repo has three independent version numbers. Do not conflate them.
 | `packages/theme-core/package.json` | npm semver for `@unep-grid/mapx-style` | On normal package releases, managed via `npm run release`. |
 | `package.json` | private workspace/demo app version | Normally never; it is not published. |
 
-`npm run release` bumps the theme package, builds `packages/theme-core/dist/`,
-commits, tags, and lets the publish workflow publish the package and release.
+`npm run release` runs unit tests, bumps the theme package, updates the changelog,
+commits, tags, and lets the publish workflow build and publish the package.
 
 ---
 
@@ -254,9 +262,10 @@ Restricted datasets are documented in `data/un_countries/`. Anyone forking this 
 
 1. `npm ci`
 2. `npm run test:unit`
-3. `npm run build` — Vite demo build to root `dist/`
-4. Upload `dist/` as the GitHub Pages artifact
-5. Deploy the artifact to GitHub Pages
+3. `npm run build:lib` in `packages/theme-core`
+4. `npm run build` — Vite demo build to root `dist/`
+5. Upload `dist/` as the GitHub Pages artifact
+6. Deploy the artifact to GitHub Pages
 
 Visual Playwright tests are intentionally outside the default release and CI gate.
 Run `npm run test:visual` when reviewing rendering changes. To update reference
@@ -268,7 +277,7 @@ locally and commit the new references.
 1. `npm ci`
 2. `npm run test:unit`
 3. `npm run build:lib` in `packages/theme-core`
-4. `npm publish` to GitHub Packages
+4. `npm publish` to the public npm registry using trusted publishing
 5. Create the GitHub release
 
 ---
