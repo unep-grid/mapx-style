@@ -6,7 +6,8 @@
   "sources": {
     "mapx_borders": {
       "type": "vector",
-      "url": "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles"
+      "url": "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles",
+      "attribution": "© United Nations Boundaries"
     },
     "protomaps_basemap": {
       "type": "vector",

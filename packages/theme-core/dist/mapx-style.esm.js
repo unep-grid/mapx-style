@@ -697,7 +697,8 @@ const Cr = 8, Kr = "MapX Style", Ur = "__S3_BASE__/style/v1/glyphs/{fontstack}/{
   },
   mapx_borders: {
     type: "vector",
-    url: "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles"
+    url: "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles",
+    attribution: "© United Nations Boundaries"
   },
   mapx_bathymetry: {
     type: "vector",
@@ -4329,7 +4330,8 @@ const Cr = 8, Kr = "MapX Style", Ur = "__S3_BASE__/style/v1/glyphs/{fontstack}/{
 }, _r = "DEBUG style — mapx_borders wireframe. Black bg, neon per layer. All collision/zoom limits removed. Swap into main.js to diagnose borders at any zoom.", $r = 8, tn = "MapX Borders Debug", en = "__S3_BASE__/style/v1/glyphs/{fontstack}/{range}.pbf", rn = {
   mapx_borders: {
     type: "vector",
-    url: "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles"
+    url: "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles",
+    attribution: "© United Nations Boundaries"
   },
   protomaps_basemap: {
     type: "vector",

@@ -7,16 +7,18 @@
     "protomaps_basemap": {
       "type": "vector",
       "url": "pmtiles://__S3_BASE__/layers/protomaps_basemap__v0.pmtiles",
-      "attribution": "© <a href='https://openstreetmap.org'>OpenStreetMap</a> contributors"
+      "attribution": "<a href='https://openstreetmap.org/about'>© OpenStreetMap contributors</a>"
     },
     "mapx_borders": {
       "type": "vector",
-      "url": "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles"
+      "url": "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles",
+      "attribution": "<a href='https://www.un.org/geospatial/'>© UN Geospatial</a>"
     },
     "mapx_bathymetry": {
       "type": "vector",
       "url": "pmtiles://__S3_BASE__/layers/bathymetry__v0.pmtiles",
-      "attribution": "Bathymetry: GEBCO Bathymetric Compilation Group 2026, GEBCO_2026 Grid"
+      "attribution": "<a href='https://www.gebco.net/'>© GEBCO</a>"
+
     },
     "terrain": {
       "type": "raster-dem",
@@ -24,7 +26,7 @@
       "tiles": ["__terrain_tiles_placeholder__"],
       "tileSize": 512,
       "maxzoom": 14,
-      "attribution": "Terrain tiles © <a href='https://mapterhorn.com/attribution'>Mapterhorn</a>"
+      "attribution": "<a href='https://mapterhorn.com/attribution'>© Mapterhorn</a>"
     },
     "terrain_hillshade": {
       "type": "raster-dem",
@@ -49,7 +51,7 @@
       ],
       "tileSize": 256,
       "maxzoom": 14,
-      "attribution": "Sentinel-2 cloudless - <a href='https://s2maps.eu'>s2maps.eu</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2024)"
+      "attribution": "<a href='https://s2maps.eu'>© Sentinel-2/EOX</a>"
     }
   },
   "layers": [
