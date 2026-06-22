@@ -43,6 +43,7 @@ data/catalog.json
 data/s3_catalog*.json
 data/gebco_*.zip
 data/gebco_*/
+data/misc
 
 # Rust build output
 target/
