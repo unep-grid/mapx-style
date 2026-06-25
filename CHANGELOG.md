@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.0](https://github.com/unep-grid/mapx-style/compare/v0.8.9...v0.9.0) (2026-06-25)
+
+### Features
+
+* new un borders w/o caspian sea boundaries ([524f275](https://github.com/unep-grid/mapx-style/commit/524f275d0873b69d30ba516b1130956df33bc844))
+
+### Bug Fixes
+
+* gitignore data misc ([8559368](https://github.com/unep-grid/mapx-style/commit/85593688cbcce9a7821a816aac4569fa3ed2521f))
+
 ## [0.8.9](https://github.com/unep-grid/mapx-style/compare/v0.8.8...v0.8.9) (2026-06-17)
 
 ### Bug Fixes
