@@ -36,5 +36,5 @@ echo
 run "style.json (32 KB)" "/style/v1/style.json"
 run "wmo_borders PMTiles header (16 KB range)" "/layers/wmo_borders__v0.pmtiles" \
     -H "Range: bytes=0-16383"
-run "mapx_borders PMTiles header (16 KB range)" "/layers/mapx_borders__v1.pmtiles" \
+run "mapx_borders PMTiles header (16 KB range)" "/layers/mapx_borders__v2.pmtiles" \
     -H "Range: bytes=0-16383"

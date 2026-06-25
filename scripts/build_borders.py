@@ -6,13 +6,13 @@ PMTiles file, then uploads to S3 under the layers/ prefix.
 
 Usage:
   uv run scripts/build_borders.py
-  uv run scripts/build_borders.py --version 1       # bump version → layers/mapx_borders__v1.pmtiles
+  uv run scripts/build_borders.py --version 2       # bump version → layers/mapx_borders__v2.pmtiles
   uv run scripts/build_borders.py --no-upload        # generate only, keep file at --out path
   uv run scripts/build_borders.py --out /data/borders.pmtiles  # custom output path
 
 Source files (not committed — restricted UN data):
   data/un_countries/un_2020_countries_polygons.geojson
-  data/un_countries/un_2020_countries_lines.geojson
+  data/un_countries/un_2020_countries_lines_wo_caspian.geojson
   data/un_countries/un_2020_countries_points.geojson
 
 S3 output:
@@ -20,7 +20,7 @@ S3 output:
 
 Layer name ↔ GeoJSON mapping (edit LAYERS below when source files or style changes):
   un_2020_borders_poly          ← un_2020_countries_polygons.geojson
-  un_2020_borders_line          ← un_2020_countries_lines.geojson
+  un_2020_borders_line          ← un_2020_countries_lines_wo_caspian.geojson
   un_2020_labels_countries_point ← un_2020_countries_points.geojson
 
 These names must stay in sync with:
@@ -39,7 +39,7 @@ REPO_ROOT = Path(__file__).parent.parent
 # Update this dict whenever source files or style source-layer names change.
 LAYERS = {
     "un_2020_borders_poly":           "data/un_countries/un_2020_countries_polygons.geojson",
-    "un_2020_borders_line":           "data/un_countries/un_2020_countries_lines.geojson",
+    "un_2020_borders_line":           "data/un_countries/un_2020_countries_lines_wo_caspian.geojson",
     "un_2020_labels_countries_point": "data/un_countries/un_2020_countries_points.geojson",
 }
 

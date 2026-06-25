@@ -195,7 +195,7 @@ every request. For `curl`:
 
 ```bash
 curl -H "Authorization: AWS all_users:" \
-     "${S3_PUBLIC_BASE_URL}/layers/mapx_borders__v1.pmtiles"
+     "${S3_PUBLIC_BASE_URL}/layers/mapx_borders__v2.pmtiles"
 ```
 
 ### ACL — making objects public

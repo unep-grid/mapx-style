@@ -11,7 +11,7 @@
     },
     "mapx_borders": {
       "type": "vector",
-      "url": "pmtiles://__S3_BASE__/layers/mapx_borders__v1.pmtiles",
+      "url": "pmtiles://__S3_BASE__/layers/mapx_borders__v2.pmtiles",
       "attribution": "<a href='https://www.un.org/geospatial/'>© UN Geospatial</a>"
     },
     "mapx_bathymetry": {

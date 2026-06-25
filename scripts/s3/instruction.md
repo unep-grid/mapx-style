@@ -29,7 +29,7 @@ SECRET_KEY=$(echo -n "$S3_KEY"  | md5sum | awk '{print $1}')
 
 ```bash
 curl -H "Authorization: AWS all_users:" \
-     "${S3_PUBLIC_BASE_URL}/layers/mapx_borders__v1.pmtiles"
+     "${S3_PUBLIC_BASE_URL}/layers/mapx_borders__v2.pmtiles"
 ```
 
 ## List objects (raw curl)
